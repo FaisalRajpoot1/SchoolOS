@@ -113,6 +113,7 @@ model School {
   invoices          Invoice[]
   payments          Payment[]
   exams             Exam[]
+  homeworks         Homework[]
 
   @@map("schools")
 }
@@ -153,6 +154,7 @@ model Class {
   classSubjects ClassSubject[]
   students      Student[]
   exams         Exam[]
+  homeworks     Homework[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -176,6 +178,7 @@ model Section {
 
   students          Student[]
   attendanceRecords AttendanceRecord[]
+  homeworks         Homework[]
 
   @@unique([classId, name])
   @@index([classId])
@@ -196,6 +199,7 @@ model Subject {
 
   classSubjects ClassSubject[]
   examSubjects  ExamSubject[]
+  homeworks     Homework[]
 
   @@unique([schoolId, code])
   @@unique([schoolId, name])
@@ -249,10 +253,11 @@ model Student {
   sectionId String?
   section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
-  guardians         Guardian[]
-  attendanceRecords AttendanceRecord[]
-  invoices          Invoice[]
-  marks             Mark[]
+  guardians           Guardian[]
+  attendanceRecords   AttendanceRecord[]
+  invoices            Invoice[]
+  marks               Mark[]
+  homeworkSubmissions HomeworkSubmission[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -467,6 +472,64 @@ model Mark {
   @@map("marks")
 }
 
+/// Homework assigned to a section (optionally for a subject). Tenant-scoped.
+model Homework {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  attachmentUrl String?
+  dueDate       DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  // The teacher who set it; nulled if the teacher is removed.
+  teacherId String?
+  teacher   Teacher? @relation("HomeworkTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  submissions HomeworkSubmission[]
+
+  @@index([schoolId])
+  @@index([sectionId])
+  @@map("homeworks")
+}
+
+/// A student's submission to a homework, with optional teacher feedback/marks.
+model HomeworkSubmission {
+  id            String    @id @default(uuid())
+  content       String?
+  attachmentUrl String?
+  submittedAt   DateTime  @default(now())
+  isLate        Boolean   @default(false)
+  feedback      String?
+  marks         Int?
+  gradedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  homeworkId String
+  homework   Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([homeworkId, studentId])
+  @@index([homeworkId])
+  @@index([studentId])
+  @@map("homework_submissions")
+}
+
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
 model Teacher {
   id              String      @id @default(uuid())
@@ -495,6 +558,7 @@ model Teacher {
 
   classSections      Section[]      @relation("ClassTeacher")
   subjectAssignments ClassSubject[] @relation("SubjectTeacher")
+  homeworks          Homework[]     @relation("HomeworkTeacher")
 
   @@unique([schoolId, employeeNo])
   @@index([schoolId])

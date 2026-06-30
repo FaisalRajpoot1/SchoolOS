@@ -170,3 +170,17 @@ Exam management is `SCHOOL_ADMIN`; marks entry and results are `SCHOOL_ADMIN` + 
 | GET    | `/exams/:id/results`                       | Ranked results: per-student totals, percentage, grade, pass/fail  |
 
 Grade scale: A+ ≥90, A ≥80, B ≥70, C ≥60, D ≥50, E ≥40, else F.
+
+## Homework — Module 10 (roles `SCHOOL_ADMIN` + `TEACHER`, tenant-scoped)
+
+| Method | Path                                       | Description                                                     |
+| ------ | ------------------------------------------ | --------------------------------------------------------------- |
+| POST   | `/homework`                                | Create homework for a section (author teacher resolved from the caller) |
+| GET    | `/homework`                                | List homework (`page`, `limit`, `search`, `classId`, `sectionId`, `subjectId`) |
+| GET    | `/homework/:id`                            | Homework detail + submission count                              |
+| PATCH  | `/homework/:id`                            | Update title/description/dueDate/attachment/subject            |
+| DELETE | `/homework/:id`                            | Delete homework                                                 |
+| GET    | `/homework/:id/submissions`                | Section roster with each student's submission (or null)        |
+| PUT    | `/homework/:id/submissions/:studentId`     | Record/update a submission (computes `isLate` vs due date)     |
+| PATCH  | `/homework/:id/submissions/:studentId/grade` | Add feedback + marks                                          |
+| DELETE | `/homework/:id/submissions/:studentId`     | Remove a submission                                            |

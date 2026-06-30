@@ -27,6 +27,9 @@ import { CreateExamPage } from '@/features/exams/pages/CreateExamPage';
 import { ExamDetailPage } from '@/features/exams/pages/ExamDetailPage';
 import { MarksEntryPage } from '@/features/exams/pages/MarksEntryPage';
 import { ExamResultsPage } from '@/features/exams/pages/ExamResultsPage';
+import { HomeworkListPage } from '@/features/homework/pages/HomeworkListPage';
+import { CreateHomeworkPage } from '@/features/homework/pages/CreateHomeworkPage';
+import { HomeworkDetailPage } from '@/features/homework/pages/HomeworkDetailPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -73,6 +76,9 @@ export const router = createBrowserRouter([
               { path: '/exams/:id', element: <ExamDetailPage /> },
               { path: '/exams/:id/results', element: <ExamResultsPage /> },
               { path: '/exams/:id/subjects/:examSubjectId/marks', element: <MarksEntryPage /> },
+              { path: '/homework', element: <HomeworkListPage /> },
+              { path: '/homework/new', element: <CreateHomeworkPage /> },
+              { path: '/homework/:id', element: <HomeworkDetailPage /> },
             ],
           },
         ],

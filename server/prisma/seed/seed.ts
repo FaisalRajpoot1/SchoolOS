@@ -281,6 +281,48 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo homework for Grade 1 / Section A with one submission.
+  if (sectionA) {
+    const mathSubject = subjects.find((s) => s.code === 'MATH');
+    const hwTeacher = await prisma.teacher.findUnique({
+      where: { schoolId_employeeNo: { schoolId: school.id, employeeNo: 'EMP-00001' } },
+    });
+    const existingHomework = await prisma.homework.findFirst({
+      where: { schoolId: school.id, sectionId: sectionA.id, title: 'Algebra Worksheet 1' },
+    });
+    if (!existingHomework) {
+      const homework = await prisma.homework.create({
+        data: {
+          schoolId: school.id,
+          classId: grade1.id,
+          sectionId: sectionA.id,
+          subjectId: mathSubject?.id ?? null,
+          teacherId: hwTeacher?.id ?? null,
+          title: 'Algebra Worksheet 1',
+          description: 'Complete questions 1–10 from chapter 3.',
+          dueDate: new Date('2026-07-05'),
+        },
+      });
+      const secStudents = await prisma.student.findMany({
+        where: { schoolId: school.id, sectionId: sectionA.id },
+        select: { id: true },
+      });
+      if (secStudents[0]) {
+        await prisma.homeworkSubmission.upsert({
+          where: { homeworkId_studentId: { homeworkId: homework.id, studentId: secStudents[0].id } },
+          update: {},
+          create: {
+            homeworkId: homework.id,
+            studentId: secStudents[0].id,
+            content: 'Submitted, all questions attempted.',
+            submittedAt: new Date('2026-07-04'),
+            isLate: false,
+          },
+        });
+      }
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
