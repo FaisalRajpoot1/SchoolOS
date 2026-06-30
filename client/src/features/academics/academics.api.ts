@@ -52,6 +52,22 @@ export const classesApi = {
     await api.delete(`/classes/${classId}/sections/${sectionId}`);
   },
 
+  async setClassTeacher(
+    classId: string,
+    sectionId: string,
+    classTeacherId: string | null,
+  ): Promise<void> {
+    await api.patch(`/classes/${classId}/sections/${sectionId}`, { classTeacherId });
+  },
+
+  async setSubjectTeacher(
+    classId: string,
+    subjectId: string,
+    teacherId: string | null,
+  ): Promise<void> {
+    await api.put(`/classes/${classId}/subjects/${subjectId}/teacher`, { teacherId });
+  },
+
   async setSubjects(classId: string, subjectIds: string[]): Promise<Subject[]> {
     const { data } = await api.put<{ data: Subject[] }>(`/classes/${classId}/subjects`, {
       subjectIds,

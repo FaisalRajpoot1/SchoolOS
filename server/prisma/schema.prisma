@@ -37,6 +37,13 @@ enum StudentStatus {
   ALUMNI
 }
 
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -73,6 +80,7 @@ model School {
   classes       Class[]
   subjects      Subject[]
   students      Student[]
+  teachers      Teacher[]
 
   @@map("schools")
 }
@@ -127,10 +135,15 @@ model Section {
   classId String
   class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
 
+  // Optional class teacher (homeroom). Nulled if the teacher is removed.
+  classTeacherId String?
+  classTeacher   Teacher? @relation("ClassTeacher", fields: [classTeacherId], references: [id], onDelete: SetNull)
+
   students Student[]
 
   @@unique([classId, name])
   @@index([classId])
+  @@index([classTeacherId])
   @@map("sections")
 }
 
@@ -163,9 +176,14 @@ model ClassSubject {
   subjectId String
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
+  // Optional subject teacher for this class. Nulled if the teacher is removed.
+  teacherId String?
+  teacher   Teacher? @relation("SubjectTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
   @@unique([classId, subjectId])
   @@index([classId])
   @@index([subjectId])
+  @@index([teacherId])
   @@map("class_subjects")
 }
 
@@ -224,6 +242,40 @@ model Guardian {
   @@map("guardians")
 }
 
+/// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
+model Teacher {
+  id              String      @id @default(uuid())
+  employeeNo      String
+  firstName       String
+  lastName        String
+  email           String
+  phone           String?
+  gender          Gender?
+  dateOfBirth     DateTime?
+  qualification   String?
+  experienceYears Int?
+  /// Monthly salary in major currency units (school's currency).
+  salary          Int?
+  joiningDate     DateTime    @default(now())
+  status          StaffStatus @default(ACTIVE)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Login account (role TEACHER). One-to-one.
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  classSections      Section[]      @relation("ClassTeacher")
+  subjectAssignments ClassSubject[] @relation("SubjectTeacher")
+
+  @@unique([schoolId, employeeNo])
+  @@index([schoolId])
+  @@map("teachers")
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String
@@ -241,6 +293,7 @@ model User {
   school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   refreshTokens RefreshToken[]
+  teacher       Teacher?
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])

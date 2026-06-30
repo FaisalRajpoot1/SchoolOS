@@ -91,3 +91,21 @@ Classes, sections, and offered subjects:
 | POST   | `/students/:id/guardians`         | Add a guardian                                       |
 | PATCH  | `/students/:id/guardians/:guardianId` | Update a guardian                                |
 | DELETE | `/students/:id/guardians/:guardianId` | Remove a guardian                                |
+
+## Teacher Management — Module 4 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                  | Description                                                     |
+| ------ | --------------------- | -------------------------------------------------------------- |
+| POST   | `/teachers`           | Create a teacher + linked TEACHER login account (auto employee #) |
+| GET    | `/teachers`           | List teachers (`page`, `limit`, `search`, `status`)            |
+| GET    | `/teachers/:id`       | Teacher detail (login, class-teacher sections, subject assignments) |
+| PATCH  | `/teachers/:id`       | Update profile (name change syncs the login account)           |
+| PATCH  | `/teachers/:id/status`| Change status (ACTIVE/INACTIVE/ON_LEAVE/TERMINATED); non-active disables login |
+| DELETE | `/teachers/:id`       | Delete teacher + login account                                 |
+
+Assignments (in the Classes module):
+
+| Method | Path                                            | Description                          |
+| ------ | ----------------------------------------------- | ------------------------------------ |
+| PATCH  | `/classes/:classId/sections/:sectionId`         | Set/clear class teacher via `classTeacherId` |
+| PUT    | `/classes/:classId/subjects/:subjectId/teacher` | Set/clear subject teacher (`{ teacherId }`)  |

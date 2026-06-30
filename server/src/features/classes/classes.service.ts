@@ -21,6 +21,14 @@ const assertClass = async (schoolId: string, classId: string): Promise<Class> =>
   return found;
 };
 
+/** Ensures a teacher belongs to the tenant, or throws 400. */
+const assertTeacherInSchool = async (schoolId: string, teacherId: string): Promise<void> => {
+  const teacher = await prisma.teacher.findFirst({ where: { id: teacherId, schoolId } });
+  if (!teacher) throw ApiError.badRequest('Invalid teacher for this school');
+};
+
+const teacherRef = { select: { id: true, firstName: true, lastName: true } } as const;
+
 export const classesService = {
   // ---- Classes ----
   async create(schoolId: string, input: CreateClassInput): Promise<Class> {
@@ -45,8 +53,11 @@ export const classesService = {
     const detail = await prisma.class.findUnique({
       where: { id: classId },
       include: {
-        sections: { orderBy: { name: 'asc' } },
-        classSubjects: { include: { subject: true }, orderBy: { subject: { name: 'asc' } } },
+        sections: { orderBy: { name: 'asc' }, include: { classTeacher: teacherRef } },
+        classSubjects: {
+          include: { subject: true, teacher: teacherRef },
+          orderBy: { subject: { name: 'asc' } },
+        },
       },
     });
     // assertClass guarantees existence.
@@ -90,6 +101,7 @@ export const classesService = {
     await assertClass(schoolId, classId);
     const section = await prisma.section.findFirst({ where: { id: sectionId, classId } });
     if (!section) throw ApiError.notFound('Section not found');
+    if (input.classTeacherId) await assertTeacherInSchool(schoolId, input.classTeacherId);
     try {
       return await prisma.section.update({ where: { id: sectionId }, data: input });
     } catch (err) {
@@ -133,6 +145,27 @@ export const classesService = {
     return prisma.subject.findMany({
       where: { classSubjects: { some: { classId } } },
       orderBy: { name: 'asc' },
+    });
+  },
+
+  /** Assigns (or clears, with null) the subject teacher for a class's offered subject. */
+  async setSubjectTeacher(
+    schoolId: string,
+    classId: string,
+    subjectId: string,
+    teacherId: string | null,
+  ) {
+    await assertClass(schoolId, classId);
+    const link = await prisma.classSubject.findUnique({
+      where: { classId_subjectId: { classId, subjectId } },
+    });
+    if (!link) throw ApiError.badRequest('This subject is not offered by the class');
+    if (teacherId) await assertTeacherInSchool(schoolId, teacherId);
+
+    return prisma.classSubject.update({
+      where: { id: link.id },
+      data: { teacherId },
+      include: { subject: true, teacher: teacherRef },
     });
   },
 };

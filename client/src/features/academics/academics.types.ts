@@ -7,11 +7,19 @@ export interface Subject {
   updatedAt: string;
 }
 
+export interface TeacherRef {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface Section {
   id: string;
   classId: string;
   name: string;
   capacity: number | null;
+  classTeacherId: string | null;
+  classTeacher: TeacherRef | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +34,8 @@ export interface ClassListItem {
 export interface ClassSubjectLink {
   id: string;
   subject: Subject;
+  teacherId: string | null;
+  teacher: TeacherRef | null;
 }
 
 export interface ClassDetail {

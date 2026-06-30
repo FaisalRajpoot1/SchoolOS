@@ -6,6 +6,7 @@ import { academicYearRoutes } from '@/features/academicYears/academicYears.route
 import { classRoutes } from '@/features/classes/classes.routes';
 import { subjectRoutes } from '@/features/subjects/subjects.routes';
 import { studentRoutes } from '@/features/students/students.routes';
+import { teacherRoutes } from '@/features/teachers/teachers.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -20,6 +21,7 @@ router.use('/academic-years', academicYearRoutes);
 router.use('/classes', classRoutes);
 router.use('/subjects', subjectRoutes);
 router.use('/students', studentRoutes);
+router.use('/teachers', teacherRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

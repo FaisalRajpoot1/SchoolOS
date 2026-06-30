@@ -5,10 +5,12 @@ import { validate } from '@/middlewares/validate.middleware';
 import { classesController } from './classes.controller';
 import {
   classIdParamSchema,
+  classSubjectParamSchema,
   createClassSchema,
   createSectionSchema,
   sectionIdParamSchema,
   setClassSubjectsSchema,
+  setSubjectTeacherSchema,
   updateClassSchema,
   updateSectionSchema,
 } from './classes.validation';
@@ -50,6 +52,13 @@ router.put(
   '/:classId/subjects',
   validate({ params: classIdParamSchema, body: setClassSubjectsSchema }),
   classesController.setSubjects,
+);
+
+// Assign / clear the subject teacher for one offered subject.
+router.put(
+  '/:classId/subjects/:subjectId/teacher',
+  validate({ params: classSubjectParamSchema, body: setSubjectTeacherSchema }),
+  classesController.setSubjectTeacher,
 );
 
 export const classRoutes = router;

@@ -75,4 +75,14 @@ export const classesController = {
     );
     res.status(200).json({ success: true, data: subjects });
   }),
+
+  setSubjectTeacher: asyncHandler(async (req: Request, res: Response) => {
+    const classSubject = await classesService.setSubjectTeacher(
+      requireSchoolId(req.user),
+      req.params.classId as string,
+      req.params.subjectId as string,
+      req.body.teacherId,
+    );
+    res.status(200).json({ success: true, data: { classSubject } });
+  }),
 };

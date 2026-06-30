@@ -101,10 +101,53 @@ async function main(): Promise<void> {
     skipDuplicates: true,
   });
 
-  // A couple of enrolled students in Grade 1 / Section A, each with a guardian.
+  // A demo teacher with a login account, set as class teacher of Grade 1/A
+  // and subject teacher of Mathematics.
   const sectionA = await prisma.section.findUnique({
     where: { classId_name: { classId: grade1.id, name: 'A' } },
   });
+
+  const existingTeacher = await prisma.teacher.findUnique({
+    where: { schoolId_employeeNo: { schoolId: school.id, employeeNo: 'EMP-00001' } },
+  });
+  if (!existingTeacher) {
+    const teacherUser = await prisma.user.create({
+      data: {
+        email: 'teacher@demo.school',
+        passwordHash,
+        firstName: 'Tariq',
+        lastName: 'Mehmood',
+        role: UserRole.TEACHER,
+        schoolId: school.id,
+      },
+    });
+    const teacher = await prisma.teacher.create({
+      data: {
+        schoolId: school.id,
+        userId: teacherUser.id,
+        employeeNo: 'EMP-00001',
+        firstName: 'Tariq',
+        lastName: 'Mehmood',
+        email: 'teacher@demo.school',
+        qualification: 'M.Sc. Mathematics',
+        experienceYears: 6,
+      },
+    });
+
+    if (sectionA) {
+      await prisma.section.update({
+        where: { id: sectionA.id },
+        data: { classTeacherId: teacher.id },
+      });
+    }
+    const mathSubject = subjects.find((s) => s.code === 'MATH');
+    if (mathSubject) {
+      await prisma.classSubject.update({
+        where: { classId_subjectId: { classId: grade1.id, subjectId: mathSubject.id } },
+        data: { teacherId: teacher.id },
+      });
+    }
+  }
 
   const studentSeeds = [
     { admissionNo: 'ADM-00001', firstName: 'Ayesha', lastName: 'Khan', guardian: 'Imran Khan' },
@@ -141,6 +184,7 @@ async function main(): Promise<void> {
   console.table({
     superAdmin: { email: 'owner@schoolos.dev', password: DEMO_PASSWORD, schoolId: '(none)' },
     schoolAdmin: { email: 'admin@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
+    teacher: { email: 'teacher@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
   });
 }
 

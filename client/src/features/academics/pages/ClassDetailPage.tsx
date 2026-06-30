@@ -8,10 +8,14 @@ import {
   useCreateSection,
   useDeleteSection,
   useSetClassSubjects,
+  useSetClassTeacher,
+  useSetSubjectTeacher,
   useSubjects,
 } from '../useAcademics';
+import { useTeacherOptions } from '@/features/teachers/useTeachers';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { getApiErrorMessage } from '@/lib/apiError';
 
@@ -32,6 +36,9 @@ export function ClassDetailPage() {
   const createSection = useCreateSection(classId);
   const deleteSection = useDeleteSection(classId);
   const setSubjects = useSetClassSubjects(classId);
+  const teachers = useTeacherOptions();
+  const setClassTeacher = useSetClassTeacher(classId);
+  const setSubjectTeacher = useSetSubjectTeacher(classId);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -90,20 +97,40 @@ export function ClassDetailPage() {
         {detail.data.sections.length > 0 ? (
           <ul className="divide-y divide-slate-100">
             {detail.data.sections.map((section) => (
-              <li key={section.id} className="flex items-center justify-between py-2">
-                <span>
+              <li key={section.id} className="flex items-center justify-between gap-3 py-2">
+                <span className="min-w-24">
                   <span className="font-medium">{section.name}</span>
                   {section.capacity !== null && (
                     <span className="ml-2 text-xs text-slate-500">capacity {section.capacity}</span>
                   )}
                 </span>
-                <Button
-                  variant="ghost"
-                  isLoading={deleteSection.isPending && deleteSection.variables === section.id}
-                  onClick={() => deleteSection.mutate(section.id)}
-                >
-                  Delete
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Select
+                    aria-label="Class teacher"
+                    className="w-44 py-1.5"
+                    value={section.classTeacherId ?? ''}
+                    onChange={(e) =>
+                      setClassTeacher.mutate({
+                        sectionId: section.id,
+                        teacherId: e.target.value || null,
+                      })
+                    }
+                  >
+                    <option value="">No class teacher</option>
+                    {teachers.data?.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.firstName} {t.lastName}
+                      </option>
+                    ))}
+                  </Select>
+                  <Button
+                    variant="ghost"
+                    isLoading={deleteSection.isPending && deleteSection.variables === section.id}
+                    onClick={() => deleteSection.mutate(section.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
@@ -176,6 +203,38 @@ export function ClassDetailPage() {
           </p>
         )}
       </Card>
+
+      {/* Subject teachers */}
+      {detail.data.classSubjects.length > 0 && (
+        <Card className="space-y-4">
+          <h2 className="font-semibold">Subject teachers</h2>
+          <ul className="divide-y divide-slate-100">
+            {detail.data.classSubjects.map((cs) => (
+              <li key={cs.id} className="flex items-center justify-between gap-3 py-2">
+                <span className="font-medium">{cs.subject.name}</span>
+                <Select
+                  aria-label={`Teacher for ${cs.subject.name}`}
+                  className="w-52 py-1.5"
+                  value={cs.teacherId ?? ''}
+                  onChange={(e) =>
+                    setSubjectTeacher.mutate({
+                      subjectId: cs.subject.id,
+                      teacherId: e.target.value || null,
+                    })
+                  }
+                >
+                  <option value="">No teacher</option>
+                  {teachers.data?.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.firstName} {t.lastName}
+                    </option>
+                  ))}
+                </Select>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }

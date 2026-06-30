@@ -80,3 +80,21 @@ export const useSetClassSubjects = (classId: string) => {
     },
   });
 };
+
+export const useSetClassTeacher = (classId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sectionId, teacherId }: { sectionId: string; teacherId: string | null }) =>
+      classesApi.setClassTeacher(classId, sectionId, teacherId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: classKeys.detail(classId) }),
+  });
+};
+
+export const useSetSubjectTeacher = (classId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ subjectId, teacherId }: { subjectId: string; teacherId: string | null }) =>
+      classesApi.setSubjectTeacher(classId, subjectId, teacherId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: classKeys.detail(classId) }),
+  });
+};
