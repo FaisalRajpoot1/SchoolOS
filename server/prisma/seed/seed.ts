@@ -228,6 +228,7 @@ async function main(): Promise<void> {
           invoiceNo: 'INV-00001',
           title: 'Term 1 Fees',
           status: 'PARTIAL',
+          total: 20000,
           items: {
             create: [
               { categoryId: tuition.id, description: 'Tuition — Term 1', amount: 15000, quantity: 1 },

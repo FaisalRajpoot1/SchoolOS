@@ -145,3 +145,9 @@ Invoices & payments (amounts are whole units of the school's currency; line-item
 | DELETE | `/invoices/:id/payments/:paymentId` | Remove a payment (recomputes status)                        |
 
 Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `CASH`, `CARD`, `BANK_TRANSFER`, `ONLINE`, `OTHER`.
+
+## Dashboard — Module 23 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path         | Description                                                            |
+| ------ | ------------ | --------------------------------------------------------------------- |
+| GET    | `/dashboard` | Aggregated KPIs: student/teacher/class/section counts, today's attendance breakdown + rate, finance (invoiced/collected/outstanding + invoices by status), and recent invoices |

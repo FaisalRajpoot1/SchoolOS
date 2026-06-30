@@ -325,6 +325,8 @@ model Invoice {
   dueDate   DateTime?
   status    InvoiceStatus @default(PENDING)
   notes     String?
+  /// Denormalized sum of line items (amount × quantity); items are fixed at creation.
+  total     Int           @default(0)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 

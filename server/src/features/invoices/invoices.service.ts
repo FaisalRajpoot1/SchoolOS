@@ -104,6 +104,7 @@ export const invoicesService = {
           title: input.title,
           dueDate: input.dueDate ?? null,
           notes: input.notes ?? null,
+          total: input.items.reduce((acc, i) => acc + i.amount * i.quantity, 0),
           items: {
             create: input.items.map((i) => ({
               categoryId: i.categoryId ?? null,
