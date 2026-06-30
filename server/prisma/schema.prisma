@@ -23,6 +23,20 @@ enum UserRole {
   HR
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  TRANSFERRED
+  ALUMNI
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -58,6 +72,7 @@ model School {
   academicYears AcademicYear[]
   classes       Class[]
   subjects      Subject[]
+  students      Student[]
 
   @@map("schools")
 }
@@ -94,6 +109,7 @@ model Class {
 
   sections      Section[]
   classSubjects ClassSubject[]
+  students      Student[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -110,6 +126,8 @@ model Section {
 
   classId String
   class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  students Student[]
 
   @@unique([classId, name])
   @@index([classId])
@@ -151,6 +169,61 @@ model ClassSubject {
   @@map("class_subjects")
 }
 
+/// An enrolled student (admission record + current placement). Tenant-scoped.
+model Student {
+  id            String        @id @default(uuid())
+  admissionNo   String
+  firstName     String
+  lastName      String
+  gender        Gender?
+  dateOfBirth   DateTime?
+  email         String?
+  phone         String?
+  address       String?
+  status        StudentStatus @default(ACTIVE)
+  admissionDate DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Current placement; nulled (not deleted) if the class/section is removed.
+  classId   String?
+  class     Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
+  sectionId String?
+  section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  guardians Guardian[]
+
+  @@unique([schoolId, admissionNo])
+  @@index([schoolId])
+  @@index([classId])
+  @@index([sectionId])
+  @@map("students")
+}
+
+/// A parent/guardian linked to a student.
+model Guardian {
+  id         String   @id @default(uuid())
+  relation   String
+  firstName  String
+  lastName   String
+  phone      String?
+  email      String?
+  occupation String?
+  address    String?
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("guardians")
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String
@@ -177,13 +250,13 @@ model User {
 
 /// Hashed refresh tokens for rotation/revocation.
 model RefreshToken {
-  id        String   @id @default(uuid())
-  tokenHash String   @unique
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@map("refresh_tokens")

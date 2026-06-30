@@ -11,6 +11,9 @@ import { SchoolSettingsPage } from '@/features/schools/pages/SchoolSettingsPage'
 import { ClassesPage } from '@/features/academics/pages/ClassesPage';
 import { ClassDetailPage } from '@/features/academics/pages/ClassDetailPage';
 import { SubjectsPage } from '@/features/academics/pages/SubjectsPage';
+import { StudentsListPage } from '@/features/students/pages/StudentsListPage';
+import { AdmitStudentPage } from '@/features/students/pages/AdmitStudentPage';
+import { StudentDetailPage } from '@/features/students/pages/StudentDetailPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -41,6 +44,9 @@ export const router = createBrowserRouter([
               { path: '/academics/classes', element: <ClassesPage /> },
               { path: '/academics/classes/:classId', element: <ClassDetailPage /> },
               { path: '/academics/subjects', element: <SubjectsPage /> },
+              { path: '/students', element: <StudentsListPage /> },
+              { path: '/students/new', element: <AdmitStudentPage /> },
+              { path: '/students/:id', element: <StudentDetailPage /> },
             ],
           },
         ],

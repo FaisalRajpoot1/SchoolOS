@@ -77,3 +77,17 @@ Classes, sections, and offered subjects:
 | PATCH  | `/classes/:classId/sections/:sectionId`| Update a section                         |
 | DELETE | `/classes/:classId/sections/:sectionId`| Delete a section                         |
 | PUT    | `/classes/:classId/subjects`           | Replace the class's offered subjects (`{ subjectIds }`) |
+
+## Student Management — Module 3 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                              | Description                                          |
+| ------ | --------------------------------- | ---------------------------------------------------- |
+| POST   | `/students`                       | Admit a student (auto admission # if omitted; optional guardians + enrollment) |
+| GET    | `/students`                       | List students (`page`, `limit`, `search`, `classId`, `sectionId`, `status`) |
+| GET    | `/students/:id`                   | Student detail (guardians + class/section)           |
+| PATCH  | `/students/:id`                   | Update profile / enrollment                          |
+| PATCH  | `/students/:id/status`            | Change status (ACTIVE/INACTIVE/GRADUATED/TRANSFERRED/ALUMNI) |
+| DELETE | `/students/:id`                   | Delete a student                                     |
+| POST   | `/students/:id/guardians`         | Add a guardian                                       |
+| PATCH  | `/students/:id/guardians/:guardianId` | Update a guardian                                |
+| DELETE | `/students/:id/guardians/:guardianId` | Remove a guardian                                |

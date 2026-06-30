@@ -101,6 +101,40 @@ async function main(): Promise<void> {
     skipDuplicates: true,
   });
 
+  // A couple of enrolled students in Grade 1 / Section A, each with a guardian.
+  const sectionA = await prisma.section.findUnique({
+    where: { classId_name: { classId: grade1.id, name: 'A' } },
+  });
+
+  const studentSeeds = [
+    { admissionNo: 'ADM-00001', firstName: 'Ayesha', lastName: 'Khan', guardian: 'Imran Khan' },
+    { admissionNo: 'ADM-00002', firstName: 'Bilal', lastName: 'Ahmed', guardian: 'Sara Ahmed' },
+  ];
+
+  for (const seed of studentSeeds) {
+    const [guardianFirst, guardianLast] = seed.guardian.split(' ');
+    await prisma.student.upsert({
+      where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: seed.admissionNo } },
+      update: {},
+      create: {
+        schoolId: school.id,
+        admissionNo: seed.admissionNo,
+        firstName: seed.firstName,
+        lastName: seed.lastName,
+        classId: grade1.id,
+        sectionId: sectionA?.id ?? null,
+        guardians: {
+          create: {
+            relation: 'Parent',
+            firstName: guardianFirst ?? 'Parent',
+            lastName: guardianLast ?? seed.lastName,
+            isPrimary: true,
+          },
+        },
+      },
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

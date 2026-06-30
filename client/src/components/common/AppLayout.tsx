@@ -14,6 +14,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/schools', label: 'Schools', roles: ['SUPER_ADMIN'] },
+  { to: '/students', label: 'Students', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/classes', label: 'Classes', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/subjects', label: 'Subjects', roles: ['SCHOOL_ADMIN'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
