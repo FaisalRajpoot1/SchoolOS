@@ -19,5 +19,25 @@ export const loginSchema = z.object({
   schoolId: z.string().uuid(),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+  schoolId: z.string().uuid(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password,
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: password,
+});
+
+export const sessionIdParamSchema = z.object({ sessionId: z.string().uuid() });
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

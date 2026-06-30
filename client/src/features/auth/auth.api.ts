@@ -26,4 +26,42 @@ export const authApi = {
   async logout(): Promise<void> {
     await api.post('/auth/logout');
   },
+
+  async forgotPassword(payload: { email: string; schoolId: string }): Promise<{ resetToken?: string }> {
+    const { data } = await api.post<{ data?: { resetToken?: string } }>(
+      '/auth/forgot-password',
+      payload,
+    );
+    return { resetToken: data.data?.resetToken };
+  },
+
+  async resetPassword(payload: { token: string; password: string }): Promise<void> {
+    await api.post('/auth/reset-password', payload);
+  },
+
+  async changePassword(payload: { currentPassword: string; newPassword: string }): Promise<void> {
+    await api.post('/auth/change-password', payload);
+  },
+
+  async listSessions(): Promise<SessionInfo[]> {
+    const { data } = await api.get<Envelope<SessionInfo[]>>('/auth/sessions');
+    return data.data;
+  },
+
+  async revokeSession(sessionId: string): Promise<void> {
+    await api.delete(`/auth/sessions/${sessionId}`);
+  },
+
+  async revokeOtherSessions(): Promise<void> {
+    await api.post('/auth/sessions/revoke-others');
+  },
 };
+
+export interface SessionInfo {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+  isCurrent: boolean;
+}

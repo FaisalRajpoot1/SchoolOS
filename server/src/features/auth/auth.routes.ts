@@ -3,7 +3,14 @@ import rateLimit from 'express-rate-limit';
 import { validate } from '@/middlewares/validate.middleware';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { authController } from './auth.controller';
-import { loginSchema, registerSchema } from './auth.validation';
+import {
+  changePasswordSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  sessionIdParamSchema,
+} from './auth.validation';
 
 /** Tighter rate limit on credential endpoints to slow brute-force attempts. */
 const authLimiter = rateLimit({
@@ -16,10 +23,39 @@ const authLimiter = rateLimit({
 
 const router = Router();
 
+// Public credential endpoints.
 router.post('/register', authLimiter, validate({ body: registerSchema }), authController.register);
 router.post('/login', authLimiter, validate({ body: loginSchema }), authController.login);
 router.post('/refresh', authController.refresh);
 router.post('/logout', authController.logout);
+router.post(
+  '/forgot-password',
+  authLimiter,
+  validate({ body: forgotPasswordSchema }),
+  authController.forgotPassword,
+);
+router.post(
+  '/reset-password',
+  authLimiter,
+  validate({ body: resetPasswordSchema }),
+  authController.resetPassword,
+);
+
+// Authenticated account + session management.
 router.get('/me', authenticate, authController.me);
+router.post(
+  '/change-password',
+  authenticate,
+  validate({ body: changePasswordSchema }),
+  authController.changePassword,
+);
+router.get('/sessions', authenticate, authController.listSessions);
+router.delete(
+  '/sessions/:sessionId',
+  authenticate,
+  validate({ params: sessionIdParamSchema }),
+  authController.revokeSession,
+);
+router.post('/sessions/revoke-others', authenticate, authController.revokeOtherSessions);
 
 export const authRoutes = router;

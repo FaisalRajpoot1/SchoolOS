@@ -13,6 +13,7 @@ import { invoiceRoutes } from '@/features/invoices/invoices.routes';
 import { dashboardRoutes } from '@/features/dashboard/dashboard.routes';
 import { examRoutes } from '@/features/exams/exams.routes';
 import { homeworkRoutes } from '@/features/homework/homework.routes';
+import { auditRoutes } from '@/features/audit/audit.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -34,6 +35,7 @@ router.use('/invoices', invoiceRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/exams', examRoutes);
 router.use('/homework', homeworkRoutes);
+router.use('/audit-logs', auditRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

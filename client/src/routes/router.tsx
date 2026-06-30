@@ -30,11 +30,17 @@ import { ExamResultsPage } from '@/features/exams/pages/ExamResultsPage';
 import { HomeworkListPage } from '@/features/homework/pages/HomeworkListPage';
 import { CreateHomeworkPage } from '@/features/homework/pages/CreateHomeworkPage';
 import { HomeworkDetailPage } from '@/features/homework/pages/HomeworkDetailPage';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
+import { SecurityPage } from '@/features/auth/pages/SecurityPage';
+import { AuditLogsPage } from '@/features/audit/pages/AuditLogsPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
 
   // Authenticated app shell.
   {
@@ -44,6 +50,13 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          // Available to every authenticated user.
+          { path: '/settings/security', element: <SecurityPage /> },
+          // School and platform admins.
+          {
+            element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'SUPER_ADMIN']} />,
+            children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+          },
           // SUPER_ADMIN only.
           {
             element: <ProtectedRoute roles={['SUPER_ADMIN']} />,

@@ -22,6 +22,20 @@ token is an httpOnly cookie set by the server.
 | POST   | `/auth/refresh`  | cookie | Rotate refresh token, issue access token |
 | POST   | `/auth/logout`   | cookie | Revoke refresh token                     |
 | GET    | `/auth/me`       | Bearer | Current user profile                     |
+| POST   | `/auth/forgot-password` | —      | Request a reset token (no enumeration; returns the token in non-prod) |
+| POST   | `/auth/reset-password`  | —      | Consume a reset token, set a new password, revoke all sessions |
+| POST   | `/auth/change-password` | Bearer | Change password (keeps current session, revokes others) |
+| GET    | `/auth/sessions` | Bearer | List active sessions (device/IP/last-used, current flagged) |
+| DELETE | `/auth/sessions/:sessionId` | Bearer | Revoke one session |
+| POST   | `/auth/sessions/revoke-others` | Bearer | Revoke all sessions except the current |
+
+## Audit Logs — Module 1 (roles `SCHOOL_ADMIN` + `SUPER_ADMIN`, tenant-scoped; super admin sees all)
+
+| Method | Path          | Description                                                |
+| ------ | ------------- | ---------------------------------------------------------- |
+| GET    | `/audit-logs` | List audit events (`page`, `limit`, `action`, `userId`)    |
+
+Auth events are recorded automatically: `auth.register`, `auth.login`, `auth.logout`, `auth.password_reset_requested`, `auth.password_reset`, `auth.password_changed`, `auth.session_revoked`, `auth.sessions_revoked_others`.
 
 ## Schools — Module 2
 

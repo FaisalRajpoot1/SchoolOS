@@ -24,6 +24,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/fees/invoices', label: 'Fees', roles: ['SCHOOL_ADMIN'] },
   { to: '/fees/categories', label: 'Fee Categories', roles: ['SCHOOL_ADMIN'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
+  { to: '/audit-logs', label: 'Audit Logs', roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] },
+  { to: '/settings/security', label: 'Security' },
 ];
 
 export function AppLayout() {

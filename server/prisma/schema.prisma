@@ -114,6 +114,7 @@ model School {
   payments          Payment[]
   exams             Exam[]
   homeworks         Homework[]
+  auditLogs         AuditLog[]
 
   @@map("schools")
 }
@@ -581,10 +582,12 @@ model User {
   schoolId String?
   school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  refreshTokens     RefreshToken[]
-  teacher           Teacher?
-  attendanceRecords AttendanceRecord[] @relation("AttendanceRecorder")
-  paymentsRecorded  Payment[]          @relation("PaymentRecorder")
+  refreshTokens       RefreshToken[]
+  teacher             Teacher?
+  attendanceRecords   AttendanceRecord[]   @relation("AttendanceRecorder")
+  paymentsRecorded    Payment[]            @relation("PaymentRecorder")
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])
@@ -592,16 +595,54 @@ model User {
   @@map("users")
 }
 
-/// Hashed refresh tokens for rotation/revocation.
+/// Hashed refresh tokens for rotation/revocation. One row per session.
 model RefreshToken {
+  id         String    @id @default(uuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+  ipAddress  String?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+/// Single-use, hashed password-reset tokens.
+model PasswordResetToken {
   id        String    @id @default(uuid())
   tokenHash String    @unique
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  revokedAt DateTime?
+  usedAt    DateTime?
   createdAt DateTime  @default(now())
 
   @@index([userId])
-  @@map("refresh_tokens")
+  @@map("password_reset_tokens")
+}
+
+/// Immutable audit trail of security-relevant actions.
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  // Actor + tenant; nulled/cascaded appropriately.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
+  @@index([userId])
+  @@map("audit_logs")
 }

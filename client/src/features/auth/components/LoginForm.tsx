@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
+import { Link } from 'react-router-dom';
 import { useLogin } from '../useAuth';
 
 const loginFormSchema = z.object({
@@ -78,6 +79,12 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       >
         {login.isPending ? 'Signing in…' : 'Sign in'}
       </button>
+
+      <p className="text-center text-sm">
+        <Link to="/forgot-password" className="text-brand-600">
+          Forgot password?
+        </Link>
+      </p>
     </form>
   );
 }
