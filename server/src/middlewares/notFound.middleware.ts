@@ -1,0 +1,9 @@
+import type { Request, Response } from 'express';
+
+/** Terminal 404 handler for unmatched routes. */
+export const notFoundHandler = (req: Request, res: Response): void => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+};

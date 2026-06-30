@@ -1,0 +1,79 @@
+// SchoolOS Prisma schema.
+// Multi-tenant School ERP. This is a starting slice (auth + tenancy);
+// feature modules add their models incrementally.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+  ACCOUNTANT
+  LIBRARIAN
+  RECEPTIONIST
+  HR
+}
+
+/// A tenant. Every domain record is scoped to a school.
+model School {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  email     String?
+  phone     String?
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@map("schools")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole  @default(STUDENT)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Tenancy: SUPER_ADMIN has no school; everyone else belongs to one.
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  refreshTokens RefreshToken[]
+
+  // Email is unique within a tenant.
+  @@unique([schoolId, email])
+  @@index([schoolId])
+  @@map("users")
+}
+
+/// Hashed refresh tokens for rotation/revocation.
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}

@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+/* SchoolOS design tokens. Extend the theme here as the design system grows. */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
