@@ -109,3 +109,13 @@ Assignments (in the Classes module):
 | ------ | ----------------------------------------------- | ------------------------------------ |
 | PATCH  | `/classes/:classId/sections/:sectionId`         | Set/clear class teacher via `classTeacherId` |
 | PUT    | `/classes/:classId/subjects/:subjectId/teacher` | Set/clear subject teacher (`{ teacherId }`)  |
+
+## Attendance — Module 6 (roles `SCHOOL_ADMIN` + `TEACHER`, tenant-scoped)
+
+| Method | Path                            | Description                                                  |
+| ------ | ------------------------------- | ------------------------------------------------------------ |
+| GET    | `/attendance`                   | Roster for a section/date (`sectionId`, `date`) — each active student + recorded status |
+| POST   | `/attendance`                   | Bulk mark/update a section/date (`{ sectionId, date, records:[{ studentId, status, remark? }] }`); upserts |
+| GET    | `/attendance/students/:studentId` | A student's records over a range (`from`, `to`) with per-status counts |
+
+Attendance statuses: `PRESENT`, `ABSENT`, `LATE`, `LEAVE`.

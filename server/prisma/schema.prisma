@@ -44,6 +44,13 @@ enum StaffStatus {
   TERMINATED
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  LEAVE
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -75,12 +82,13 @@ model School {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users         User[]
-  academicYears AcademicYear[]
-  classes       Class[]
-  subjects      Subject[]
-  students      Student[]
-  teachers      Teacher[]
+  users             User[]
+  academicYears     AcademicYear[]
+  classes           Class[]
+  subjects          Subject[]
+  students          Student[]
+  teachers          Teacher[]
+  attendanceRecords AttendanceRecord[]
 
   @@map("schools")
 }
@@ -139,7 +147,8 @@ model Section {
   classTeacherId String?
   classTeacher   Teacher? @relation("ClassTeacher", fields: [classTeacherId], references: [id], onDelete: SetNull)
 
-  students Student[]
+  students          Student[]
+  attendanceRecords AttendanceRecord[]
 
   @@unique([classId, name])
   @@index([classId])
@@ -212,7 +221,8 @@ model Student {
   sectionId String?
   section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
-  guardians Guardian[]
+  guardians         Guardian[]
+  attendanceRecords AttendanceRecord[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -240,6 +250,34 @@ model Guardian {
 
   @@index([studentId])
   @@map("guardians")
+}
+
+/// One attendance entry per student per day. Tenant-scoped.
+model AttendanceRecord {
+  id        String           @id @default(uuid())
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  remark    String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // The user who took attendance; kept (nulled) if that user is removed.
+  recordedById String?
+  recordedBy   User?   @relation("AttendanceRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, date])
+  @@index([schoolId, date])
+  @@index([sectionId, date])
+  @@map("attendance_records")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
@@ -292,8 +330,9 @@ model User {
   schoolId String?
   school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  refreshTokens RefreshToken[]
-  teacher       Teacher?
+  refreshTokens     RefreshToken[]
+  teacher           Teacher?
+  attendanceRecords AttendanceRecord[] @relation("AttendanceRecorder")
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])

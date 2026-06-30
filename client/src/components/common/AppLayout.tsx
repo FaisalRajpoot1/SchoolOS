@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/teachers', label: 'Teachers', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/classes', label: 'Classes', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/subjects', label: 'Subjects', roles: ['SCHOOL_ADMIN'] },
+  { to: '/attendance', label: 'Attendance', roles: ['SCHOOL_ADMIN'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
 ];
 

@@ -178,6 +178,29 @@ async function main(): Promise<void> {
     });
   }
 
+  // Sample attendance for Grade 1/A on a fixed day.
+  if (sectionA) {
+    const day = new Date('2026-06-29');
+    const sectionStudents = await prisma.student.findMany({
+      where: { schoolId: school.id, sectionId: sectionA.id },
+      select: { id: true },
+    });
+    const statuses = ['PRESENT', 'ABSENT'] as const;
+    for (const [index, student] of sectionStudents.entries()) {
+      await prisma.attendanceRecord.upsert({
+        where: { studentId_date: { studentId: student.id, date: day } },
+        update: {},
+        create: {
+          schoolId: school.id,
+          studentId: student.id,
+          sectionId: sectionA.id,
+          date: day,
+          status: statuses[index % statuses.length],
+        },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

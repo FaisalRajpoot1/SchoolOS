@@ -7,6 +7,7 @@ import { classRoutes } from '@/features/classes/classes.routes';
 import { subjectRoutes } from '@/features/subjects/subjects.routes';
 import { studentRoutes } from '@/features/students/students.routes';
 import { teacherRoutes } from '@/features/teachers/teachers.routes';
+import { attendanceRoutes } from '@/features/attendance/attendance.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -22,6 +23,7 @@ router.use('/classes', classRoutes);
 router.use('/subjects', subjectRoutes);
 router.use('/students', studentRoutes);
 router.use('/teachers', teacherRoutes);
+router.use('/attendance', attendanceRoutes);
 // ...future feature routers
 
 export const apiRouter = router;
