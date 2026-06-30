@@ -1,0 +1,16 @@
+# Normalize line endings: store LF in the repo, check out native on each OS.
+* text=auto eol=lf
+
+# Binaries — never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.pdf binary
+*.woff binary
+*.woff2 binary
+
+# Lockfiles — keep diffs clean, treat as generated.
+package-lock.json -diff linguist-generated

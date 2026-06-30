@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { authReducer } from '@/features/auth/authSlice';
 
 /**
  * Root Redux store. Feature slices are registered in the `reducer` map
@@ -6,7 +7,7 @@ import { configureStore } from '@reduxjs/toolkit';
  */
 export const store = configureStore({
   reducer: {
-    // auth: authReducer,
+    auth: authReducer,
   },
 });
 
