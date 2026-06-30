@@ -56,6 +56,8 @@ model School {
 
   users         User[]
   academicYears AcademicYear[]
+  classes       Class[]
+  subjects      Subject[]
 
   @@map("schools")
 }
@@ -76,6 +78,77 @@ model AcademicYear {
   @@unique([schoolId, name])
   @@index([schoolId])
   @@map("academic_years")
+}
+
+/// A grade/class within a school (e.g. "Grade 1"). Holds sections and offered subjects.
+model Class {
+  id        String   @id @default(uuid())
+  name      String
+  /// Optional numeric ordering for sorting/promotion logic (e.g. 1, 2, 10).
+  level     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  sections      Section[]
+  classSubjects ClassSubject[]
+
+  @@unique([schoolId, name])
+  @@index([schoolId])
+  @@map("classes")
+}
+
+/// A subdivision of a class (e.g. "A", "B"). Scoped to its class (and thus tenant).
+model Section {
+  id        String   @id @default(uuid())
+  name      String
+  capacity  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, name])
+  @@index([classId])
+  @@map("sections")
+}
+
+/// A subject offered by a school (catalog), e.g. "Mathematics" / "MATH".
+model Subject {
+  id        String   @id @default(uuid())
+  name      String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  classSubjects ClassSubject[]
+
+  @@unique([schoolId, code])
+  @@unique([schoolId, name])
+  @@index([schoolId])
+  @@map("subjects")
+}
+
+/// Join table: which subjects a class offers.
+model ClassSubject {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, subjectId])
+  @@index([classId])
+  @@index([subjectId])
+  @@map("class_subjects")
 }
 
 model User {

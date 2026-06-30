@@ -52,3 +52,28 @@ Tenant self-service (role `SCHOOL_ADMIN`):
 | PATCH  | `/academic-years/:id`      | Update an academic year              |
 | PATCH  | `/academic-years/:id/current` | Mark as the current session       |
 | DELETE | `/academic-years/:id`      | Delete an academic year              |
+
+## Academic Management — Module 8 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+Subjects (catalog):
+
+| Method | Path            | Description            |
+| ------ | --------------- | ---------------------- |
+| POST   | `/subjects`     | Create a subject       |
+| GET    | `/subjects`     | List subjects          |
+| PATCH  | `/subjects/:id` | Update a subject       |
+| DELETE | `/subjects/:id` | Delete a subject       |
+
+Classes, sections, and offered subjects:
+
+| Method | Path                                   | Description                              |
+| ------ | -------------------------------------- | ---------------------------------------- |
+| POST   | `/classes`                             | Create a class                           |
+| GET    | `/classes`                             | List classes (with section/subject counts) |
+| GET    | `/classes/:classId`                    | Class detail (sections + offered subjects) |
+| PATCH  | `/classes/:classId`                    | Update a class                           |
+| DELETE | `/classes/:classId`                    | Delete a class                           |
+| POST   | `/classes/:classId/sections`           | Add a section                            |
+| PATCH  | `/classes/:classId/sections/:sectionId`| Update a section                         |
+| DELETE | `/classes/:classId/sections/:sectionId`| Delete a section                         |
+| PUT    | `/classes/:classId/subjects`           | Replace the class's offered subjects (`{ subjectIds }`) |

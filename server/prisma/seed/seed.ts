@@ -65,6 +65,42 @@ async function main(): Promise<void> {
     },
   });
 
+  // Subject catalog.
+  const subjectSeeds = [
+    { name: 'Mathematics', code: 'MATH' },
+    { name: 'English', code: 'ENG' },
+    { name: 'Science', code: 'SCI' },
+  ];
+  const subjects = await Promise.all(
+    subjectSeeds.map((s) =>
+      prisma.subject.upsert({
+        where: { schoolId_code: { schoolId: school.id, code: s.code } },
+        update: {},
+        create: { schoolId: school.id, name: s.name, code: s.code },
+      }),
+    ),
+  );
+
+  // A class with two sections, offering every subject.
+  const grade1 = await prisma.class.upsert({
+    where: { schoolId_name: { schoolId: school.id, name: 'Grade 1' } },
+    update: {},
+    create: { schoolId: school.id, name: 'Grade 1', level: 1 },
+  });
+
+  for (const name of ['A', 'B']) {
+    await prisma.section.upsert({
+      where: { classId_name: { classId: grade1.id, name } },
+      update: {},
+      create: { classId: grade1.id, name, capacity: 30 },
+    });
+  }
+
+  await prisma.classSubject.createMany({
+    data: subjects.map((subject) => ({ classId: grade1.id, subjectId: subject.id })),
+    skipDuplicates: true,
+  });
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
