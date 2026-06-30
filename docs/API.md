@@ -119,3 +119,29 @@ Assignments (in the Classes module):
 | GET    | `/attendance/students/:studentId` | A student's records over a range (`from`, `to`) with per-status counts |
 
 Attendance statuses: `PRESENT`, `ABSENT`, `LATE`, `LEAVE`.
+
+## Fee Management — Module 7 (roles `SCHOOL_ADMIN` + `ACCOUNTANT`, tenant-scoped)
+
+Fee categories:
+
+| Method | Path                  | Description           |
+| ------ | --------------------- | --------------------- |
+| POST   | `/fee-categories`     | Create a fee category |
+| GET    | `/fee-categories`     | List fee categories   |
+| PATCH  | `/fee-categories/:id` | Update a fee category |
+| DELETE | `/fee-categories/:id` | Delete a fee category |
+
+Invoices & payments (amounts are whole units of the school's currency; line-item amounts may be negative for discounts/scholarships):
+
+| Method | Path                                | Description                                                  |
+| ------ | ----------------------------------- | ------------------------------------------------------------ |
+| POST   | `/invoices`                         | Create an invoice with line items (auto invoice #)           |
+| GET    | `/invoices`                         | List invoices (`page`, `limit`, `search`, `status`, `studentId`); each row carries `totals` |
+| GET    | `/invoices/:id`                     | Invoice detail (items, payments, `totals: {total,paid,balance}`) |
+| PATCH  | `/invoices/:id`                     | Update title/dueDate/notes                                   |
+| POST   | `/invoices/:id/cancel`              | Cancel an invoice                                            |
+| DELETE | `/invoices/:id`                     | Delete an invoice                                            |
+| POST   | `/invoices/:id/payments`            | Record a payment (recomputes status PENDING/PARTIAL/PAID)    |
+| DELETE | `/invoices/:id/payments/:paymentId` | Remove a payment (recomputes status)                        |
+
+Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `CASH`, `CARD`, `BANK_TRANSFER`, `ONLINE`, `OTHER`.

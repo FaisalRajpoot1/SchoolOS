@@ -18,6 +18,10 @@ import { TeachersListPage } from '@/features/teachers/pages/TeachersListPage';
 import { AddTeacherPage } from '@/features/teachers/pages/AddTeacherPage';
 import { TeacherDetailPage } from '@/features/teachers/pages/TeacherDetailPage';
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage';
+import { FeeCategoriesPage } from '@/features/fees/pages/FeeCategoriesPage';
+import { InvoicesListPage } from '@/features/fees/pages/InvoicesListPage';
+import { CreateInvoicePage } from '@/features/fees/pages/CreateInvoicePage';
+import { InvoiceDetailPage } from '@/features/fees/pages/InvoiceDetailPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -55,6 +59,10 @@ export const router = createBrowserRouter([
               { path: '/teachers/new', element: <AddTeacherPage /> },
               { path: '/teachers/:id', element: <TeacherDetailPage /> },
               { path: '/attendance', element: <AttendancePage /> },
+              { path: '/fees/invoices', element: <InvoicesListPage /> },
+              { path: '/fees/invoices/new', element: <CreateInvoicePage /> },
+              { path: '/fees/invoices/:id', element: <InvoiceDetailPage /> },
+              { path: '/fees/categories', element: <FeeCategoriesPage /> },
             ],
           },
         ],

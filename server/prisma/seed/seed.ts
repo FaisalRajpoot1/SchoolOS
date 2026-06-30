@@ -201,6 +201,47 @@ async function main(): Promise<void> {
     }
   }
 
+  // Fee categories + a demo invoice with a partial payment for the first student.
+  const tuition = await prisma.feeCategory.upsert({
+    where: { schoolId_name: { schoolId: school.id, name: 'Tuition' } },
+    update: {},
+    create: { schoolId: school.id, name: 'Tuition', description: 'Monthly tuition fee' },
+  });
+  await prisma.feeCategory.upsert({
+    where: { schoolId_name: { schoolId: school.id, name: 'Transport' } },
+    update: {},
+    create: { schoolId: school.id, name: 'Transport' },
+  });
+
+  const firstStudent = await prisma.student.findUnique({
+    where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: 'ADM-00001' } },
+  });
+  if (firstStudent) {
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { schoolId_invoiceNo: { schoolId: school.id, invoiceNo: 'INV-00001' } },
+    });
+    if (!existingInvoice) {
+      await prisma.invoice.create({
+        data: {
+          schoolId: school.id,
+          studentId: firstStudent.id,
+          invoiceNo: 'INV-00001',
+          title: 'Term 1 Fees',
+          status: 'PARTIAL',
+          items: {
+            create: [
+              { categoryId: tuition.id, description: 'Tuition — Term 1', amount: 15000, quantity: 1 },
+              { description: 'Admission fee', amount: 5000, quantity: 1 },
+            ],
+          },
+          payments: {
+            create: { schoolId: school.id, amount: 10000, method: 'CASH' },
+          },
+        },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

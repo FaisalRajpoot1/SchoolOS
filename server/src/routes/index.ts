@@ -8,6 +8,8 @@ import { subjectRoutes } from '@/features/subjects/subjects.routes';
 import { studentRoutes } from '@/features/students/students.routes';
 import { teacherRoutes } from '@/features/teachers/teachers.routes';
 import { attendanceRoutes } from '@/features/attendance/attendance.routes';
+import { feeCategoryRoutes } from '@/features/feeCategories/feeCategories.routes';
+import { invoiceRoutes } from '@/features/invoices/invoices.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -24,6 +26,8 @@ router.use('/subjects', subjectRoutes);
 router.use('/students', studentRoutes);
 router.use('/teachers', teacherRoutes);
 router.use('/attendance', attendanceRoutes);
+router.use('/fee-categories', feeCategoryRoutes);
+router.use('/invoices', invoiceRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

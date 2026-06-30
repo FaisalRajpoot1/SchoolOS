@@ -2,7 +2,7 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   error?: string;
 }
 
@@ -12,9 +12,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
     const inputId = id ?? props.name;
     return (
       <div className="space-y-1">
-        <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
-          {label}
-        </label>
+        {label && (
+          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+            {label}
+          </label>
+        )}
         <input
           id={inputId}
           ref={ref}
