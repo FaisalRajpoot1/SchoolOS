@@ -243,6 +243,44 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo published exam with marks for Grade 1.
+  const existingExam = await prisma.exam.findFirst({
+    where: { schoolId: school.id, name: 'Mid-Term', classId: grade1.id },
+  });
+  if (!existingExam) {
+    const exam = await prisma.exam.create({
+      data: {
+        schoolId: school.id,
+        name: 'Mid-Term',
+        classId: grade1.id,
+        status: 'PUBLISHED',
+        examSubjects: {
+          create: subjects.map((s) => ({ subjectId: s.id, maxMarks: 100, passMarks: 40 })),
+        },
+      },
+      include: { examSubjects: true },
+    });
+
+    const gradeStudents = await prisma.student.findMany({
+      where: { schoolId: school.id, classId: grade1.id },
+      select: { id: true },
+    });
+    const baseScores = [85, 72, 60];
+    for (const [si, es] of exam.examSubjects.entries()) {
+      for (const [pi, student] of gradeStudents.entries()) {
+        await prisma.mark.upsert({
+          where: { examSubjectId_studentId: { examSubjectId: es.id, studentId: student.id } },
+          update: {},
+          create: {
+            examSubjectId: es.id,
+            studentId: student.id,
+            marksObtained: Math.max(35, (baseScores[si] ?? 70) - pi * 10),
+          },
+        });
+      }
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

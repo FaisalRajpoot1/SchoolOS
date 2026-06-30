@@ -66,6 +66,11 @@ enum PaymentMethod {
   OTHER
 }
 
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -107,6 +112,7 @@ model School {
   feeCategories     FeeCategory[]
   invoices          Invoice[]
   payments          Payment[]
+  exams             Exam[]
 
   @@map("schools")
 }
@@ -123,6 +129,8 @@ model AcademicYear {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  exams Exam[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -144,6 +152,7 @@ model Class {
   sections      Section[]
   classSubjects ClassSubject[]
   students      Student[]
+  exams         Exam[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -186,6 +195,7 @@ model Subject {
   school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   classSubjects ClassSubject[]
+  examSubjects  ExamSubject[]
 
   @@unique([schoolId, code])
   @@unique([schoolId, name])
@@ -242,6 +252,7 @@ model Student {
   guardians         Guardian[]
   attendanceRecords AttendanceRecord[]
   invoices          Invoice[]
+  marks             Mark[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -385,6 +396,75 @@ model Payment {
   @@index([invoiceId])
   @@index([schoolId])
   @@map("payments")
+}
+
+/// An examination for a class (e.g. "Mid-Term"). Holds per-subject schedule + scheme.
+model Exam {
+  id        String     @id @default(uuid())
+  name      String
+  status    ExamStatus @default(DRAFT)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  academicYearId String?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+
+  examSubjects ExamSubject[]
+
+  @@index([schoolId])
+  @@index([classId])
+  @@map("exams")
+}
+
+/// A subject within an exam: marking scheme (max/pass) and schedule date.
+model ExamSubject {
+  id        String    @id @default(uuid())
+  maxMarks  Int       @default(100)
+  passMarks Int       @default(40)
+  examDate  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  marks Mark[]
+
+  @@unique([examId, subjectId])
+  @@index([examId])
+  @@map("exam_subjects")
+}
+
+/// A student's mark for one exam subject.
+model Mark {
+  id            String   @id @default(uuid())
+  marksObtained Int?
+  isAbsent      Boolean  @default(false)
+  remark        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  examSubjectId String
+  examSubject   ExamSubject @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examSubjectId, studentId])
+  @@index([examSubjectId])
+  @@index([studentId])
+  @@map("marks")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

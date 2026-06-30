@@ -1,0 +1,10 @@
+/** Maps a percentage (0–100) to a letter grade on a fixed scale. */
+export const gradeForPercentage = (percentage: number): string => {
+  if (percentage >= 90) return 'A+';
+  if (percentage >= 80) return 'A';
+  if (percentage >= 70) return 'B';
+  if (percentage >= 60) return 'C';
+  if (percentage >= 50) return 'D';
+  if (percentage >= 40) return 'E';
+  return 'F';
+};

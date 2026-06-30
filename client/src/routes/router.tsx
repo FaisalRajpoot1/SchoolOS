@@ -22,6 +22,11 @@ import { FeeCategoriesPage } from '@/features/fees/pages/FeeCategoriesPage';
 import { InvoicesListPage } from '@/features/fees/pages/InvoicesListPage';
 import { CreateInvoicePage } from '@/features/fees/pages/CreateInvoicePage';
 import { InvoiceDetailPage } from '@/features/fees/pages/InvoiceDetailPage';
+import { ExamsListPage } from '@/features/exams/pages/ExamsListPage';
+import { CreateExamPage } from '@/features/exams/pages/CreateExamPage';
+import { ExamDetailPage } from '@/features/exams/pages/ExamDetailPage';
+import { MarksEntryPage } from '@/features/exams/pages/MarksEntryPage';
+import { ExamResultsPage } from '@/features/exams/pages/ExamResultsPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -63,6 +68,11 @@ export const router = createBrowserRouter([
               { path: '/fees/invoices/new', element: <CreateInvoicePage /> },
               { path: '/fees/invoices/:id', element: <InvoiceDetailPage /> },
               { path: '/fees/categories', element: <FeeCategoriesPage /> },
+              { path: '/exams', element: <ExamsListPage /> },
+              { path: '/exams/new', element: <CreateExamPage /> },
+              { path: '/exams/:id', element: <ExamDetailPage /> },
+              { path: '/exams/:id/results', element: <ExamResultsPage /> },
+              { path: '/exams/:id/subjects/:examSubjectId/marks', element: <MarksEntryPage /> },
             ],
           },
         ],

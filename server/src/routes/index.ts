@@ -11,6 +11,7 @@ import { attendanceRoutes } from '@/features/attendance/attendance.routes';
 import { feeCategoryRoutes } from '@/features/feeCategories/feeCategories.routes';
 import { invoiceRoutes } from '@/features/invoices/invoices.routes';
 import { dashboardRoutes } from '@/features/dashboard/dashboard.routes';
+import { examRoutes } from '@/features/exams/exams.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -30,6 +31,7 @@ router.use('/attendance', attendanceRoutes);
 router.use('/fee-categories', feeCategoryRoutes);
 router.use('/invoices', invoiceRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/exams', examRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

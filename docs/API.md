@@ -151,3 +151,22 @@ Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `C
 | Method | Path         | Description                                                            |
 | ------ | ------------ | --------------------------------------------------------------------- |
 | GET    | `/dashboard` | Aggregated KPIs: student/teacher/class/section counts, today's attendance breakdown + rate, finance (invoiced/collected/outstanding + invoices by status), and recent invoices |
+
+## Examination — Module 12 (tenant-scoped)
+
+Exam management is `SCHOOL_ADMIN`; marks entry and results are `SCHOOL_ADMIN` + `TEACHER`.
+
+| Method | Path                                       | Description                                                       |
+| ------ | ------------------------------------------ | ----------------------------------------------------------------- |
+| POST   | `/exams`                                   | Create an exam (auto-populates subjects from the class's offered subjects) |
+| GET    | `/exams`                                   | List exams (`page`, `limit`, `search`, `classId`, `status`)        |
+| GET    | `/exams/:id`                               | Exam detail (subjects with scheme + marks counts)                 |
+| PATCH  | `/exams/:id`                               | Update name/dates                                                 |
+| POST   | `/exams/:id/publish` · `/unpublish`        | Toggle published status                                           |
+| DELETE | `/exams/:id`                               | Delete an exam                                                    |
+| PATCH  | `/exams/:id/subjects/:examSubjectId`       | Update marking scheme (`maxMarks`, `passMarks`, `examDate`)        |
+| GET    | `/exams/:id/subjects/:examSubjectId/marks` | Marks roster for one subject                                      |
+| POST   | `/exams/:id/subjects/:examSubjectId/marks` | Bulk upsert marks (`{ records:[{ studentId, marksObtained?, isAbsent?, remark? }] }`) |
+| GET    | `/exams/:id/results`                       | Ranked results: per-student totals, percentage, grade, pass/fail  |
+
+Grade scale: A+ ≥90, A ≥80, B ≥70, C ≥60, D ≥50, E ≥40, else F.
