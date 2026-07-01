@@ -14,6 +14,8 @@ import { dashboardRoutes } from '@/features/dashboard/dashboard.routes';
 import { examRoutes } from '@/features/exams/exams.routes';
 import { homeworkRoutes } from '@/features/homework/homework.routes';
 import { auditRoutes } from '@/features/audit/audit.routes';
+import { parentRoutes } from '@/features/parents/parents.routes';
+import { portalRoutes } from '@/features/portal/portal.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -36,6 +38,8 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/exams', examRoutes);
 router.use('/homework', homeworkRoutes);
 router.use('/audit-logs', auditRoutes);
+router.use('/parents', parentRoutes);
+router.use('/portal', portalRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

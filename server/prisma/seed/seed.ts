@@ -323,6 +323,37 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo parent account linked to the seeded students.
+  const existingParentUser = await prisma.user.findFirst({
+    where: { schoolId: school.id, email: 'parent@demo.school' },
+  });
+  if (!existingParentUser) {
+    const allStudents = await prisma.student.findMany({
+      where: { schoolId: school.id },
+      select: { id: true },
+    });
+    const parentUser = await prisma.user.create({
+      data: {
+        email: 'parent@demo.school',
+        passwordHash,
+        firstName: 'Imran',
+        lastName: 'Khan',
+        role: UserRole.PARENT,
+        schoolId: school.id,
+      },
+    });
+    await prisma.parent.create({
+      data: {
+        schoolId: school.id,
+        userId: parentUser.id,
+        firstName: 'Imran',
+        lastName: 'Khan',
+        email: 'parent@demo.school',
+        children: { create: allStudents.map((s) => ({ studentId: s.id, relation: 'Father' })) },
+      },
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
@@ -330,6 +361,7 @@ async function main(): Promise<void> {
     superAdmin: { email: 'owner@schoolos.dev', password: DEMO_PASSWORD, schoolId: '(none)' },
     schoolAdmin: { email: 'admin@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
     teacher: { email: 'teacher@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
+    parent: { email: 'parent@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
   });
 }
 

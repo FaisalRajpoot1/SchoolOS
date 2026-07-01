@@ -37,6 +37,30 @@ token is an httpOnly cookie set by the server.
 
 Auth events are recorded automatically: `auth.register`, `auth.login`, `auth.logout`, `auth.password_reset_requested`, `auth.password_reset`, `auth.password_changed`, `auth.session_revoked`, `auth.sessions_revoked_others`.
 
+## Parents — Module 5 admin (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                              | Description                                          |
+| ------ | --------------------------------- | ---------------------------------------------------- |
+| POST   | `/parents`                        | Create a parent + PARENT login, link children        |
+| GET    | `/parents`                        | List parents (`page`, `limit`, `search`)             |
+| GET    | `/parents/:id`                    | Parent detail (login + linked children)              |
+| PATCH  | `/parents/:id`                    | Update profile (name change syncs login)             |
+| DELETE | `/parents/:id`                    | Delete parent (cascades login account)               |
+| POST   | `/parents/:id/children`           | Link a child (`{ studentId, relation? }`)            |
+| DELETE | `/parents/:id/children/:studentId`| Unlink a child                                       |
+
+## Parent Portal — Module 5 (role `PARENT`, own children only)
+
+| Method | Path                                          | Description                                        |
+| ------ | --------------------------------------------- | -------------------------------------------------- |
+| GET    | `/portal/me`                                  | Parent profile + children                          |
+| GET    | `/portal/children/:studentId/attendance`      | Child attendance history + counts (`from`, `to`)   |
+| GET    | `/portal/children/:studentId/invoices`        | Child invoices with balances                       |
+| GET    | `/portal/children/:studentId/homework`        | Child homework + submission status                 |
+| GET    | `/portal/children/:studentId/results`         | Child published exam results (per-exam grade)      |
+
+Every portal route verifies the student is linked to the calling parent (403 otherwise).
+
 ## Schools — Module 2
 
 Platform administration (role `SUPER_ADMIN`):

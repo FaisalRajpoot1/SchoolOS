@@ -34,6 +34,10 @@ import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
 import { AuditLogsPage } from '@/features/audit/pages/AuditLogsPage';
+import { ParentsListPage } from '@/features/parents/pages/ParentsListPage';
+import { AddParentPage } from '@/features/parents/pages/AddParentPage';
+import { ParentDetailPage } from '@/features/parents/pages/ParentDetailPage';
+import { ChildPage } from '@/features/portal/pages/ChildPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -52,6 +56,11 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <DashboardPage /> },
           // Available to every authenticated user.
           { path: '/settings/security', element: <SecurityPage /> },
+          // PARENT portal.
+          {
+            element: <ProtectedRoute roles={['PARENT']} />,
+            children: [{ path: '/portal/children/:studentId', element: <ChildPage /> }],
+          },
           // School and platform admins.
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'SUPER_ADMIN']} />,
@@ -92,6 +101,9 @@ export const router = createBrowserRouter([
               { path: '/homework', element: <HomeworkListPage /> },
               { path: '/homework/new', element: <CreateHomeworkPage /> },
               { path: '/homework/:id', element: <HomeworkDetailPage /> },
+              { path: '/parents', element: <ParentsListPage /> },
+              { path: '/parents/new', element: <AddParentPage /> },
+              { path: '/parents/:id', element: <ParentDetailPage /> },
             ],
           },
         ],

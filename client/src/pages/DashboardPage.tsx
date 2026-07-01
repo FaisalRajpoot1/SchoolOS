@@ -3,6 +3,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { useAuth } from '@/features/auth/useAuth';
 import { useDashboard } from '@/features/dashboard/useDashboard';
+import { usePortalMe } from '@/features/portal/usePortal';
 import { Card } from '@/components/ui/Card';
 import { formatAmount } from '@/features/fees/format';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -147,6 +148,39 @@ function SchoolAdminDashboard() {
   );
 }
 
+function ParentDashboard() {
+  const me = usePortalMe();
+
+  if (me.isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (me.isError || !me.data) return <p className="text-sm text-red-600">{getApiErrorMessage(me.error)}</p>;
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-semibold">My children</h2>
+      {me.data.children.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {me.data.children.map((child) => (
+            <Link key={child.id} to={`/portal/children/${child.id}`}>
+              <Card className="transition hover:border-brand-300">
+                <p className="text-lg font-semibold text-brand-700">
+                  {child.firstName} {child.lastName}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {child.class?.name ?? '—'}
+                  {child.section ? ` / ${child.section.name}` : ''} · {child.admissionNo}
+                </p>
+                <p className="mt-2 text-sm text-brand-600">View attendance, fees, homework & results →</p>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-slate-500">No children are linked to your account yet.</p>
+      )}
+    </div>
+  );
+}
+
 function SuperAdminDashboard() {
   return (
     <Card>
@@ -174,6 +208,8 @@ export function DashboardPage() {
         <SuperAdminDashboard />
       ) : user?.role === 'SCHOOL_ADMIN' ? (
         <SchoolAdminDashboard />
+      ) : user?.role === 'PARENT' ? (
+        <ParentDashboard />
       ) : (
         <Card>
           <p className="text-sm text-slate-500">Your role</p>
