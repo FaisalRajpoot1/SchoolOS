@@ -36,6 +36,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
   { to: '/announcements', label: 'Announcements' },
   { to: '/announcements/manage', label: 'Manage Notices', roles: ['SCHOOL_ADMIN'] },
+  { to: '/events', label: 'Events' },
+  { to: '/events/manage', label: 'Manage Events', roles: ['SCHOOL_ADMIN'] },
   { to: '/audit-logs', label: 'Audit Logs', roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] },
   { to: '/settings/security', label: 'Security' },
 ];

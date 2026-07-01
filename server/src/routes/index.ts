@@ -25,6 +25,7 @@ import { hostelRoutes } from '@/features/hostel/hostel.routes';
 import { inventoryRoutes } from '@/features/inventory/inventory.routes';
 import { hrRoutes } from '@/features/hr/hr.routes';
 import { payrollRoutes } from '@/features/payroll/payroll.routes';
+import { eventRoutes } from '@/features/events/events.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -58,6 +59,7 @@ router.use('/hostels', hostelRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/hr', hrRoutes);
 router.use('/payroll', payrollRoutes);
+router.use('/events', eventRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

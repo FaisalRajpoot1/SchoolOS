@@ -129,6 +129,15 @@ enum PayslipStatus {
   PAID
 }
 
+enum EventType {
+  GENERAL
+  HOLIDAY
+  EXAM
+  PTM
+  COMPETITION
+  SPORTS
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -191,6 +200,7 @@ model School {
   employees            Employee[]
   leaveRequests        LeaveRequest[]
   payslips             Payslip[]
+  events               Event[]
 
   @@map("schools")
 }
@@ -1144,6 +1154,27 @@ model Payslip {
   @@unique([employeeId, periodYear, periodMonth])
   @@index([schoolId, periodYear, periodMonth])
   @@map("payslips")
+}
+
+/// A school calendar event (holiday, PTM, competition, …). Tenant-scoped.
+model Event {
+  id          String               @id @default(uuid())
+  title       String
+  description String?
+  type        EventType            @default(GENERAL)
+  audience    AnnouncementAudience @default(ALL)
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, startDate])
+  @@map("events")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

@@ -709,6 +709,32 @@ async function main(): Promise<void> {
     });
   }
 
+  // A couple of calendar events.
+  const existingEvent = await prisma.event.findFirst({ where: { schoolId: school.id } });
+  if (!existingEvent) {
+    await prisma.event.createMany({
+      data: [
+        {
+          schoolId: school.id,
+          title: 'Independence Day (Holiday)',
+          type: 'HOLIDAY',
+          audience: 'ALL',
+          startDate: new Date('2026-08-14'),
+          allDay: true,
+        },
+        {
+          schoolId: school.id,
+          title: 'Parent-Teacher Meeting',
+          type: 'PTM',
+          audience: 'PARENTS',
+          location: 'Main Hall',
+          startDate: new Date('2026-07-24T10:00:00'),
+          allDay: false,
+        },
+      ],
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

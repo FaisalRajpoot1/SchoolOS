@@ -371,3 +371,18 @@ Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bo
 | DELETE | `/payroll/payslips/:id`           | Delete a payslip                                            |
 
 Statuses: `DRAFT`, `PAID`. (Payslip PDF export + bank-transfer files are deferred.)
+
+## Events — Module 20 (tenant-scoped)
+
+School calendar. The calendar feed is readable by any authenticated user (audience-filtered by role); management is `SCHOOL_ADMIN`.
+
+| Method | Path                | Auth          | Description                                                     |
+| ------ | ------------------- | ------------- | -------------------------------------------------------------- |
+| GET    | `/events/calendar`  | any           | Events overlapping `[from, to]` (defaults to the next 60 days) for the caller's role |
+| POST   | `/events`           | SCHOOL_ADMIN  | Create an event (`type`, `audience`, dates, `location`, `allDay`) |
+| GET    | `/events`           | SCHOOL_ADMIN  | Manage list (paginated, `type` filter)                        |
+| GET    | `/events/:id`       | SCHOOL_ADMIN  | Get one                                                        |
+| PATCH  | `/events/:id`       | SCHOOL_ADMIN  | Update                                                         |
+| DELETE | `/events/:id`       | SCHOOL_ADMIN  | Delete                                                        |
+
+Event types: `GENERAL`, `HOLIDAY`, `EXAM`, `PTM`, `COMPETITION`, `SPORTS`. Audiences reuse the announcement set (`ALL`/`TEACHERS`/`STUDENTS`/`PARENTS`/`STAFF`).

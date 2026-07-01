@@ -51,6 +51,8 @@ import { EmployeeDetailPage } from '@/features/hr/pages/EmployeeDetailPage';
 import { LeaveRequestsPage } from '@/features/hr/pages/LeaveRequestsPage';
 import { PayslipsListPage } from '@/features/payroll/pages/PayslipsListPage';
 import { PayslipDetailPage } from '@/features/payroll/pages/PayslipDetailPage';
+import { EventsCalendarPage } from '@/features/events/pages/EventsCalendarPage';
+import { ManageEventsPage } from '@/features/events/pages/ManageEventsPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -81,9 +83,13 @@ export const router = createBrowserRouter([
           // Available to every authenticated user.
           { path: '/settings/security', element: <SecurityPage /> },
           { path: '/announcements', element: <AnnouncementsFeedPage /> },
+          { path: '/events', element: <EventsCalendarPage /> },
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN']} />,
-            children: [{ path: '/announcements/manage', element: <ManageAnnouncementsPage /> }],
+            children: [
+              { path: '/announcements/manage', element: <ManageAnnouncementsPage /> },
+              { path: '/events/manage', element: <ManageEventsPage /> },
+            ],
           },
           // PARENT portal.
           {

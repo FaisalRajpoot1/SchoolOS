@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/useAuth';
 import { useDashboard } from '@/features/dashboard/useDashboard';
 import { usePortalMe } from '@/features/portal/usePortal';
 import { NoticeBoard } from '@/features/announcements/components/NoticeBoard';
+import { UpcomingEvents } from '@/features/events/components/UpcomingEvents';
 import { Card } from '@/components/ui/Card';
 import { formatAmount } from '@/features/fees/format';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -206,6 +207,7 @@ export function DashboardPage() {
       </div>
 
       <NoticeBoard />
+      <UpcomingEvents />
 
       {user?.role === 'SUPER_ADMIN' ? (
         <SuperAdminDashboard />
