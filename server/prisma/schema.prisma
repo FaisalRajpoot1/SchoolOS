@@ -138,6 +138,13 @@ enum EventType {
   SPORTS
 }
 
+enum CertificateType {
+  BONAFIDE
+  CHARACTER
+  TRANSFER
+  LEAVING
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -201,6 +208,7 @@ model School {
   leaveRequests        LeaveRequest[]
   payslips             Payslip[]
   events               Event[]
+  certificates         Certificate[]
 
   @@map("schools")
 }
@@ -355,6 +363,7 @@ model Student {
   bookIssues            BookIssue[]
   transportAllocation   TransportAllocation?
   hostelAllocation      HostelAllocation?
+  certificates          Certificate[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -1175,6 +1184,30 @@ model Event {
 
   @@index([schoolId, startDate])
   @@map("events")
+}
+
+/// An issued certificate for a student, with a public verification code.
+model Certificate {
+  id               String          @id @default(uuid())
+  type             CertificateType
+  serialNo         String
+  verificationCode String          @unique
+  title            String
+  body             String
+  issueDate        DateTime        @default(now())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, serialNo])
+  @@index([schoolId])
+  @@index([studentId])
+  @@map("certificates")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

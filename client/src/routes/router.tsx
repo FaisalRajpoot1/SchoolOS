@@ -56,6 +56,9 @@ import { ManageEventsPage } from '@/features/events/pages/ManageEventsPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
+import { CertificatesListPage } from '@/features/certificates/pages/CertificatesListPage';
+import { CertificateDetailPage } from '@/features/certificates/pages/CertificateDetailPage';
+import { VerifyCertificatePage } from '@/pages/VerifyCertificatePage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -71,6 +74,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/verify-certificate/:code', element: <VerifyCertificatePage /> },
 
   // Authenticated app shell.
   {
@@ -100,6 +104,14 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'SUPER_ADMIN']} />,
             children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+          },
+          // Certificates — school admins and receptionists.
+          {
+            element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'RECEPTIONIST']} />,
+            children: [
+              { path: '/certificates', element: <CertificatesListPage /> },
+              { path: '/certificates/:id', element: <CertificateDetailPage /> },
+            ],
           },
           // HR — school admins and HR staff.
           {

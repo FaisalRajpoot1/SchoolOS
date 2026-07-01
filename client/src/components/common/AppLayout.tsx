@@ -33,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/inventory/items', label: 'Inventory', roles: ['SCHOOL_ADMIN'] },
   { to: '/hr/employees', label: 'HR', roles: ['SCHOOL_ADMIN', 'HR'] },
   { to: '/payroll/payslips', label: 'Payroll', roles: ['SCHOOL_ADMIN', 'HR'] },
+  { to: '/certificates', label: 'Certificates', roles: ['SCHOOL_ADMIN', 'RECEPTIONIST'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
   { to: '/announcements', label: 'Announcements' },
   { to: '/announcements/manage', label: 'Manage Notices', roles: ['SCHOOL_ADMIN'] },

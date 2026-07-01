@@ -735,6 +735,25 @@ async function main(): Promise<void> {
     });
   }
 
+  // A demo bonafide certificate with a fixed verification code.
+  const certStudent = await prisma.student.findUnique({
+    where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: 'ADM-00001' } },
+  });
+  const existingCert = await prisma.certificate.findFirst({ where: { schoolId: school.id } });
+  if (certStudent && !existingCert) {
+    await prisma.certificate.create({
+      data: {
+        schoolId: school.id,
+        studentId: certStudent.id,
+        type: 'BONAFIDE',
+        serialNo: 'CERT-00001',
+        verificationCode: 'demo-verify-0001',
+        title: 'Bonafide Certificate',
+        body: `This is to certify that ${certStudent.firstName} ${certStudent.lastName}, bearing Admission No. ${certStudent.admissionNo}, is a bona fide student of ${school.name}. This certificate is issued for official purposes.`,
+      },
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

@@ -386,3 +386,17 @@ School calendar. The calendar feed is readable by any authenticated user (audien
 | DELETE | `/events/:id`       | SCHOOL_ADMIN  | Delete                                                        |
 
 Event types: `GENERAL`, `HOLIDAY`, `EXAM`, `PTM`, `COMPETITION`, `SPORTS`. Audiences reuse the announcement set (`ALL`/`TEACHERS`/`STUDENTS`/`PARENTS`/`STAFF`).
+
+## Certificates — Module 21 (tenant-scoped)
+
+Management is `SCHOOL_ADMIN` + `RECEPTIONIST`; verification is **public** (for QR scanning).
+
+| Method | Path                          | Auth                       | Description                                                    |
+| ------ | ----------------------------- | -------------------------- | ------------------------------------------------------------- |
+| GET    | `/certificates/verify/:code`  | public                     | Verify by code → `{ valid, certificate? }` (minimal info)     |
+| POST   | `/certificates`               | SCHOOL_ADMIN / RECEPTIONIST | Issue (auto serial + verification code; body auto-generated from a template unless provided) |
+| GET    | `/certificates`               | SCHOOL_ADMIN / RECEPTIONIST | List (`studentId`, `type`, `search`)                          |
+| GET    | `/certificates/:id`           | SCHOOL_ADMIN / RECEPTIONIST | Certificate detail                                            |
+| DELETE | `/certificates/:id`           | SCHOOL_ADMIN / RECEPTIONIST | Delete                                                        |
+
+Types: `BONAFIDE`, `CHARACTER`, `TRANSFER`, `LEAVING`. Each issued certificate carries a unique `verificationCode`; the client renders a printable certificate and a public verify link (`/verify-certificate/:code`).
