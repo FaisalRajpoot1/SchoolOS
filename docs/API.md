@@ -400,3 +400,15 @@ Management is `SCHOOL_ADMIN` + `RECEPTIONIST`; verification is **public** (for Q
 | DELETE | `/certificates/:id`           | SCHOOL_ADMIN / RECEPTIONIST | Delete                                                        |
 
 Types: `BONAFIDE`, `CHARACTER`, `TRANSFER`, `LEAVING`. Each issued certificate carries a unique `verificationCode`; the client renders a printable certificate and a public verify link (`/verify-certificate/:code`).
+
+## Reports — Module 22 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+Read-only aggregates over existing data (no new tables).
+
+| Method | Path                  | Description                                                          |
+| ------ | --------------------- | ------------------------------------------------------------------- |
+| GET    | `/reports/students`   | Headcounts: total/active, by status, by gender, by class            |
+| GET    | `/reports/attendance` | Present/absent/late/leave totals + present-rate over `[from, to]` (defaults to last 30 days) |
+| GET    | `/reports/finance`    | Invoiced/collected/outstanding, invoices by status, top-10 outstanding balances |
+
+The client renders these as Chart.js charts with CSV export (students-by-class, fee defaulters).
