@@ -291,3 +291,18 @@ Late fine = days past due × the per-day rate (config constant).
 | GET    | `/transport/allocations`               | List allocations (`routeId` filter)                     |
 | PUT    | `/transport/allocations/:studentId`    | Assign/reassign a student to a route + stop (one per student) |
 | DELETE | `/transport/allocations/:studentId`    | Unallocate a student                                    |
+
+## Communication — Module 19 (tenant-scoped)
+
+Notice-board announcements targeted by audience. The feed is readable by any authenticated user; management is `SCHOOL_ADMIN`.
+
+| Method | Path                  | Auth          | Description                                              |
+| ------ | --------------------- | ------------- | ------------------------------------------------------- |
+| GET    | `/announcements/feed` | any           | Active announcements for the caller's role (pinned first) |
+| POST   | `/announcements`      | SCHOOL_ADMIN  | Post an announcement (`audience`, `pinned`, `expiresAt`) |
+| GET    | `/announcements`      | SCHOOL_ADMIN  | Manage list (paginated)                                 |
+| GET    | `/announcements/:id`  | SCHOOL_ADMIN  | Get one                                                 |
+| PATCH  | `/announcements/:id`  | SCHOOL_ADMIN  | Update                                                  |
+| DELETE | `/announcements/:id`  | SCHOOL_ADMIN  | Delete                                                  |
+
+Audiences: `ALL`, `TEACHERS`, `STUDENTS`, `PARENTS`, `STAFF`. The feed matches `ALL` plus the audience(s) mapped to the caller's role, excludes expired/future-dated items, and orders pinned first. (Email/SMS/WhatsApp/push channels are deferred — require external providers.)

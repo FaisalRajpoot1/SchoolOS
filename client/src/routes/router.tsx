@@ -35,6 +35,8 @@ import { BooksListPage } from '@/features/library/pages/BooksListPage';
 import { BookDetailPage } from '@/features/library/pages/BookDetailPage';
 import { BookCategoriesPage } from '@/features/library/pages/BookCategoriesPage';
 import { IssuesListPage } from '@/features/library/pages/IssuesListPage';
+import { AnnouncementsFeedPage } from '@/features/announcements/pages/AnnouncementsFeedPage';
+import { ManageAnnouncementsPage } from '@/features/announcements/pages/ManageAnnouncementsPage';
 import { VehiclesPage } from '@/features/transport/pages/VehiclesPage';
 import { RoutesListPage } from '@/features/transport/pages/RoutesListPage';
 import { RouteDetailPage } from '@/features/transport/pages/RouteDetailPage';
@@ -67,6 +69,11 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <DashboardPage /> },
           // Available to every authenticated user.
           { path: '/settings/security', element: <SecurityPage /> },
+          { path: '/announcements', element: <AnnouncementsFeedPage /> },
+          {
+            element: <ProtectedRoute roles={['SCHOOL_ADMIN']} />,
+            children: [{ path: '/announcements/manage', element: <ManageAnnouncementsPage /> }],
+          },
           // PARENT portal.
           {
             element: <ProtectedRoute roles={['PARENT']} />,

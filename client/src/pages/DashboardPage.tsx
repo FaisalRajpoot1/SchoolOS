@@ -4,6 +4,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { useAuth } from '@/features/auth/useAuth';
 import { useDashboard } from '@/features/dashboard/useDashboard';
 import { usePortalMe } from '@/features/portal/usePortal';
+import { NoticeBoard } from '@/features/announcements/components/NoticeBoard';
 import { Card } from '@/components/ui/Card';
 import { formatAmount } from '@/features/fees/format';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -203,6 +204,8 @@ export function DashboardPage() {
         </h1>
         <p className="text-slate-500">Here's an overview of your workspace.</p>
       </div>
+
+      <NoticeBoard />
 
       {user?.role === 'SUPER_ADMIN' ? (
         <SuperAdminDashboard />

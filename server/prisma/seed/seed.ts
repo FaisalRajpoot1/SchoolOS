@@ -548,6 +548,36 @@ async function main(): Promise<void> {
     }
   }
 
+  // A couple of notice-board announcements.
+  const adminUser = await prisma.user.findFirst({
+    where: { schoolId: school.id, email: 'admin@demo.school' },
+    select: { id: true },
+  });
+  const existingAnnouncement = await prisma.announcement.findFirst({
+    where: { schoolId: school.id },
+  });
+  if (!existingAnnouncement) {
+    await prisma.announcement.createMany({
+      data: [
+        {
+          schoolId: school.id,
+          authorId: adminUser?.id ?? null,
+          title: 'Welcome to the new term',
+          body: 'Classes resume Monday. Please review your timetable and fee dues.',
+          audience: 'ALL',
+          pinned: true,
+        },
+        {
+          schoolId: school.id,
+          authorId: adminUser?.id ?? null,
+          title: 'Parent-teacher meeting',
+          body: 'A PTM is scheduled for next Friday at 10:00 AM in the main hall.',
+          audience: 'PARENTS',
+        },
+      ],
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
