@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/parents', label: 'Parents', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/classes', label: 'Classes', roles: ['SCHOOL_ADMIN'] },
   { to: '/academics/subjects', label: 'Subjects', roles: ['SCHOOL_ADMIN'] },
+  { to: '/timetable', label: 'Timetable', roles: ['SCHOOL_ADMIN'] },
   { to: '/attendance', label: 'Attendance', roles: ['SCHOOL_ADMIN'] },
   { to: '/exams', label: 'Exams', roles: ['SCHOOL_ADMIN'] },
   { to: '/homework', label: 'Homework', roles: ['SCHOOL_ADMIN'] },

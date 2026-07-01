@@ -240,3 +240,16 @@ Like homework, but graded out of `maxMarks` with an optional rubric.
 | DELETE | `/assignments/:id/submissions/:studentId`     | Remove a submission                                            |
 
 Parent portal gains `GET /portal/children/:studentId/assignments` (child's assignments + submission status).
+
+## Timetable — Module 9 (tenant-scoped)
+
+Weekly recurring slots per section. Viewing is `SCHOOL_ADMIN` + `TEACHER`; editing is `SCHOOL_ADMIN`. Times are minutes from midnight; `dayOfWeek` is `MON`–`SUN`.
+
+| Method | Path                    | Description                                                          |
+| ------ | ----------------------- | ------------------------------------------------------------------- |
+| GET    | `/timetable/slots`      | Weekly slots for a `sectionId` **or** `teacherId`                    |
+| POST   | `/timetable/slots`      | Add a slot (rejects section/teacher/room clashes on the same day)   |
+| PATCH  | `/timetable/slots/:id`  | Update a slot (re-checks clashes)                                    |
+| DELETE | `/timetable/slots/:id`  | Delete a slot                                                       |
+
+Conflict detection: two slots overlap when `existing.start < new.end AND existing.end > new.start` on the same day — enforced for the section, the assigned teacher (across all sections), and the room.

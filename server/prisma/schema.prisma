@@ -71,6 +71,16 @@ enum ExamStatus {
   PUBLISHED
 }
 
+enum DayOfWeek {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -117,6 +127,7 @@ model School {
   auditLogs         AuditLog[]
   parents           Parent[]
   assignments       Assignment[]
+  timetableSlots    TimetableSlot[]
 
   @@map("schools")
 }
@@ -184,6 +195,7 @@ model Section {
   attendanceRecords AttendanceRecord[]
   homeworks         Homework[]
   assignments       Assignment[]
+  timetableSlots    TimetableSlot[]
 
   @@unique([classId, name])
   @@index([classId])
@@ -202,10 +214,11 @@ model Subject {
   schoolId String
   school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  classSubjects ClassSubject[]
-  examSubjects  ExamSubject[]
-  homeworks     Homework[]
-  assignments   Assignment[]
+  classSubjects  ClassSubject[]
+  examSubjects   ExamSubject[]
+  homeworks      Homework[]
+  assignments    Assignment[]
+  timetableSlots TimetableSlot[]
 
   @@unique([schoolId, code])
   @@unique([schoolId, name])
@@ -656,6 +669,34 @@ model AssignmentSubmission {
   @@map("assignment_submissions")
 }
 
+/// A weekly recurring timetable slot for a section. Times are minutes from midnight.
+model TimetableSlot {
+  id          String    @id @default(uuid())
+  dayOfWeek   DayOfWeek
+  startMinute Int
+  endMinute   Int
+  room        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  teacherId String?
+  teacher   Teacher? @relation("TimetableTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId])
+  @@index([sectionId, dayOfWeek])
+  @@index([teacherId, dayOfWeek])
+  @@map("timetable_slots")
+}
+
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
 model Teacher {
   id              String      @id @default(uuid())
@@ -682,10 +723,11 @@ model Teacher {
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  classSections      Section[]      @relation("ClassTeacher")
-  subjectAssignments ClassSubject[] @relation("SubjectTeacher")
-  homeworks          Homework[]     @relation("HomeworkTeacher")
-  assignments        Assignment[]   @relation("AssignmentTeacher")
+  classSections      Section[]       @relation("ClassTeacher")
+  subjectAssignments ClassSubject[]  @relation("SubjectTeacher")
+  homeworks          Homework[]      @relation("HomeworkTeacher")
+  assignments        Assignment[]    @relation("AssignmentTeacher")
+  timetableSlots     TimetableSlot[] @relation("TimetableTeacher")
 
   @@unique([schoolId, employeeNo])
   @@index([schoolId])

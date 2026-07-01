@@ -1,0 +1,21 @@
+import { api } from '@/lib/axios';
+import type { CreateSlotPayload, TimetableSlot } from './timetable.types';
+
+export interface TimetableQuery {
+  sectionId?: string;
+  teacherId?: string;
+}
+
+export const timetableApi = {
+  async list(params: TimetableQuery): Promise<TimetableSlot[]> {
+    const { data } = await api.get<{ data: TimetableSlot[] }>('/timetable/slots', { params });
+    return data.data;
+  },
+  async create(payload: CreateSlotPayload): Promise<TimetableSlot> {
+    const { data } = await api.post<{ data: { slot: TimetableSlot } }>('/timetable/slots', payload);
+    return data.data.slot;
+  },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/timetable/slots/${id}`);
+  },
+};

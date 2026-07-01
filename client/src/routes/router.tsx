@@ -30,6 +30,7 @@ import { ExamResultsPage } from '@/features/exams/pages/ExamResultsPage';
 import { HomeworkListPage } from '@/features/homework/pages/HomeworkListPage';
 import { CreateHomeworkPage } from '@/features/homework/pages/CreateHomeworkPage';
 import { HomeworkDetailPage } from '@/features/homework/pages/HomeworkDetailPage';
+import { TimetablePage } from '@/features/timetable/pages/TimetablePage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -85,6 +86,7 @@ export const router = createBrowserRouter([
               { path: '/academics/classes', element: <ClassesPage /> },
               { path: '/academics/classes/:classId', element: <ClassDetailPage /> },
               { path: '/academics/subjects', element: <SubjectsPage /> },
+              { path: '/timetable', element: <TimetablePage /> },
               { path: '/students', element: <StudentsListPage /> },
               { path: '/students/new', element: <AdmitStudentPage /> },
               { path: '/students/:id', element: <StudentDetailPage /> },

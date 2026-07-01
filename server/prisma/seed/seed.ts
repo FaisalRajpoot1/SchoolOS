@@ -407,6 +407,43 @@ async function main(): Promise<void> {
     });
   }
 
+  // A couple of Monday timetable slots for Grade 1 / Section A.
+  if (sectionA) {
+    const mathSubject = subjects.find((s) => s.code === 'MATH');
+    const engSubject = subjects.find((s) => s.code === 'ENG');
+    const ttTeacher = await prisma.teacher.findUnique({
+      where: { schoolId_employeeNo: { schoolId: school.id, employeeNo: 'EMP-00001' } },
+    });
+    const existingSlot = await prisma.timetableSlot.findFirst({
+      where: { schoolId: school.id, sectionId: sectionA.id },
+    });
+    if (!existingSlot) {
+      await prisma.timetableSlot.createMany({
+        data: [
+          {
+            schoolId: school.id,
+            sectionId: sectionA.id,
+            dayOfWeek: 'MON',
+            startMinute: 480,
+            endMinute: 525,
+            subjectId: mathSubject?.id ?? null,
+            teacherId: ttTeacher?.id ?? null,
+            room: '101',
+          },
+          {
+            schoolId: school.id,
+            sectionId: sectionA.id,
+            dayOfWeek: 'MON',
+            startMinute: 525,
+            endMinute: 570,
+            subjectId: engSubject?.id ?? null,
+            room: '101',
+          },
+        ],
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
