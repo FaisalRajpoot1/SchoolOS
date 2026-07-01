@@ -28,6 +28,7 @@ import { payrollRoutes } from '@/features/payroll/payroll.routes';
 import { eventRoutes } from '@/features/events/events.routes';
 import { certificateRoutes } from '@/features/certificates/certificates.routes';
 import { reportRoutes } from '@/features/reports/reports.routes';
+import { settingsRoutes } from '@/features/settings/settings.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -64,6 +65,7 @@ router.use('/payroll', payrollRoutes);
 router.use('/events', eventRoutes);
 router.use('/certificates', certificateRoutes);
 router.use('/reports', reportRoutes);
+router.use('/settings', settingsRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

@@ -209,6 +209,7 @@ model School {
   payslips             Payslip[]
   events               Event[]
   certificates         Certificate[]
+  apiKeys              ApiKey[]
 
   @@map("schools")
 }
@@ -1208,6 +1209,22 @@ model Certificate {
   @@index([schoolId])
   @@index([studentId])
   @@map("certificates")
+}
+
+/// A hashed API key for third-party integrations. The raw key is shown once.
+model ApiKey {
+  id         String    @id @default(uuid())
+  name       String
+  prefix     String
+  keyHash    String    @unique
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@map("api_keys")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

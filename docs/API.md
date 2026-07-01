@@ -412,3 +412,15 @@ Read-only aggregates over existing data (no new tables).
 | GET    | `/reports/finance`    | Invoiced/collected/outstanding, invoices by status, top-10 outstanding balances |
 
 The client renders these as Chart.js charts with CSV export (students-by-class, fee defaulters).
+
+## Settings — Module 24 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+School branding/localization live on the school profile (Module 2). This module adds API keys for integrations; a roles/permissions reference is shown client-side.
+
+| Method | Path                     | Description                                                   |
+| ------ | ------------------------ | ------------------------------------------------------------- |
+| POST   | `/settings/api-keys`     | Generate a key (`{ name }`); returns the raw `key` **once** (stored only as a hash) |
+| GET    | `/settings/api-keys`     | List keys (name, prefix, last-used, created — never the secret) |
+| DELETE | `/settings/api-keys/:id` | Revoke (delete) a key                                        |
+
+Keys are `sk_…` tokens; only the SHA-256 hash and an 11-char prefix are persisted.
