@@ -272,3 +272,22 @@ Conflict detection: two slots overlap when `existing.start < new.end AND existin
 | GET    | `/library/issues`                 | List issues (`page`, `limit`, `status`, `studentId`, `bookId`) |
 
 Late fine = days past due × the per-day rate (config constant).
+
+## Transport — Module 14 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                                   | Description                                             |
+| ------ | -------------------------------------- | ------------------------------------------------------- |
+| POST   | `/transport/vehicles`                  | Add a vehicle (unique registration per school)          |
+| GET    | `/transport/vehicles`                  | List vehicles                                           |
+| PATCH  | `/transport/vehicles/:id`              | Update a vehicle                                        |
+| DELETE | `/transport/vehicles/:id`              | Delete a vehicle                                        |
+| POST   | `/transport/routes`                    | Create a route (optional `vehicleId`, `fee`, nested `stops`) |
+| GET    | `/transport/routes`                    | List routes (vehicle + stop/rider counts)               |
+| GET    | `/transport/routes/:id`                | Route detail (stops + allocations)                      |
+| PATCH  | `/transport/routes/:id`                | Update a route                                          |
+| DELETE | `/transport/routes/:id`                | Delete a route                                          |
+| POST   | `/transport/routes/:id/stops`          | Add a stop                                              |
+| DELETE | `/transport/routes/:id/stops/:stopId`  | Remove a stop                                           |
+| GET    | `/transport/allocations`               | List allocations (`routeId` filter)                     |
+| PUT    | `/transport/allocations/:studentId`    | Assign/reassign a student to a route + stop (one per student) |
+| DELETE | `/transport/allocations/:studentId`    | Unallocate a student                                    |

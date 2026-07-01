@@ -19,6 +19,7 @@ import { portalRoutes } from '@/features/portal/portal.routes';
 import { assignmentRoutes } from '@/features/assignments/assignments.routes';
 import { timetableRoutes } from '@/features/timetable/timetable.routes';
 import { libraryRoutes } from '@/features/library/library.routes';
+import { transportRoutes } from '@/features/transport/transport.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -46,6 +47,7 @@ router.use('/portal', portalRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/timetable', timetableRoutes);
 router.use('/library', libraryRoutes);
+router.use('/transport', transportRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

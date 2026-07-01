@@ -35,6 +35,9 @@ import { BooksListPage } from '@/features/library/pages/BooksListPage';
 import { BookDetailPage } from '@/features/library/pages/BookDetailPage';
 import { BookCategoriesPage } from '@/features/library/pages/BookCategoriesPage';
 import { IssuesListPage } from '@/features/library/pages/IssuesListPage';
+import { VehiclesPage } from '@/features/transport/pages/VehiclesPage';
+import { RoutesListPage } from '@/features/transport/pages/RoutesListPage';
+import { RouteDetailPage } from '@/features/transport/pages/RouteDetailPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -126,6 +129,9 @@ export const router = createBrowserRouter([
               { path: '/parents', element: <ParentsListPage /> },
               { path: '/parents/new', element: <AddParentPage /> },
               { path: '/parents/:id', element: <ParentDetailPage /> },
+              { path: '/transport/vehicles', element: <VehiclesPage /> },
+              { path: '/transport/routes', element: <RoutesListPage /> },
+              { path: '/transport/routes/:id', element: <RouteDetailPage /> },
             ],
           },
         ],

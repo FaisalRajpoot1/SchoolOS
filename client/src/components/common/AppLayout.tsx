@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/fees/categories', label: 'Fee Categories', roles: ['SCHOOL_ADMIN'] },
   { to: '/library', label: 'Library', roles: ['SCHOOL_ADMIN', 'LIBRARIAN'] },
   { to: '/library/categories', label: 'Book Categories', roles: ['SCHOOL_ADMIN', 'LIBRARIAN'] },
+  { to: '/transport/routes', label: 'Transport', roles: ['SCHOOL_ADMIN'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
   { to: '/audit-logs', label: 'Audit Logs', roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] },
   { to: '/settings/security', label: 'Security' },

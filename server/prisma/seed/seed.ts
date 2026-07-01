@@ -501,6 +501,53 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo transport vehicle, route with stops, and one student allocation.
+  const existingVehicle = await prisma.vehicle.findUnique({
+    where: { schoolId_registrationNo: { schoolId: school.id, registrationNo: 'BUS-01' } },
+  });
+  if (!existingVehicle) {
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        schoolId: school.id,
+        registrationNo: 'BUS-01',
+        model: 'Toyota Coaster',
+        capacity: 30,
+        driverName: 'Rashid Ali',
+        driverPhone: '0300-1234567',
+      },
+    });
+    const route = await prisma.transportRoute.create({
+      data: {
+        schoolId: school.id,
+        name: 'North Route',
+        fee: 2000,
+        vehicleId: vehicle.id,
+        stops: {
+          create: [
+            { name: 'Main Gate', sequence: 1, pickupMinute: 435 },
+            { name: 'City Center', sequence: 2, pickupMinute: 450 },
+          ],
+        },
+      },
+      include: { stops: true },
+    });
+    const rider = await prisma.student.findUnique({
+      where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: 'ADM-00002' } },
+    });
+    if (rider) {
+      await prisma.transportAllocation.upsert({
+        where: { studentId: rider.id },
+        update: {},
+        create: {
+          schoolId: school.id,
+          studentId: rider.id,
+          routeId: route.id,
+          stopId: route.stops[0]?.id ?? null,
+        },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
