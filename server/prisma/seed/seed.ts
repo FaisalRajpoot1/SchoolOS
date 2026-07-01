@@ -323,6 +323,59 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo assignment (with rubric) for Grade 1 / Section A and a graded submission.
+  if (sectionA) {
+    const mathSubject = subjects.find((s) => s.code === 'MATH');
+    const asgTeacher = await prisma.teacher.findUnique({
+      where: { schoolId_employeeNo: { schoolId: school.id, employeeNo: 'EMP-00001' } },
+    });
+    const existingAssignment = await prisma.assignment.findFirst({
+      where: { schoolId: school.id, sectionId: sectionA.id, title: 'Geometry Model Project' },
+    });
+    if (!existingAssignment) {
+      const assignment = await prisma.assignment.create({
+        data: {
+          schoolId: school.id,
+          classId: grade1.id,
+          sectionId: sectionA.id,
+          subjectId: mathSubject?.id ?? null,
+          teacherId: asgTeacher?.id ?? null,
+          title: 'Geometry Model Project',
+          description: 'Build a 3D model demonstrating basic shapes.',
+          maxMarks: 50,
+          dueDate: new Date('2026-07-10'),
+          criteria: {
+            create: [
+              { label: 'Accuracy', maxPoints: 25, sortOrder: 0 },
+              { label: 'Presentation', maxPoints: 25, sortOrder: 1 },
+            ],
+          },
+        },
+      });
+      const secStudents = await prisma.student.findMany({
+        where: { schoolId: school.id, sectionId: sectionA.id },
+        select: { id: true },
+      });
+      if (secStudents[0]) {
+        await prisma.assignmentSubmission.upsert({
+          where: {
+            assignmentId_studentId: { assignmentId: assignment.id, studentId: secStudents[0].id },
+          },
+          update: {},
+          create: {
+            assignmentId: assignment.id,
+            studentId: secStudents[0].id,
+            content: 'Model submitted.',
+            submittedAt: new Date('2026-07-09'),
+            isLate: false,
+            marks: 42,
+            gradedAt: new Date('2026-07-11'),
+          },
+        });
+      }
+    }
+  }
+
   // A demo parent account linked to the seeded students.
   const existingParentUser = await prisma.user.findFirst({
     where: { schoolId: school.id, email: 'parent@demo.school' },

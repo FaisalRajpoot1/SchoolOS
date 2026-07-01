@@ -25,6 +25,13 @@ export const useChildHomework = (studentId: string) =>
     enabled: !!studentId,
   });
 
+export const useChildAssignments = (studentId: string) =>
+  useQuery({
+    queryKey: ['portal', 'assignments', studentId],
+    queryFn: () => portalApi.assignments(studentId),
+    enabled: !!studentId,
+  });
+
 export const useChildResults = (studentId: string) =>
   useQuery({
     queryKey: ['portal', 'results', studentId],

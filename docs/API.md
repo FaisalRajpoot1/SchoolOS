@@ -222,3 +222,21 @@ Grade scale: A+ ≥90, A ≥80, B ≥70, C ≥60, D ≥50, E ≥40, else F.
 | PUT    | `/homework/:id/submissions/:studentId`     | Record/update a submission (computes `isLate` vs due date)     |
 | PATCH  | `/homework/:id/submissions/:studentId/grade` | Add feedback + marks                                          |
 | DELETE | `/homework/:id/submissions/:studentId`     | Remove a submission                                            |
+
+## Assignments — Module 11 (roles `SCHOOL_ADMIN` + `TEACHER`, tenant-scoped)
+
+Like homework, but graded out of `maxMarks` with an optional rubric.
+
+| Method | Path                                          | Description                                                     |
+| ------ | --------------------------------------------- | --------------------------------------------------------------- |
+| POST   | `/assignments`                                | Create an assignment (optional `criteria: [{ label, maxPoints }]`) |
+| GET    | `/assignments`                                | List (`page`, `limit`, `search`, `classId`, `sectionId`, `subjectId`) |
+| GET    | `/assignments/:id`                            | Detail (rubric criteria + submission count)                    |
+| PATCH  | `/assignments/:id`                            | Update title/instructions/maxMarks/dueDate/attachment/subject  |
+| DELETE | `/assignments/:id`                            | Delete assignment                                              |
+| GET    | `/assignments/:id/submissions`                | Section roster + each student's submission                     |
+| PUT    | `/assignments/:id/submissions/:studentId`     | Record/update a submission (computes `isLate`)                  |
+| PATCH  | `/assignments/:id/submissions/:studentId/grade` | Grade (`marks` ≤ maxMarks, `feedback`)                       |
+| DELETE | `/assignments/:id/submissions/:studentId`     | Remove a submission                                            |
+
+Parent portal gains `GET /portal/children/:studentId/assignments` (child's assignments + submission status).

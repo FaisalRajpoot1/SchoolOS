@@ -33,6 +33,11 @@ export const portalController = {
     res.status(200).json({ success: true, data });
   }),
 
+  childAssignments: asyncHandler(async (req: Request, res: Response) => {
+    const data = await portalService.childAssignments(userId(req), req.params.studentId as string);
+    res.status(200).json({ success: true, data });
+  }),
+
   childResults: asyncHandler(async (req: Request, res: Response) => {
     const data = await portalService.childResults(userId(req), req.params.studentId as string);
     res.status(200).json({ success: true, data });

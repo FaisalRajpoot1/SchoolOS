@@ -30,6 +30,9 @@ import { ExamResultsPage } from '@/features/exams/pages/ExamResultsPage';
 import { HomeworkListPage } from '@/features/homework/pages/HomeworkListPage';
 import { CreateHomeworkPage } from '@/features/homework/pages/CreateHomeworkPage';
 import { HomeworkDetailPage } from '@/features/homework/pages/HomeworkDetailPage';
+import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
+import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
+import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -101,6 +104,9 @@ export const router = createBrowserRouter([
               { path: '/homework', element: <HomeworkListPage /> },
               { path: '/homework/new', element: <CreateHomeworkPage /> },
               { path: '/homework/:id', element: <HomeworkDetailPage /> },
+              { path: '/assignments', element: <AssignmentsListPage /> },
+              { path: '/assignments/new', element: <CreateAssignmentPage /> },
+              { path: '/assignments/:id', element: <AssignmentDetailPage /> },
               { path: '/parents', element: <ParentsListPage /> },
               { path: '/parents/new', element: <AddParentPage /> },
               { path: '/parents/:id', element: <ParentDetailPage /> },

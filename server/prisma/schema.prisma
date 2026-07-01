@@ -116,6 +116,7 @@ model School {
   homeworks         Homework[]
   auditLogs         AuditLog[]
   parents           Parent[]
+  assignments       Assignment[]
 
   @@map("schools")
 }
@@ -157,6 +158,7 @@ model Class {
   students      Student[]
   exams         Exam[]
   homeworks     Homework[]
+  assignments   Assignment[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -181,6 +183,7 @@ model Section {
   students          Student[]
   attendanceRecords AttendanceRecord[]
   homeworks         Homework[]
+  assignments       Assignment[]
 
   @@unique([classId, name])
   @@index([classId])
@@ -202,6 +205,7 @@ model Subject {
   classSubjects ClassSubject[]
   examSubjects  ExamSubject[]
   homeworks     Homework[]
+  assignments   Assignment[]
 
   @@unique([schoolId, code])
   @@unique([schoolId, name])
@@ -255,12 +259,13 @@ model Student {
   sectionId String?
   section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
-  guardians           Guardian[]
-  attendanceRecords   AttendanceRecord[]
-  invoices            Invoice[]
-  marks               Mark[]
-  homeworkSubmissions HomeworkSubmission[]
-  parentLinks         ParentStudent[]
+  guardians             Guardian[]
+  attendanceRecords     AttendanceRecord[]
+  invoices              Invoice[]
+  marks                 Mark[]
+  homeworkSubmissions   HomeworkSubmission[]
+  parentLinks           ParentStudent[]
+  assignmentSubmissions AssignmentSubmission[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -576,6 +581,81 @@ model HomeworkSubmission {
   @@map("homework_submissions")
 }
 
+/// A graded assignment for a section, with max marks and rubric criteria.
+model Assignment {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  instructions  String?
+  attachmentUrl String?
+  maxMarks      Int      @default(100)
+  dueDate       DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  teacherId String?
+  teacher   Teacher? @relation("AssignmentTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  criteria    AssignmentCriterion[]
+  submissions AssignmentSubmission[]
+
+  @@index([schoolId])
+  @@index([sectionId])
+  @@map("assignments")
+}
+
+/// A rubric criterion for an assignment (label + max points).
+model AssignmentCriterion {
+  id        String   @id @default(uuid())
+  label     String
+  maxPoints Int
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId])
+  @@map("assignment_criteria")
+}
+
+/// A student's submission to an assignment, with optional marks + feedback.
+model AssignmentSubmission {
+  id            String    @id @default(uuid())
+  content       String?
+  attachmentUrl String?
+  submittedAt   DateTime  @default(now())
+  isLate        Boolean   @default(false)
+  marks         Int?
+  feedback      String?
+  gradedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@map("assignment_submissions")
+}
+
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
 model Teacher {
   id              String      @id @default(uuid())
@@ -605,6 +685,7 @@ model Teacher {
   classSections      Section[]      @relation("ClassTeacher")
   subjectAssignments ClassSubject[] @relation("SubjectTeacher")
   homeworks          Homework[]     @relation("HomeworkTeacher")
+  assignments        Assignment[]   @relation("AssignmentTeacher")
 
   @@unique([schoolId, employeeNo])
   @@index([schoolId])

@@ -108,6 +108,36 @@ export const portalService = {
     }));
   },
 
+  async childAssignments(userId: string, studentId: string) {
+    const { parent } = await getParentAndChild(userId, studentId);
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+      select: { sectionId: true },
+    });
+    if (!student?.sectionId) return [];
+
+    const assignments = await prisma.assignment.findMany({
+      where: { schoolId: parent.schoolId, sectionId: student.sectionId },
+      orderBy: { dueDate: 'desc' },
+      include: {
+        subject: { select: { id: true, name: true } },
+        submissions: {
+          where: { studentId },
+          select: { submittedAt: true, isLate: true, marks: true, feedback: true, gradedAt: true },
+        },
+      },
+    });
+
+    return assignments.map((a) => ({
+      id: a.id,
+      title: a.title,
+      dueDate: a.dueDate,
+      maxMarks: a.maxMarks,
+      subject: a.subject,
+      submission: a.submissions[0] ?? null,
+    }));
+  },
+
   /** Published exam results for the child, computed per exam. */
   async childResults(userId: string, studentId: string) {
     const { parent } = await getParentAndChild(userId, studentId);

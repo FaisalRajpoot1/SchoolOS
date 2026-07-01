@@ -27,6 +27,11 @@ router.get(
   portalController.childHomework,
 );
 router.get(
+  '/children/:studentId/assignments',
+  validate({ params: childParamSchema }),
+  portalController.childAssignments,
+);
+router.get(
   '/children/:studentId/results',
   validate({ params: childParamSchema }),
   portalController.childResults,

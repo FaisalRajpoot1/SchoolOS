@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import {
+  useChildAssignments,
   useChildAttendance,
   useChildHomework,
   useChildInvoices,
@@ -22,6 +23,7 @@ export function ChildPage() {
   const attendance = useChildAttendance(studentId);
   const invoices = useChildInvoices(studentId);
   const homework = useChildHomework(studentId);
+  const assignments = useChildAssignments(studentId);
   const results = useChildResults(studentId);
 
   const child = me.data?.children.find((c) => c.id === studentId);
@@ -124,6 +126,37 @@ export function ChildPage() {
           </ul>
         ) : (
           <p className="text-sm text-slate-500">No homework.</p>
+        )}
+      </Card>
+
+      {/* Assignments */}
+      <Card className="space-y-3">
+        <h2 className="font-semibold">Assignments</h2>
+        {assignments.isLoading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : assignments.data && assignments.data.length > 0 ? (
+          <ul className="text-sm">
+            {assignments.data.map((a) => (
+              <li key={a.id} className="flex items-center justify-between border-b border-slate-100 py-2 last:border-0">
+                <span>
+                  <span className="font-medium">{a.title}</span>
+                  {a.subject && <span className="ml-2 text-xs text-slate-400">{a.subject.name}</span>}
+                  <span className="ml-2 text-xs text-slate-400">due {a.dueDate.slice(0, 10)}</span>
+                </span>
+                {a.submission ? (
+                  <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                    {a.submission.marks != null ? `${a.submission.marks}/${a.maxMarks}` : 'Submitted'}
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                    Pending
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">No assignments.</p>
         )}
       </Card>
 

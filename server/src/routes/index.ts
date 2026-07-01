@@ -16,6 +16,7 @@ import { homeworkRoutes } from '@/features/homework/homework.routes';
 import { auditRoutes } from '@/features/audit/audit.routes';
 import { parentRoutes } from '@/features/parents/parents.routes';
 import { portalRoutes } from '@/features/portal/portal.routes';
+import { assignmentRoutes } from '@/features/assignments/assignments.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -40,6 +41,7 @@ router.use('/homework', homeworkRoutes);
 router.use('/audit-logs', auditRoutes);
 router.use('/parents', parentRoutes);
 router.use('/portal', portalRoutes);
+router.use('/assignments', assignmentRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

@@ -51,6 +51,21 @@ export interface ChildHomework {
   } | null;
 }
 
+export interface ChildAssignment {
+  id: string;
+  title: string;
+  dueDate: string;
+  maxMarks: number;
+  subject: NamedRef | null;
+  submission: {
+    submittedAt: string;
+    isLate: boolean;
+    marks: number | null;
+    feedback: string | null;
+    gradedAt: string | null;
+  } | null;
+}
+
 export interface ChildResult {
   examId: string;
   examName: string;

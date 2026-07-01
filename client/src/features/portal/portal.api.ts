@@ -1,5 +1,6 @@
 import { api } from '@/lib/axios';
 import type {
+  ChildAssignment,
   ChildAttendance,
   ChildHomework,
   ChildInvoice,
@@ -27,6 +28,12 @@ export const portalApi = {
   async homework(studentId: string): Promise<ChildHomework[]> {
     const { data } = await api.get<{ data: ChildHomework[] }>(
       `/portal/children/${studentId}/homework`,
+    );
+    return data.data;
+  },
+  async assignments(studentId: string): Promise<ChildAssignment[]> {
+    const { data } = await api.get<{ data: ChildAssignment[] }>(
+      `/portal/children/${studentId}/assignments`,
     );
     return data.data;
   },
