@@ -49,6 +49,8 @@ import { EmployeesListPage } from '@/features/hr/pages/EmployeesListPage';
 import { AddEmployeePage } from '@/features/hr/pages/AddEmployeePage';
 import { EmployeeDetailPage } from '@/features/hr/pages/EmployeeDetailPage';
 import { LeaveRequestsPage } from '@/features/hr/pages/LeaveRequestsPage';
+import { PayslipsListPage } from '@/features/payroll/pages/PayslipsListPage';
+import { PayslipDetailPage } from '@/features/payroll/pages/PayslipDetailPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -101,6 +103,8 @@ export const router = createBrowserRouter([
               { path: '/hr/employees/new', element: <AddEmployeePage /> },
               { path: '/hr/employees/:id', element: <EmployeeDetailPage /> },
               { path: '/hr/leave', element: <LeaveRequestsPage /> },
+              { path: '/payroll/payslips', element: <PayslipsListPage /> },
+              { path: '/payroll/payslips/:id', element: <PayslipDetailPage /> },
             ],
           },
           // Library — school admins and librarians.

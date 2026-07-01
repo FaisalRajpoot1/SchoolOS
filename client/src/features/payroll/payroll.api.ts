@@ -1,0 +1,43 @@
+import { api } from '@/lib/axios';
+import type {
+  CreatePayslipPayload,
+  ListPayslipsParams,
+  PaginationMeta,
+  Payslip,
+  UpdatePayslipPayload,
+} from './payroll.types';
+
+export const payrollApi = {
+  async list(params: ListPayslipsParams): Promise<{ items: Payslip[]; meta: PaginationMeta }> {
+    const { data } = await api.get<{ data: Payslip[]; meta: PaginationMeta }>('/payroll/payslips', {
+      params,
+    });
+    return { items: data.data, meta: data.meta };
+  },
+  async getById(id: string): Promise<Payslip> {
+    const { data } = await api.get<{ data: { payslip: Payslip } }>(`/payroll/payslips/${id}`);
+    return data.data.payslip;
+  },
+  async create(payload: CreatePayslipPayload): Promise<Payslip> {
+    const { data } = await api.post<{ data: { payslip: Payslip } }>('/payroll/payslips', payload);
+    return data.data.payslip;
+  },
+  async generate(periodMonth: number, periodYear: number): Promise<{ created: number }> {
+    const { data } = await api.post<{ data: { created: number } }>('/payroll/payslips/generate', {
+      periodMonth,
+      periodYear,
+    });
+    return data.data;
+  },
+  async update(id: string, payload: UpdatePayslipPayload): Promise<Payslip> {
+    const { data } = await api.patch<{ data: { payslip: Payslip } }>(`/payroll/payslips/${id}`, payload);
+    return data.data.payslip;
+  },
+  async pay(id: string): Promise<Payslip> {
+    const { data } = await api.post<{ data: { payslip: Payslip } }>(`/payroll/payslips/${id}/pay`);
+    return data.data.payslip;
+  },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/payroll/payslips/${id}`);
+  },
+};

@@ -685,6 +685,28 @@ async function main(): Promise<void> {
         reason: 'Family event',
       },
     });
+
+    // A demo payslip for June 2026.
+    await prisma.payslip.upsert({
+      where: {
+        employeeId_periodYear_periodMonth: {
+          employeeId: employee.id,
+          periodYear: 2026,
+          periodMonth: 6,
+        },
+      },
+      update: {},
+      create: {
+        schoolId: school.id,
+        employeeId: employee.id,
+        periodMonth: 6,
+        periodYear: 2026,
+        basicSalary: 60000,
+        allowances: 5000,
+        tax: 3000,
+        netPay: 62000,
+      },
+    });
   }
 
   // eslint-disable-next-line no-console

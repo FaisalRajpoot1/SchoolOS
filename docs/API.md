@@ -354,4 +354,20 @@ Audiences: `ALL`, `TEACHERS`, `STUDENTS`, `PARENTS`, `STAFF`. The feed matches `
 | GET    | `/hr/leave`                   | List leave requests (`status`, `employeeId`)                |
 | PATCH  | `/hr/leave/:leaveId/status`   | Approve/reject a pending request                           |
 
-Employment types: `FULL_TIME`, `PART_TIME`, `CONTRACT`. Leave types: `CASUAL`, `SICK`, `ANNUAL`, `UNPAID`. (Payroll/salary generation is Module 18.)
+Employment types: `FULL_TIME`, `PART_TIME`, `CONTRACT`. Leave types: `CASUAL`, `SICK`, `ANNUAL`, `UNPAID`.
+
+## Payroll — Module 18 (roles `SCHOOL_ADMIN` + `HR`, tenant-scoped)
+
+Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bonus − deductions − tax`.
+
+| Method | Path                              | Description                                                    |
+| ------ | --------------------------------- | ------------------------------------------------------------- |
+| POST   | `/payroll/payslips/generate`      | Bulk-create DRAFT payslips for active salaried employees missing one for `{ periodMonth, periodYear }` |
+| POST   | `/payroll/payslips`               | Create one payslip (basic defaults to the employee's salary)  |
+| GET    | `/payroll/payslips`               | List (`employeeId`, `periodMonth`, `periodYear`, `status`)     |
+| GET    | `/payroll/payslips/:id`           | Payslip detail                                               |
+| PATCH  | `/payroll/payslips/:id`           | Edit amounts (DRAFT only; recomputes net)                    |
+| POST   | `/payroll/payslips/:id/pay`       | Mark paid (sets `paidAt`)                                    |
+| DELETE | `/payroll/payslips/:id`           | Delete a payslip                                            |
+
+Statuses: `DRAFT`, `PAID`. (Payslip PDF export + bank-transfer files are deferred.)
