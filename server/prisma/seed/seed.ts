@@ -578,6 +578,35 @@ async function main(): Promise<void> {
     });
   }
 
+  // A demo hostel with a room and one allocated boarder.
+  const existingHostel = await prisma.hostel.findFirst({
+    where: { schoolId: school.id, name: 'Boys Hostel A' },
+  });
+  if (!existingHostel) {
+    const hostel = await prisma.hostel.create({
+      data: {
+        schoolId: school.id,
+        name: 'Boys Hostel A',
+        type: 'BOYS',
+        wardenName: 'Kamran Malik',
+        monthlyFee: 5000,
+        rooms: { create: [{ roomNumber: '101', floor: '1', capacity: 2 }] },
+      },
+      include: { rooms: true },
+    });
+    const boarder = await prisma.student.findUnique({
+      where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: 'ADM-00002' } },
+    });
+    const room = hostel.rooms[0];
+    if (boarder && room) {
+      await prisma.hostelAllocation.upsert({
+        where: { studentId: boarder.id },
+        update: {},
+        create: { schoolId: school.id, studentId: boarder.id, roomId: room.id, bedLabel: 'A' },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

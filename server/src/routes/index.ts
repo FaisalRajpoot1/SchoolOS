@@ -21,6 +21,7 @@ import { timetableRoutes } from '@/features/timetable/timetable.routes';
 import { libraryRoutes } from '@/features/library/library.routes';
 import { transportRoutes } from '@/features/transport/transport.routes';
 import { announcementRoutes } from '@/features/announcements/announcements.routes';
+import { hostelRoutes } from '@/features/hostel/hostel.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -50,6 +51,7 @@ router.use('/timetable', timetableRoutes);
 router.use('/library', libraryRoutes);
 router.use('/transport', transportRoutes);
 router.use('/announcements', announcementRoutes);
+router.use('/hostels', hostelRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

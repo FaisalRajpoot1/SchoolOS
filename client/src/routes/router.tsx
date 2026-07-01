@@ -40,6 +40,8 @@ import { ManageAnnouncementsPage } from '@/features/announcements/pages/ManageAn
 import { VehiclesPage } from '@/features/transport/pages/VehiclesPage';
 import { RoutesListPage } from '@/features/transport/pages/RoutesListPage';
 import { RouteDetailPage } from '@/features/transport/pages/RouteDetailPage';
+import { HostelsListPage } from '@/features/hostel/pages/HostelsListPage';
+import { HostelDetailPage } from '@/features/hostel/pages/HostelDetailPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -139,6 +141,8 @@ export const router = createBrowserRouter([
               { path: '/transport/vehicles', element: <VehiclesPage /> },
               { path: '/transport/routes', element: <RoutesListPage /> },
               { path: '/transport/routes/:id', element: <RouteDetailPage /> },
+              { path: '/hostels', element: <HostelsListPage /> },
+              { path: '/hostels/:id', element: <HostelDetailPage /> },
             ],
           },
         ],

@@ -306,3 +306,19 @@ Notice-board announcements targeted by audience. The feed is readable by any aut
 | DELETE | `/announcements/:id`  | SCHOOL_ADMIN  | Delete                                                  |
 
 Audiences: `ALL`, `TEACHERS`, `STUDENTS`, `PARENTS`, `STAFF`. The feed matches `ALL` plus the audience(s) mapped to the caller's role, excludes expired/future-dated items, and orders pinned first. (Email/SMS/WhatsApp/push channels are deferred — require external providers.)
+
+## Hostel — Module 15 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                              | Description                                                  |
+| ------ | --------------------------------- | ------------------------------------------------------------ |
+| POST   | `/hostels`                        | Create a hostel (`type` BOYS/GIRLS/MIXED, warden, monthly fee) |
+| GET    | `/hostels`                        | List hostels (room count, total beds, occupancy)             |
+| GET    | `/hostels/:id`                    | Hostel detail (rooms + allocations)                          |
+| PATCH  | `/hostels/:id`                    | Update a hostel                                              |
+| DELETE | `/hostels/:id`                    | Delete a hostel                                              |
+| POST   | `/hostels/:id/rooms`              | Add a room (`roomNumber`, `floor`, `capacity`)               |
+| PATCH  | `/hostels/:id/rooms/:roomId`      | Update a room (capacity ≥ current occupancy)                 |
+| DELETE | `/hostels/:id/rooms/:roomId`      | Remove a room                                               |
+| GET    | `/hostels/allocations`            | List allocations (`hostelId` / `roomId` filter)              |
+| PUT    | `/hostels/allocations/:studentId` | Allocate/reallocate a student to a room (`{ roomId, bedLabel? }`; capacity-guarded, one per student) |
+| DELETE | `/hostels/allocations/:studentId` | Deallocate a student                                         |
