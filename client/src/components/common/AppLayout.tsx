@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/transport/routes', label: 'Transport', roles: ['SCHOOL_ADMIN'] },
   { to: '/hostels', label: 'Hostel', roles: ['SCHOOL_ADMIN'] },
   { to: '/inventory/items', label: 'Inventory', roles: ['SCHOOL_ADMIN'] },
+  { to: '/hr/employees', label: 'HR', roles: ['SCHOOL_ADMIN', 'HR'] },
   { to: '/settings/school', label: 'School Settings', roles: ['SCHOOL_ADMIN'] },
   { to: '/announcements', label: 'Announcements' },
   { to: '/announcements/manage', label: 'Manage Notices', roles: ['SCHOOL_ADMIN'] },

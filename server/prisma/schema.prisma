@@ -105,6 +105,25 @@ enum StockTxnType {
   OUT
 }
 
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+enum LeaveType {
+  CASUAL
+  SICK
+  ANNUAL
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -164,6 +183,8 @@ model School {
   suppliers            Supplier[]
   inventoryItems       InventoryItem[]
   stockTransactions    StockTransaction[]
+  employees            Employee[]
+  leaveRequests        LeaveRequest[]
 
   @@map("schools")
 }
@@ -1037,6 +1058,56 @@ model StockTransaction {
   @@index([itemId])
   @@index([schoolId])
   @@map("stock_transactions")
+}
+
+/// A general staff/employee HR record. Tenant-scoped.
+model Employee {
+  id             String         @id @default(uuid())
+  employeeCode   String
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  designation    String?
+  department     String?
+  employmentType EmploymentType @default(FULL_TIME)
+  joiningDate    DateTime       @default(now())
+  salary         Int?
+  status         StaffStatus    @default(ACTIVE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  leaveRequests LeaveRequest[]
+
+  @@unique([schoolId, employeeCode])
+  @@index([schoolId])
+  @@map("employees")
+}
+
+/// A leave request from an employee, reviewed by HR.
+model LeaveRequest {
+  id         String      @id @default(uuid())
+  type       LeaveType   @default(CASUAL)
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+  reviewedAt DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@index([employeeId])
+  @@map("leave_requests")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

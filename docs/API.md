@@ -339,3 +339,19 @@ Audiences: `ALL`, `TEACHERS`, `STUDENTS`, `PARENTS`, `STAFF`. The feed matches `
 | POST   | `/inventory/items/:id/stock`  | Record a movement (`type` IN/OUT, `quantity`, `unitCost?`, `supplierId?`); adjusts quantity, guards OUT below zero |
 
 `lowStock` filters items where `quantity ≤ reorderLevel` (column-to-column comparison).
+
+## HR — Module 17 (roles `SCHOOL_ADMIN` + `HR`, tenant-scoped)
+
+| Method | Path                          | Description                                                  |
+| ------ | ----------------------------- | ------------------------------------------------------------ |
+| POST   | `/hr/employees`               | Add an employee (auto `STF-` code if omitted)                |
+| GET    | `/hr/employees`               | List employees (`page`, `limit`, `search`, `department`, `status`) |
+| GET    | `/hr/employees/:id`           | Employee detail + leave history                              |
+| PATCH  | `/hr/employees/:id`           | Update employee profile                                     |
+| PATCH  | `/hr/employees/:id/status`    | Change status (ACTIVE/INACTIVE/ON_LEAVE/TERMINATED)         |
+| DELETE | `/hr/employees/:id`           | Delete an employee                                          |
+| POST   | `/hr/employees/:id/leave`     | Apply for leave (`type`, `startDate`, `endDate`, `reason?`) |
+| GET    | `/hr/leave`                   | List leave requests (`status`, `employeeId`)                |
+| PATCH  | `/hr/leave/:leaveId/status`   | Approve/reject a pending request                           |
+
+Employment types: `FULL_TIME`, `PART_TIME`, `CONTRACT`. Leave types: `CASUAL`, `SICK`, `ANNUAL`, `UNPAID`. (Payroll/salary generation is Module 18.)

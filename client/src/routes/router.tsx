@@ -45,6 +45,10 @@ import { HostelDetailPage } from '@/features/hostel/pages/HostelDetailPage';
 import { ItemsListPage } from '@/features/inventory/pages/ItemsListPage';
 import { ItemDetailPage } from '@/features/inventory/pages/ItemDetailPage';
 import { SuppliersPage } from '@/features/inventory/pages/SuppliersPage';
+import { EmployeesListPage } from '@/features/hr/pages/EmployeesListPage';
+import { AddEmployeePage } from '@/features/hr/pages/AddEmployeePage';
+import { EmployeeDetailPage } from '@/features/hr/pages/EmployeeDetailPage';
+import { LeaveRequestsPage } from '@/features/hr/pages/LeaveRequestsPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -88,6 +92,16 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'SUPER_ADMIN']} />,
             children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+          },
+          // HR — school admins and HR staff.
+          {
+            element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'HR']} />,
+            children: [
+              { path: '/hr/employees', element: <EmployeesListPage /> },
+              { path: '/hr/employees/new', element: <AddEmployeePage /> },
+              { path: '/hr/employees/:id', element: <EmployeeDetailPage /> },
+              { path: '/hr/leave', element: <LeaveRequestsPage /> },
+            ],
           },
           // Library — school admins and librarians.
           {

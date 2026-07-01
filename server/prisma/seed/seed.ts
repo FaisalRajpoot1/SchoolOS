@@ -642,6 +642,51 @@ async function main(): Promise<void> {
     }
   }
 
+  // An HR login account + a demo employee with a pending leave request.
+  const existingHr = await prisma.user.findFirst({
+    where: { schoolId: school.id, email: 'hr@demo.school' },
+  });
+  if (!existingHr) {
+    await prisma.user.create({
+      data: {
+        email: 'hr@demo.school',
+        passwordHash,
+        firstName: 'Hina',
+        lastName: 'Farooq',
+        role: UserRole.HR,
+        schoolId: school.id,
+      },
+    });
+  }
+
+  const existingEmployee = await prisma.employee.findFirst({
+    where: { schoolId: school.id, employeeCode: 'STF-00001' },
+  });
+  if (!existingEmployee) {
+    const employee = await prisma.employee.create({
+      data: {
+        schoolId: school.id,
+        employeeCode: 'STF-00001',
+        firstName: 'Junaid',
+        lastName: 'Iqbal',
+        designation: 'Accountant',
+        department: 'Finance',
+        employmentType: 'FULL_TIME',
+        salary: 60000,
+      },
+    });
+    await prisma.leaveRequest.create({
+      data: {
+        schoolId: school.id,
+        employeeId: employee.id,
+        type: 'CASUAL',
+        startDate: new Date('2026-07-15'),
+        endDate: new Date('2026-07-16'),
+        reason: 'Family event',
+      },
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
@@ -651,6 +696,7 @@ async function main(): Promise<void> {
     teacher: { email: 'teacher@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
     parent: { email: 'parent@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
     librarian: { email: 'librarian@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
+    hr: { email: 'hr@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
   });
 }
 
