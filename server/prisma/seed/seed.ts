@@ -607,6 +607,41 @@ async function main(): Promise<void> {
     }
   }
 
+  // A demo supplier and a couple of inventory items with opening stock.
+  const existingSupplier = await prisma.supplier.findFirst({
+    where: { schoolId: school.id, name: 'Stationery House' },
+  });
+  if (!existingSupplier) {
+    const supplier = await prisma.supplier.create({
+      data: {
+        schoolId: school.id,
+        name: 'Stationery House',
+        contactPerson: 'Ahmed Raza',
+        phone: '0311-2223344',
+      },
+    });
+    const itemSeeds = [
+      { name: 'A4 Paper Ream', category: 'Stationery', unit: 'ream', quantity: 50, reorderLevel: 10 },
+      { name: 'Whiteboard Marker', category: 'Stationery', unit: 'piece', quantity: 8, reorderLevel: 20 },
+    ];
+    for (const seed of itemSeeds) {
+      await prisma.inventoryItem.create({
+        data: {
+          schoolId: school.id,
+          supplierId: supplier.id,
+          name: seed.name,
+          category: seed.category,
+          unit: seed.unit,
+          quantity: seed.quantity,
+          reorderLevel: seed.reorderLevel,
+          transactions: {
+            create: { schoolId: school.id, type: 'IN', quantity: seed.quantity, note: 'Opening stock' },
+          },
+        },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

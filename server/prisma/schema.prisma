@@ -100,6 +100,11 @@ enum HostelType {
   MIXED
 }
 
+enum StockTxnType {
+  IN
+  OUT
+}
+
 /// A tenant. Every domain record is scoped to a school.
 model School {
   id      String  @id @default(uuid())
@@ -156,6 +161,9 @@ model School {
   announcements        Announcement[]
   hostels              Hostel[]
   hostelAllocations    HostelAllocation[]
+  suppliers            Supplier[]
+  inventoryItems       InventoryItem[]
+  stockTransactions    StockTransaction[]
 
   @@map("schools")
 }
@@ -963,6 +971,72 @@ model HostelAllocation {
   @@index([schoolId])
   @@index([roomId])
   @@map("hostel_allocations")
+}
+
+/// A supplier/vendor. Tenant-scoped.
+model Supplier {
+  id            String   @id @default(uuid())
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  items        InventoryItem[]
+  transactions StockTransaction[]
+
+  @@index([schoolId])
+  @@map("suppliers")
+}
+
+/// An inventory item (asset or consumable) with current stock quantity.
+model InventoryItem {
+  id           String   @id @default(uuid())
+  name         String
+  category     String?
+  unit         String?
+  quantity     Int      @default(0)
+  reorderLevel Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  transactions StockTransaction[]
+
+  @@index([schoolId])
+  @@map("inventory_items")
+}
+
+/// A stock movement (IN = purchase/restock, OUT = issue/consume).
+model StockTransaction {
+  id        String       @id @default(uuid())
+  type      StockTxnType
+  quantity  Int
+  unitCost  Int?
+  note      String?
+  createdAt DateTime     @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  itemId String
+  item   InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  @@index([itemId])
+  @@index([schoolId])
+  @@map("stock_transactions")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.

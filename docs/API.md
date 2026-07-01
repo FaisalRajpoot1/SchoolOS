@@ -322,3 +322,20 @@ Audiences: `ALL`, `TEACHERS`, `STUDENTS`, `PARENTS`, `STAFF`. The feed matches `
 | GET    | `/hostels/allocations`            | List allocations (`hostelId` / `roomId` filter)              |
 | PUT    | `/hostels/allocations/:studentId` | Allocate/reallocate a student to a room (`{ roomId, bedLabel? }`; capacity-guarded, one per student) |
 | DELETE | `/hostels/allocations/:studentId` | Deallocate a student                                         |
+
+## Inventory — Module 16 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+| Method | Path                          | Description                                                       |
+| ------ | ----------------------------- | ---------------------------------------------------------------- |
+| POST   | `/inventory/suppliers`        | Add a supplier                                                   |
+| GET    | `/inventory/suppliers`        | List suppliers (with item counts)                               |
+| PATCH  | `/inventory/suppliers/:id`    | Update a supplier                                               |
+| DELETE | `/inventory/suppliers/:id`    | Delete a supplier                                              |
+| POST   | `/inventory/items`            | Add an item (opening `quantity` seeds an IN movement)           |
+| GET    | `/inventory/items`            | List/search items (`search`, `supplierId`, `lowStock`)          |
+| GET    | `/inventory/items/:id`        | Item detail + recent stock movements                            |
+| PATCH  | `/inventory/items/:id`        | Update item metadata (quantity changes only via stock)          |
+| DELETE | `/inventory/items/:id`        | Delete an item                                                 |
+| POST   | `/inventory/items/:id/stock`  | Record a movement (`type` IN/OUT, `quantity`, `unitCost?`, `supplierId?`); adjusts quantity, guards OUT below zero |
+
+`lowStock` filters items where `quantity ≤ reorderLevel` (column-to-column comparison).

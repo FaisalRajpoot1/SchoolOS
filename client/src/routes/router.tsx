@@ -42,6 +42,9 @@ import { RoutesListPage } from '@/features/transport/pages/RoutesListPage';
 import { RouteDetailPage } from '@/features/transport/pages/RouteDetailPage';
 import { HostelsListPage } from '@/features/hostel/pages/HostelsListPage';
 import { HostelDetailPage } from '@/features/hostel/pages/HostelDetailPage';
+import { ItemsListPage } from '@/features/inventory/pages/ItemsListPage';
+import { ItemDetailPage } from '@/features/inventory/pages/ItemDetailPage';
+import { SuppliersPage } from '@/features/inventory/pages/SuppliersPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -143,6 +146,9 @@ export const router = createBrowserRouter([
               { path: '/transport/routes/:id', element: <RouteDetailPage /> },
               { path: '/hostels', element: <HostelsListPage /> },
               { path: '/hostels/:id', element: <HostelDetailPage /> },
+              { path: '/inventory/items', element: <ItemsListPage /> },
+              { path: '/inventory/items/:id', element: <ItemDetailPage /> },
+              { path: '/inventory/suppliers', element: <SuppliersPage /> },
             ],
           },
         ],
