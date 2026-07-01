@@ -37,13 +37,51 @@ SchoolOS/
 
 ## Getting Started
 
-```bash
-# Server
-cd server && npm install && cp .env.example .env && npm run dev
+Prerequisites: Node.js 20+, npm, and a running PostgreSQL instance.
 
-# Client
-cd client && npm install && cp .env.example .env && npm run dev
+```bash
+# 1. Server — configure, migrate the DB, seed demo data, then run
+cd server
+npm install
+cp .env.example .env          # set DATABASE_URL + JWT secrets (AI key optional)
+npm run prisma:migrate        # applies the committed initial migration
+npm run db:seed               # seeds a demo school + accounts
+npm run dev                   # http://localhost:4000
+
+# 2. Client (separate terminal)
+cd client
+npm install
+cp .env.example .env
+npm run dev                   # http://localhost:5173
 ```
+
+### Demo accounts
+
+All seeded with password `ChangeMe123!`:
+
+| Role         | Email                  |
+| ------------ | ---------------------- |
+| SUPER_ADMIN  | `owner@schoolos.dev`   |
+| SCHOOL_ADMIN | `admin@demo.school`    |
+| TEACHER      | `teacher@demo.school`  |
+| PARENT       | `parent@demo.school`   |
+| LIBRARIAN    | `librarian@demo.school`|
+| HR           | `hr@demo.school`       |
+
+### Optional AI features
+
+The AI Assistant (Module 25) runs on a deterministic rules engine out of the box.
+Set `ANTHROPIC_API_KEY` in `server/.env` to enable Claude-powered report comments
+and content generation (`AI_MODEL` defaults to `claude-opus-4-8`).
+
+## Feature modules
+
+All 25 modules are implemented end-to-end (server + client). Highlights: multi-tenant
+auth with RBAC & audit logs, school/academic setup, students & guardians, teachers,
+timetable, attendance, exams & results, homework & assignments, fees & invoicing,
+library, transport, hostel, inventory, HR & payroll, parent portal, announcements &
+events, certificates with public verification, an admin dashboard, reports with CSV
+export, API keys, and an AI assistant. Endpoint reference: [`docs/API.md`](docs/API.md).
 
 ## Documentation
 
