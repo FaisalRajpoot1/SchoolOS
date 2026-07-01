@@ -31,6 +31,10 @@ import { HomeworkListPage } from '@/features/homework/pages/HomeworkListPage';
 import { CreateHomeworkPage } from '@/features/homework/pages/CreateHomeworkPage';
 import { HomeworkDetailPage } from '@/features/homework/pages/HomeworkDetailPage';
 import { TimetablePage } from '@/features/timetable/pages/TimetablePage';
+import { BooksListPage } from '@/features/library/pages/BooksListPage';
+import { BookDetailPage } from '@/features/library/pages/BookDetailPage';
+import { BookCategoriesPage } from '@/features/library/pages/BookCategoriesPage';
+import { IssuesListPage } from '@/features/library/pages/IssuesListPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
 import { CreateAssignmentPage } from '@/features/assignments/pages/CreateAssignmentPage';
 import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDetailPage';
@@ -69,6 +73,16 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'SUPER_ADMIN']} />,
             children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+          },
+          // Library — school admins and librarians.
+          {
+            element: <ProtectedRoute roles={['SCHOOL_ADMIN', 'LIBRARIAN']} />,
+            children: [
+              { path: '/library', element: <BooksListPage /> },
+              { path: '/library/books/:id', element: <BookDetailPage /> },
+              { path: '/library/categories', element: <BookCategoriesPage /> },
+              { path: '/library/issues', element: <IssuesListPage /> },
+            ],
           },
           // SUPER_ADMIN only.
           {

@@ -253,3 +253,22 @@ Weekly recurring slots per section. Viewing is `SCHOOL_ADMIN` + `TEACHER`; editi
 | DELETE | `/timetable/slots/:id`  | Delete a slot                                                       |
 
 Conflict detection: two slots overlap when `existing.start < new.end AND existing.end > new.start` on the same day — enforced for the section, the assigned teacher (across all sections), and the room.
+
+## Library — Module 13 (roles `SCHOOL_ADMIN` + `LIBRARIAN`, tenant-scoped)
+
+| Method | Path                              | Description                                                    |
+| ------ | --------------------------------- | -------------------------------------------------------------- |
+| POST   | `/library/categories`             | Create a book category                                         |
+| GET    | `/library/categories`             | List categories                                                |
+| PATCH  | `/library/categories/:id`         | Rename a category                                              |
+| DELETE | `/library/categories/:id`         | Delete a category                                              |
+| POST   | `/library/books`                  | Add a book (sets available = total copies)                     |
+| GET    | `/library/books`                  | Search/list (`page`, `limit`, `search` title/author/ISBN, `categoryId`, `available`) |
+| GET    | `/library/books/:id`              | Book detail + currently-issued copies                          |
+| PATCH  | `/library/books/:id`              | Update (copy delta adjusts availability)                       |
+| DELETE | `/library/books/:id`              | Delete a book                                                  |
+| POST   | `/library/books/:id/issue`        | Issue a copy (`{ studentId, dueDate }`; decrements availability) |
+| POST   | `/library/issues/:issueId/return` | Return (computes late fine, restores a copy)                   |
+| GET    | `/library/issues`                 | List issues (`page`, `limit`, `status`, `studentId`, `bookId`) |
+
+Late fine = days past due × the per-day rate (config constant).

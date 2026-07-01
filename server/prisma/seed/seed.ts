@@ -444,6 +444,63 @@ async function main(): Promise<void> {
     }
   }
 
+  // A librarian account + a small book catalog with one active issue.
+  const existingLibrarian = await prisma.user.findFirst({
+    where: { schoolId: school.id, email: 'librarian@demo.school' },
+  });
+  if (!existingLibrarian) {
+    await prisma.user.create({
+      data: {
+        email: 'librarian@demo.school',
+        passwordHash,
+        firstName: 'Nadia',
+        lastName: 'Sheikh',
+        role: UserRole.LIBRARIAN,
+        schoolId: school.id,
+      },
+    });
+  }
+
+  const fiction = await prisma.bookCategory.upsert({
+    where: { schoolId_name: { schoolId: school.id, name: 'Fiction' } },
+    update: {},
+    create: { schoolId: school.id, name: 'Fiction' },
+  });
+
+  const firstBook = await prisma.book.findFirst({
+    where: { schoolId: school.id, title: 'The Little Prince' },
+  });
+  if (!firstBook) {
+    const book = await prisma.book.create({
+      data: {
+        schoolId: school.id,
+        title: 'The Little Prince',
+        author: 'Antoine de Saint-Exupéry',
+        isbn: '9780156012195',
+        categoryId: fiction.id,
+        totalCopies: 3,
+        availableCopies: 3,
+      },
+    });
+    const borrower = await prisma.student.findUnique({
+      where: { schoolId_admissionNo: { schoolId: school.id, admissionNo: 'ADM-00001' } },
+    });
+    if (borrower) {
+      await prisma.bookIssue.create({
+        data: {
+          schoolId: school.id,
+          bookId: book.id,
+          studentId: borrower.id,
+          dueDate: new Date('2026-07-20'),
+        },
+      });
+      await prisma.book.update({
+        where: { id: book.id },
+        data: { availableCopies: { decrement: 1 } },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console
@@ -452,6 +509,7 @@ async function main(): Promise<void> {
     schoolAdmin: { email: 'admin@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
     teacher: { email: 'teacher@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
     parent: { email: 'parent@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
+    librarian: { email: 'librarian@demo.school', password: DEMO_PASSWORD, schoolId: school.id },
   });
 }
 
