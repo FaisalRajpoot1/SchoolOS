@@ -20,6 +20,7 @@ import { TeacherDetailPage } from '@/features/teachers/pages/TeacherDetailPage';
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage';
 import { ReportsPage } from '@/features/reports/pages/ReportsPage';
 import { SettingsHubPage } from '@/features/settings/pages/SettingsHubPage';
+import { AiInsightsPage } from '@/features/ai/pages/AiInsightsPage';
 import { ApiKeysPage } from '@/features/settings/pages/ApiKeysPage';
 import { FeeCategoriesPage } from '@/features/fees/pages/FeeCategoriesPage';
 import { InvoicesListPage } from '@/features/fees/pages/InvoicesListPage';
@@ -154,6 +155,7 @@ export const router = createBrowserRouter([
               { path: '/settings/school', element: <SchoolSettingsPage /> },
               { path: '/settings/api-keys', element: <ApiKeysPage /> },
               { path: '/reports', element: <ReportsPage /> },
+              { path: '/ai', element: <AiInsightsPage /> },
               { path: '/academics/classes', element: <ClassesPage /> },
               { path: '/academics/classes/:classId', element: <ClassDetailPage /> },
               { path: '/academics/subjects', element: <SubjectsPage /> },

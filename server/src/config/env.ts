@@ -19,6 +19,11 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+
+  // Optional AI features (Module 25). When ANTHROPIC_API_KEY is unset, AI
+  // endpoints fall back to a deterministic rules-based engine.
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  AI_MODEL: z.string().default('claude-opus-4-8'),
 });
 
 const parsed = envSchema.safeParse(process.env);

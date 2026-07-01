@@ -424,3 +424,16 @@ School branding/localization live on the school profile (Module 2). This module 
 | DELETE | `/settings/api-keys/:id` | Revoke (delete) a key                                        |
 
 Keys are `sk_…` tokens; only the SHA-256 hash and an 11-char prefix are persisted.
+
+## AI Assistant — Module 25 (tenant-scoped)
+
+Insights are computed by a deterministic **rules engine** (always available). Report comments and content generation use **Claude** (`claude-opus-4-8`) when `ANTHROPIC_API_KEY` is set on the server, and gracefully fall back to templated output otherwise.
+
+| Method | Path                 | Auth                   | Description                                                            |
+| ------ | -------------------- | ---------------------- | --------------------------------------------------------------------- |
+| GET    | `/ai/status`         | any authenticated      | `{ aiEnabled }` — whether a live Claude key is configured             |
+| GET    | `/ai/insights`       | SCHOOL_ADMIN           | At-risk students flagged by attendance, exam performance, and unpaid fees, with a risk score |
+| POST   | `/ai/report-comment` | SCHOOL_ADMIN / TEACHER | `{ studentId }` → a report-card comment grounded in marks + attendance; `{ content, source }` |
+| POST   | `/ai/generate`       | SCHOOL_ADMIN / TEACHER | `{ kind: homework\|questions, subject, topic, grade, count }` → generated tasks/questions; `{ content, source }` |
+
+`source` is `"ai"` (Claude) or `"rules"` (fallback). No new tables — insights read existing attendance, marks, and invoice data. The server uses the official `@anthropic-ai/sdk`.
