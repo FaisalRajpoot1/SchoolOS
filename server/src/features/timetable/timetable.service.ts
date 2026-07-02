@@ -1,6 +1,11 @@
 import { type DayOfWeek, Prisma, type TimetableSlot } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
+import {
+  buildTimetablePdf,
+  type TimetableScope,
+  type TimetableSlotView,
+} from './timetable.pdf';
 import type { CreateSlotInput, ListSlotsQuery, UpdateSlotInput } from './timetable.validation';
 
 const hhmm = (m: number): string =>
@@ -159,5 +164,70 @@ export const timetableService = {
   async remove(schoolId: string, id: string): Promise<void> {
     await assertSlot(schoolId, id);
     await prisma.timetableSlot.delete({ where: { id } });
+  },
+
+  /** Renders a section or teacher weekly timetable as a downloadable PDF. */
+  async renderPdf(
+    schoolId: string,
+    query: ListSlotsQuery,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    // A section timetable is preferred when both filters are supplied.
+    const scope: TimetableScope = query.sectionId ? 'section' : 'teacher';
+
+    let title: string;
+    let filenameKey: string;
+    if (query.sectionId) {
+      await assertSection(schoolId, query.sectionId);
+      const section = await prisma.section.findFirst({
+        where: { id: query.sectionId, class: { schoolId } },
+        select: { name: true, class: { select: { name: true } } },
+      });
+      title = `Timetable — ${section?.class.name ?? ''} ${section?.name ?? ''}`.trim();
+      filenameKey = `section-${query.sectionId}`;
+    } else {
+      // listSlotsSchema guarantees teacherId here, but guard so the service is
+      // self-defending rather than trusting the route's validation wiring.
+      if (!query.teacherId) throw ApiError.badRequest('Provide either sectionId or teacherId');
+      const { teacherId } = query;
+      await assertTeacher(schoolId, teacherId);
+      const teacher = await prisma.teacher.findFirst({
+        where: { id: teacherId, schoolId },
+        select: { firstName: true, lastName: true },
+      });
+      title = `Timetable — ${teacher?.firstName ?? ''} ${teacher?.lastName ?? ''}`.trim();
+      filenameKey = `teacher-${teacherId}`;
+    }
+
+    // Filter by the resolved scope only. If both ids were supplied we honour the
+    // section scope (chosen above) rather than intersecting the two filters.
+    const scopeWhere: Prisma.TimetableSlotWhereInput =
+      scope === 'section' ? { sectionId: query.sectionId } : { teacherId: query.teacherId };
+
+    const [school, slots] = await Promise.all([
+      prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+      prisma.timetableSlot.findMany({
+        where: { schoolId, ...scopeWhere },
+        orderBy: [{ dayOfWeek: 'asc' }, { startMinute: 'asc' }],
+        include: slotInclude,
+      }),
+    ]);
+
+    const view: TimetableSlotView[] = slots.map((s) => ({
+      dayOfWeek: s.dayOfWeek,
+      startMinute: s.startMinute,
+      endMinute: s.endMinute,
+      subject: s.subject?.name ?? null,
+      teacher: s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}` : null,
+      section: s.section ? `${s.section.class.name} ${s.section.name}` : null,
+      room: s.room,
+    }));
+
+    const buffer = await buildTimetablePdf({
+      schoolName: school?.name ?? 'School',
+      title,
+      scope,
+      slots: view,
+    });
+    return { buffer, filename: `timetable-${filenameKey}.pdf` };
   },
 };

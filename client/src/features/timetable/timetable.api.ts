@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type { CreateSlotPayload, TimetableSlot } from './timetable.types';
 
 export interface TimetableQuery {
@@ -18,4 +19,16 @@ export const timetableApi = {
   async remove(id: string): Promise<void> {
     await api.delete(`/timetable/slots/${id}`);
   },
+  async exportPdf(params: TimetableQuery): Promise<void> {
+    const key = params.sectionId ? `section-${params.sectionId}` : `teacher-${params.teacherId}`;
+    await downloadFile(buildQueryUrl('/timetable/slots/export', params), `timetable-${key}.pdf`);
+  },
+};
+
+const buildQueryUrl = (path: string, params: TimetableQuery): string => {
+  const search = new URLSearchParams();
+  if (params.sectionId) search.set('sectionId', params.sectionId);
+  if (params.teacherId) search.set('teacherId', params.teacherId);
+  const qs = search.toString();
+  return qs ? `${path}?${qs}` : path;
 };

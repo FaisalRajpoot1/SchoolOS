@@ -21,6 +21,12 @@ router.get(
   validate({ query: listSlotsSchema }),
   timetableController.list,
 );
+router.get(
+  '/slots/export',
+  authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER),
+  validate({ query: listSlotsSchema }),
+  timetableController.exportPdf,
+);
 router.post(
   '/slots',
   authorize(UserRole.SCHOOL_ADMIN),

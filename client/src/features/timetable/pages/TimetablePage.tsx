@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useClass, useClasses } from '@/features/academics/useAcademics';
 import { useTeacherOptions } from '@/features/teachers/useTeachers';
 import { useCreateSlot, useDeleteSlot, useTimetable } from '../useTimetable';
+import { timetableApi } from '../timetable.api';
 import { DAYS, type DayOfWeek, type TimetableSlot } from '../timetable.types';
 import { minutesToTime, timeToMinutes } from '../time';
 import { Button } from '@/components/ui/Button';
@@ -12,6 +13,7 @@ import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const dayLabel: Record<DayOfWeek, string> = {
   MON: 'Monday',
@@ -89,6 +91,7 @@ export function TimetablePage() {
   const [classId, setClassId] = useState('');
   const [sectionId, setSectionId] = useState('');
   const [teacherId, setTeacherId] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const classes = useClasses();
   const classDetail = useClass(classId);
@@ -128,6 +131,17 @@ export function TimetablePage() {
 
   const slotsByDay = (day: DayOfWeek): TimetableSlot[] =>
     (timetable.data ?? []).filter((s) => s.dayOfWeek === day);
+
+  const onDownload = async (): Promise<void> => {
+    setIsDownloading(true);
+    try {
+      await timetableApi.exportPdf(isSection ? { sectionId } : { teacherId });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Could not download the timetable PDF'));
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -170,6 +184,13 @@ export function TimetablePage() {
                 <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
               ))}
             </Select>
+          </div>
+        )}
+        {activeId && (
+          <div className="ml-auto">
+            <Button variant="secondary" onClick={onDownload} isLoading={isDownloading}>
+              Download PDF
+            </Button>
           </div>
         )}
       </Card>

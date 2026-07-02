@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
+import { sendPdf } from '@/utils/pdf';
 import { timetableService } from './timetable.service';
 
 export const timetableController = {
@@ -26,5 +27,13 @@ export const timetableController = {
   remove: asyncHandler(async (req: Request, res: Response) => {
     await timetableService.remove(requireSchoolId(req.user), req.params.id as string);
     res.status(204).send();
+  }),
+
+  exportPdf: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, filename } = await timetableService.renderPdf(
+      requireSchoolId(req.user),
+      req.query as never,
+    );
+    sendPdf(res, buffer, filename);
   }),
 };

@@ -81,7 +81,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Timetable (M9)
 - `[ ]` P3 · L · Auto-generation (constraint solver) from teacher availability + rooms.
-- `[ ]` P2 · S · Printable / exportable timetable per section & teacher.
+- `[x]` P2 · S · Printable / exportable timetable per section & teacher. — batch 12: `GET /timetable/slots/export` renders a per-section or per-teacher weekly PDF (pure `groupTimetable` + `buildTimetablePdf`, tenant-scoped, page-break-aware with repeated headers) + "Download PDF" button + unit tests.
 
 ### Fees (M7)
 - `[ ]` P1 · L · Online payment gateway (Stripe/Razorpay) + webhook reconciliation.
