@@ -8,12 +8,20 @@ import {
   type PaginationMeta,
 } from '@/utils/pagination';
 import type {
+  BulkImportInput,
   CreateStudentInput,
   GuardianInput,
   ListStudentsQuery,
   PortalAccessInput,
   UpdateStudentInput,
 } from './students.validation';
+
+interface ImportRowResult {
+  index: number;
+  admissionNo: string | null;
+  ok: boolean;
+  error: string | null;
+}
 
 /** Validates that a class/section placement is consistent and tenant-owned. */
 const resolveEnrollment = async (
@@ -177,6 +185,94 @@ export const studentsService = {
     const guardian = await prisma.guardian.findFirst({ where: { id: guardianId, studentId } });
     if (!guardian) throw ApiError.notFound('Guardian not found');
     await prisma.guardian.delete({ where: { id: guardianId } });
+  },
+
+  // ---- Bulk import ----
+  /**
+   * Validates and (unless dryRun) creates a batch of students. Class/section
+   * are matched by name within the tenant. Each row succeeds or fails
+   * independently; the result reports per-row outcomes.
+   */
+  async bulkImport(schoolId: string, input: BulkImportInput) {
+    const [classes, sections] = await Promise.all([
+      prisma.class.findMany({ where: { schoolId }, select: { id: true, name: true } }),
+      prisma.section.findMany({
+        where: { class: { schoolId } },
+        select: { id: true, name: true, classId: true },
+      }),
+    ]);
+    const classByName = new Map(classes.map((c) => [c.name.toLowerCase(), c]));
+    const sectionsByClass = new Map<string, Map<string, { id: string }>>();
+    for (const s of sections) {
+      const inner = sectionsByClass.get(s.classId) ?? new Map();
+      inner.set(s.name.toLowerCase(), { id: s.id });
+      sectionsByClass.set(s.classId, inner);
+    }
+
+    let running = await prisma.student.count({ where: { schoolId } });
+    // Explicit admission numbers in this batch are reserved so generated ones
+    // don't collide with them.
+    const reserved = new Set(
+      input.rows.map((r) => r.admissionNo).filter((a): a is string => !!a),
+    );
+    const results: ImportRowResult[] = [];
+
+    for (const [i, row] of input.rows.entries()) {
+      try {
+        let classId: string | undefined;
+        let sectionId: string | undefined;
+        if (row.className) {
+          const cls = classByName.get(row.className.toLowerCase());
+          if (!cls) throw new Error(`Class "${row.className}" not found`);
+          classId = cls.id;
+          if (row.sectionName) {
+            const sec = sectionsByClass.get(cls.id)?.get(row.sectionName.toLowerCase());
+            if (!sec) throw new Error(`Section "${row.sectionName}" not found in ${row.className}`);
+            sectionId = sec.id;
+          }
+        } else if (row.sectionName) {
+          throw new Error('A class is required when a section is given');
+        }
+
+        let admissionNo = row.admissionNo;
+        if (!admissionNo) {
+          do {
+            admissionNo = `ADM-${String(++running).padStart(5, '0')}`;
+          } while (reserved.has(admissionNo));
+        }
+
+        if (!input.dryRun) {
+          await prisma.student.create({
+            data: {
+              schoolId,
+              admissionNo,
+              firstName: row.firstName,
+              lastName: row.lastName,
+              gender: row.gender,
+              email: row.email,
+              phone: row.phone,
+              classId,
+              sectionId,
+            },
+          });
+        }
+        results.push({ index: i, admissionNo, ok: true, error: null });
+      } catch (err) {
+        let message = err instanceof Error ? err.message : 'Invalid row';
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          message = 'Duplicate admission number';
+        }
+        results.push({ index: i, admissionNo: row.admissionNo ?? null, ok: false, error: message });
+      }
+    }
+
+    return {
+      dryRun: input.dryRun,
+      total: input.rows.length,
+      succeeded: results.filter((r) => r.ok).length,
+      failed: results.filter((r) => !r.ok).length,
+      results,
+    };
   },
 
   // ---- Student-portal access ----

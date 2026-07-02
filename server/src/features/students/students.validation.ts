@@ -71,8 +71,31 @@ export const guardianIdParamSchema = z.object({
   guardianId: z.string().uuid(),
 });
 
+/** One row of a bulk student import (class/section referenced by name). */
+export const importRowSchema = z
+  .object({
+    firstName: z.string().trim().min(1).max(80),
+    lastName: z.string().trim().min(1).max(80),
+    admissionNo: z.string().trim().min(1).max(40).optional(),
+    gender: gender.optional(),
+    email: z.string().email().optional(),
+    phone: z.string().trim().min(3).max(30).optional(),
+    className: z.string().trim().max(80).optional(),
+    sectionName: z.string().trim().max(80).optional(),
+  })
+  .strict();
+
+export const bulkImportSchema = z
+  .object({
+    dryRun: z.boolean().default(false),
+    rows: z.array(importRowSchema).min(1).max(500),
+  })
+  .strict();
+
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
 export type ListStudentsQuery = z.infer<typeof listStudentsSchema>;
 export type GuardianInput = z.infer<typeof guardianInputSchema>;
 export type PortalAccessInput = z.infer<typeof portalAccessSchema>;
+export type ImportRow = z.infer<typeof importRowSchema>;
+export type BulkImportInput = z.infer<typeof bulkImportSchema>;

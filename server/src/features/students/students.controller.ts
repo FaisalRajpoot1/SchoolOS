@@ -71,6 +71,11 @@ export const studentsController = {
     res.status(204).send();
   }),
 
+  bulkImport: asyncHandler(async (req: Request, res: Response) => {
+    const result = await studentsService.bulkImport(requireSchoolId(req.user), req.body);
+    res.status(200).json({ success: true, data: result });
+  }),
+
   setPortalAccess: asyncHandler(async (req: Request, res: Response) => {
     const result = await studentsService.setPortalAccess(
       requireSchoolId(req.user),

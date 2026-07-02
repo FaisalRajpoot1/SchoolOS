@@ -39,9 +39,14 @@ export function StudentsListPage() {
           <h1 className="text-2xl font-bold">Students</h1>
           <p className="text-slate-500">Admissions and enrolled students.</p>
         </div>
-        <Link to="/students/new">
-          <Button>+ Admit student</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/students/import">
+            <Button variant="secondary">Bulk import</Button>
+          </Link>
+          <Link to="/students/new">
+            <Button>+ Admit student</Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="flex flex-wrap items-end gap-3">

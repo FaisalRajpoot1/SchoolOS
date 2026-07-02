@@ -69,4 +69,31 @@ export const studentsApi = {
     );
     return data.data;
   },
+
+  async bulkImport(rows: ImportRow[], dryRun: boolean): Promise<BulkImportResult> {
+    const { data } = await api.post<{ data: BulkImportResult }>('/students/bulk-import', {
+      rows,
+      dryRun,
+    });
+    return data.data;
+  },
 };
+
+export interface ImportRow {
+  firstName: string;
+  lastName: string;
+  admissionNo?: string;
+  gender?: string;
+  email?: string;
+  phone?: string;
+  className?: string;
+  sectionName?: string;
+}
+
+export interface BulkImportResult {
+  dryRun: boolean;
+  total: number;
+  succeeded: number;
+  failed: number;
+  results: { index: number; admissionNo: string | null; ok: boolean; error: string | null }[];
+}

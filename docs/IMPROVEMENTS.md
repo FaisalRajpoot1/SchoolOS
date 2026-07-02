@@ -60,7 +60,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · L · Subscription/plan + billing per school; feature flags per plan.
 
 ### Students (M3)
-- `[ ]` P1 · M · Bulk CSV import with validation + dry-run preview.
+- `[x]` P1 · M · Bulk CSV import with validation + dry-run preview (`POST /students/bulk-import`, class/section by name) — batch 6.
 - `[ ]` P2 · S · Student photo upload (needs 1.10).
 - `[ ]` P2 · M · Class promotion / year rollover (batch advance students).
 - `[ ]` P3 · S · ID-card generation (needs 1.11).
