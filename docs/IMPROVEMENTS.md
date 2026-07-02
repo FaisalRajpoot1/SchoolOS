@@ -1,0 +1,176 @@
+# SchoolOS — Improvements Backlog
+
+Living list of concrete improvements per module, cross-cutting work, and
+candidate new modules. Worked through in batches; each batch is built, then
+audited by parallel senior-review agents (security / edge cases / perf / bad
+practices), fixed, verified (typecheck · lint · test · build), and committed.
+
+**Legend** — Priority: `P1` high · `P2` medium · `P3` nice-to-have.
+Effort: `S` (<½ day) · `M` (~1 day) · `L` (multi-day). Type: `SEC` security ·
+`BUG`/`PERF` · `FEAT` · `UX` · `TEST` · `DEBT` tech-debt.
+
+Status: `[ ]` todo · `[~]` in progress · `[x]` done.
+
+---
+
+## 0. Carried over from the last review (decisions pending)
+
+| # | Item | Pri | Eff | Type |
+|---|------|-----|-----|------|
+| 0.1 | `[ ]` Attendance: scope TEACHER writes/reads to their assigned sections (currently any teacher, any section) | P1 | M | SEC |
+| 0.2 | `[ ]` Homework/Assignments: only the owning teacher (or admin) may grade/delete submissions | P1 | M | SEC |
+| 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
+
+---
+
+## 1. Cross-cutting (platform-wide)
+
+| # | Item | Pri | Eff | Type |
+|---|------|-----|-----|------|
+| 1.1 | `[ ]` Integration tests: `supertest` against a Postgres service container in CI (auth flow, tenant isolation, a couple of critical services) | P1 | L | TEST |
+| 1.2 | `[ ]` Client tests: Vitest + Testing Library for key pages/hooks | P2 | M | TEST |
+| 1.3 | `[ ]` Global toast/notification system on the client (success/error feedback) | P1 | S | UX |
+| 1.4 | `[ ]` Consistent loading skeletons + empty states across list/detail pages | P2 | M | UX |
+| 1.5 | `[ ]` Per-user rate limiting (keyGenerator on `req.user.id`) in addition to per-IP | P2 | S | SEC |
+| 1.6 | `[ ]` Expand audit logging beyond auth to all sensitive mutations (create/update/delete on students, fees, payroll, etc.) | P2 | M | SEC |
+| 1.7 | `[ ]` OpenAPI/Swagger spec generated from Zod (`zod-to-openapi`) + Swagger UI | P2 | M | FEAT |
+| 1.8 | `[ ]` Docker + docker-compose (Postgres + server + client) for one-command local run | P2 | M | DEBT |
+| 1.9 | `[ ]` Background job queue (BullMQ/Redis) for emails, PDF generation, bulk jobs | P3 | L | DEBT |
+| 1.10 | `[ ]` File upload/storage service (S3-compatible) for photos, attachments, documents | P2 | M | FEAT |
+| 1.11 | `[ ]` PDF generation service (payslips, receipts, certificates, report cards) | P1 | M | FEAT |
+| 1.12 | `[ ]` Notification providers (email via Resend/SES, SMS, push) behind a provider interface | P2 | L | FEAT |
+| 1.13 | `[ ]` Soft-delete / archival for core records instead of hard delete (recoverability + FK safety) | P3 | M | DEBT |
+| 1.14 | `[ ]` Deployment configs: Dockerfiles + Render/Railway (server) + Vercel (client) + prod CORS/cookies | P2 | M | DEBT |
+
+---
+
+## 2. Per-module improvements
+
+### Auth & Security (M1)
+- `[ ]` P2 · M · Two-factor auth (TOTP) + backup codes.
+- `[ ]` P2 · S · Login lockout / backoff after N failed attempts per account.
+- `[ ]` P3 · M · Email verification on account creation; password-strength meter on client.
+- `[ ]` P3 · M · Google OAuth sign-in.
+
+### School Setup (M2)
+- `[ ]` P2 · S · School logo/branding upload (needs 1.10).
+- `[ ]` P3 · L · Subscription/plan + billing per school; feature flags per plan.
+
+### Students (M3)
+- `[ ]` P1 · M · Bulk CSV import with validation + dry-run preview.
+- `[ ]` P2 · S · Student photo upload (needs 1.10).
+- `[ ]` P2 · M · Class promotion / year rollover (batch advance students).
+- `[ ]` P3 · S · ID-card generation (needs 1.11).
+
+### Teachers (M4)
+- `[ ]` P2 · S · Photo + qualification/document attachments.
+- `[ ]` P3 · S · Per-teacher workload view (periods, subjects, sections).
+
+### Attendance (M6)
+- `[ ]` P1 · M · Teacher section-scoping (0.1).
+- `[ ]` P2 · S · Monthly summary + CSV export per class.
+- `[ ]` P2 · M · Auto-notify parents on absence (needs 1.12).
+- `[ ]` P3 · M · Period-wise attendance (vs day-level).
+
+### Academics (M8)
+- `[ ]` P3 · M · Electives / subject groups / streams.
+- `[ ]` P3 · S · Syllabus/curriculum document per subject (needs 1.10).
+
+### Timetable (M9)
+- `[ ]` P3 · L · Auto-generation (constraint solver) from teacher availability + rooms.
+- `[ ]` P2 · S · Printable / exportable timetable per section & teacher.
+
+### Fees (M7)
+- `[ ]` P1 · L · Online payment gateway (Stripe/Razorpay) + webhook reconciliation.
+- `[ ]` P1 · S · PDF receipt on payment (needs 1.11).
+- `[ ]` P2 · M · Fee plans / installment schedules + auto late-fee.
+- `[ ]` P2 · S · Scholarships / structured discounts.
+
+### Exams (M12)
+- `[ ]` P1 · M · Report-card PDF (needs 1.11).
+- `[ ]` P2 · M · Per-school configurable grade scheme (currently hard-coded A+…F).
+- `[ ]` P3 · M · GPA/CGPA, weighted terms, co-scholastic areas.
+
+### Homework (M10) / Assignments (M11)
+- `[ ]` P1 · M · Owner-only grading (0.2).
+- `[ ]` P2 · M · Real file attachments for tasks & submissions (needs 1.10).
+
+### Library (M13)
+- `[ ]` P3 · M · Reservations/holds + barcode lookup.
+- `[ ]` P2 · S · Overdue notifications (needs 1.12).
+
+### Transport (M14)
+- `[ ]` P3 · L · Live GPS tracking + parent ETA.
+- `[ ]` P3 · M · Route optimization.
+
+### Hostel (M15)
+- `[ ]` P3 · M · Mess/meal plans; leave/outing passes; visitor log.
+
+### Inventory (M16)
+- `[ ]` P3 · M · Purchase orders + stock valuation report.
+- `[ ]` P3 · S · Barcode / asset tagging.
+
+### HR (M17)
+- `[ ]` P3 · M · Staff attendance/biometric; appraisals; document vault.
+
+### Payroll (M18)
+- `[ ]` P1 · S · PDF payslip (needs 1.11).
+- `[ ]` P2 · M · Bank-transfer export file (CSV/NACHA); configurable tax slabs; YTD summary.
+
+### Parent Portal (M5)
+- `[ ]` P1 · M · Online fee payment from portal (needs Fees gateway).
+- `[ ]` P2 · M · Parent↔teacher messaging; PTM booking.
+
+### Communication (M19)
+- `[ ]` P2 · L · Real email/SMS/push delivery + templates + delivery status (needs 1.12).
+
+### Events (M20)
+- `[ ]` P3 · S · RSVP + iCal export + reminders.
+
+### Certificates (M21)
+- `[ ]` P1 · M · PDF certificate with embedded QR to the verify URL (needs 1.11).
+- `[ ]` P3 · M · Admin template editor.
+
+### Reports (M22)
+- `[ ]` P2 · M · SQL-side aggregation (0.3) + more report types.
+- `[ ]` P3 · M · Scheduled report emails; PDF/Excel export.
+
+### Dashboard (M23)
+- `[ ]` P2 · M · Role-specific dashboards (teacher, parent, accountant).
+- `[ ]` P3 · S · Date-range filter + drill-down.
+
+### Settings (M24)
+- `[ ]` P2 · L · Granular roles/permissions editor (fine-grained RBAC beyond fixed roles).
+- `[ ]` P3 · M · Theme customization; backup/restore; API-key scopes + usage metrics; outbound webhooks.
+
+### AI Assistant (M25)
+- `[ ]` P2 · M · SQL-side insights aggregation (0.3) + response streaming.
+- `[ ]` P3 · M · More generators (lesson plans, feedback drafts); parent/school chatbot; result caching; per-tenant model config.
+
+---
+
+## 3. Candidate NEW modules
+
+| # | Module | Pri | Eff | Notes |
+|---|--------|-----|-----|-------|
+| N1 | `[ ]` **Student Portal** (student login: timetable, homework, results, attendance, fees) | P1 | M | Natural pairing with Parent Portal; reuses existing services; high demo value |
+| N2 | `[ ]` **Online Admissions / Enquiry** (public application form → admissions pipeline → convert to student) | P1 | L | Adds a growth/funnel story to the product |
+| N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
+| N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |
+| N5 | `[ ]` **Health / Medical records** (infirmary visits, allergies, vaccinations) | P3 | M | |
+| N6 | `[ ]` **Disciplinary / Behavior records** (incidents, merits/demerits) | P3 | S | |
+| N7 | `[ ]` **Visitor / Gate management** | P3 | S | |
+| N8 | `[ ]` **LMS / Online classes** (content, video links, quizzes) | P3 | L | Large; own initiative |
+| N9 | `[ ]` **Analytics / BI** (cross-module KPI trends over time) | P3 | M | Extends Reports |
+| N10 | `[ ]` **i18n / multi-language** support | P3 | M | Cross-cutting client work |
+
+---
+
+## 4. Suggested first batch (recommended order)
+
+1. **Security & correctness hardening** — 0.1 teacher attendance scoping, 0.2 homework/assignment owner-grading, 1.5 per-user rate limiting. (P1, low risk, closes the review's open items.)
+2. **PDF service + first consumers** — 1.11 then Payslip PDF (M18) and Certificate PDF+QR (M21). (High visible value.)
+3. **Client UX** — 1.3 global toasts + 1.4 loading/empty states.
+4. **New module: Student Portal (N1)** — rounds out the portal story.
+
+Then iterate down the P1/P2 lists.
