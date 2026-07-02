@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDeletePayslip, usePayPayslip, usePayslip, useUpdatePayslip } from '../usePayroll';
 import { payrollApi } from '../payroll.api';
 import { MONTHS } from '../payroll.types';
+import { toast } from '@/lib/toast';
 import { formatAmount } from '@/features/fees/format';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -143,7 +144,12 @@ export function PayslipDetailPage() {
             <span className="text-sm text-red-600">{getApiErrorMessage(update.error ?? pay.error)}</span>
           )}
           <Button variant="secondary" onClick={save} isLoading={update.isPending}>Save</Button>
-          <Button onClick={() => pay.mutate()} isLoading={pay.isPending}>Mark paid</Button>
+          <Button
+            onClick={() => pay.mutate(undefined, { onSuccess: () => toast.success('Payslip marked as paid') })}
+            isLoading={pay.isPending}
+          >
+            Mark paid
+          </Button>
         </div>
       )}
     </div>

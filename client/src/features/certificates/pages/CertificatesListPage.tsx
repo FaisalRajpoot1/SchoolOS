@@ -6,7 +6,10 @@ import { useStudents } from '@/features/students/useStudents';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
+import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 export function CertificatesListPage() {
   const navigate = useNavigate();
@@ -21,7 +24,15 @@ export function CertificatesListPage() {
 
   const submit = (): void => {
     if (!studentId) return;
-    issue.mutate({ studentId, type }, { onSuccess: (cert) => navigate(`/certificates/${cert.id}`) });
+    issue.mutate(
+      { studentId, type },
+      {
+        onSuccess: (cert) => {
+          toast.success('Certificate issued');
+          navigate(`/certificates/${cert.id}`);
+        },
+      },
+    );
   };
 
   return (
@@ -54,11 +65,14 @@ export function CertificatesListPage() {
 
       <Card className="p-0">
         {query.isLoading ? (
-          <p className="p-6 text-sm text-slate-500">Loading…</p>
+          <Spinner />
         ) : query.isError ? (
           <p className="p-6 text-sm text-red-600">{getApiErrorMessage(query.error)}</p>
         ) : query.data && query.data.items.length === 0 ? (
-          <p className="p-6 text-sm text-slate-500">No certificates issued yet.</p>
+          <EmptyState
+            title="No certificates yet"
+            description="Issue a certificate using the form above."
+          />
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">

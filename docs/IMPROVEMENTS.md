@@ -22,7 +22,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
-**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2.
+**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3.
 
 ---
 
@@ -32,8 +32,8 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 |---|------|-----|-----|------|
 | 1.1 | `[ ]` Integration tests: `supertest` against a Postgres service container in CI (auth flow, tenant isolation, a couple of critical services) | P1 | L | TEST |
 | 1.2 | `[ ]` Client tests: Vitest + Testing Library for key pages/hooks | P2 | M | TEST |
-| 1.3 | `[ ]` Global toast/notification system on the client (success/error feedback) | P1 | S | UX |
-| 1.4 | `[ ]` Consistent loading skeletons + empty states across list/detail pages | P2 | M | UX |
+| 1.3 | `[x]` Global toast system (`lib/toast` store + `Toaster`); used for success/info feedback (errors stay inline to avoid double-reporting) | P1 | S | UX |
+| 1.4 | `[~]` `Spinner` + `EmptyState` primitives created and applied to certificates/payslips lists; roll out to remaining list/detail pages incrementally | P2 | M | UX |
 | 1.5 | `[ ]` Per-user rate limiting (keyGenerator on `req.user.id`) in addition to per-IP | P2 | S | SEC |
 | 1.6 | `[ ]` Expand audit logging beyond auth to all sensitive mutations (create/update/delete on students, fees, payroll, etc.) | P2 | M | SEC |
 | 1.7 | `[ ]` OpenAPI/Swagger spec generated from Zod (`zod-to-openapi`) + Swagger UI | P2 | M | FEAT |

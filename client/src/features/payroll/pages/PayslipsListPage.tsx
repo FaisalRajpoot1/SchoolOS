@@ -7,6 +7,8 @@ import { formatAmount } from '@/features/fees/format';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
+import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 const thisYear = new Date().getFullYear();
@@ -98,11 +100,14 @@ export function PayslipsListPage() {
 
       <Card className="p-0">
         {query.isLoading ? (
-          <p className="p-6 text-sm text-slate-500">Loading…</p>
+          <Spinner />
         ) : query.isError ? (
           <p className="p-6 text-sm text-red-600">{getApiErrorMessage(query.error)}</p>
         ) : query.data && query.data.items.length === 0 ? (
-          <p className="p-6 text-sm text-slate-500">No payslips for this period.</p>
+          <EmptyState
+            title="No payslips for this period"
+            description="Generate payslips or create one above."
+          />
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
