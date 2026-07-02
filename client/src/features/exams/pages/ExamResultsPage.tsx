@@ -1,11 +1,26 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useExamResults } from '../useExams';
+import { examsApi } from '../exams.api';
 import { Card } from '@/components/ui/Card';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 export function ExamResultsPage() {
   const { id = '' } = useParams();
   const results = useExamResults(id);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const downloadCard = async (studentId: string, admissionNo: string): Promise<void> => {
+    setDownloadingId(studentId);
+    try {
+      await examsApi.downloadReportCard(id, studentId, admissionNo);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   if (results.isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
   if (results.isError || !results.data)
@@ -36,6 +51,7 @@ export function ExamResultsPage() {
                 <th className="px-6 py-3 text-right">%</th>
                 <th className="px-6 py-3">Grade</th>
                 <th className="px-6 py-3">Result</th>
+                <th className="px-6 py-3">Card</th>
               </tr>
             </thead>
             <tbody>
@@ -59,6 +75,15 @@ export function ExamResultsPage() {
                     >
                       {row.passed ? 'PASS' : 'FAIL'}
                     </span>
+                  </td>
+                  <td className="px-6 py-3">
+                    <button
+                      onClick={() => downloadCard(row.student.id, row.student.admissionNo)}
+                      disabled={downloadingId === row.student.id}
+                      className="text-xs font-medium text-brand-600 hover:underline disabled:opacity-50"
+                    >
+                      {downloadingId === row.student.id ? 'Preparing…' : 'PDF'}
+                    </button>
                   </td>
                 </tr>
               ))}

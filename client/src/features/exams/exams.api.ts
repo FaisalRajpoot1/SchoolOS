@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type {
   BulkMarkRecord,
   CreateExamPayload,
@@ -67,5 +68,11 @@ export const examsApi = {
   async results(examId: string): Promise<ExamResults> {
     const { data } = await api.get<{ data: ExamResults }>(`/exams/${examId}/results`);
     return data.data;
+  },
+  downloadReportCard(examId: string, studentId: string, admissionNo: string): Promise<void> {
+    return downloadFile(
+      `/exams/${examId}/report-card/${studentId}/pdf`,
+      `report-card-${admissionNo}.pdf`,
+    );
   },
 };

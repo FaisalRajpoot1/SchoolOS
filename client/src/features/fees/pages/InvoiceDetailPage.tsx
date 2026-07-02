@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { invoicesApi } from '../fees.api';
 import {
   useAddPayment,
   useCancelInvoice,
@@ -16,6 +18,7 @@ import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const statusBadge: Record<InvoiceStatus, string> = {
   PENDING: 'bg-amber-50 text-amber-700',
@@ -59,9 +62,23 @@ export function InvoiceDetailPage() {
     reset({ method: 'CASH', amount: undefined, reference: '', note: '' });
   });
 
+  const [downloading, setDownloading] = useState(false);
+
   const handleDelete = async (): Promise<void> => {
     await deleteInvoice.mutateAsync(id);
     navigate('/fees/invoices', { replace: true });
+  };
+
+  const handleDownload = async (): Promise<void> => {
+    if (!invoice.data) return;
+    setDownloading(true);
+    try {
+      await invoicesApi.downloadInvoicePdf(invoice.data.id, invoice.data.invoiceNo);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (invoice.isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
@@ -89,6 +106,9 @@ export function InvoiceDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleDownload} isLoading={downloading}>
+            Download PDF
+          </Button>
           {!isCancelled && (
             <Button variant="secondary" onClick={() => cancelInvoice.mutate()} isLoading={cancelInvoice.isPending}>
               Cancel invoice

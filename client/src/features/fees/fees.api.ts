@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type {
   AddPaymentPayload,
   CreateInvoicePayload,
@@ -59,5 +60,8 @@ export const invoicesApi = {
       `/invoices/${id}/payments/${paymentId}`,
     );
     return data.data.invoice;
+  },
+  downloadInvoicePdf(id: string, invoiceNo: string): Promise<void> {
+    return downloadFile(`/invoices/${id}/pdf`, `invoice-${invoiceNo}.pdf`);
   },
 };

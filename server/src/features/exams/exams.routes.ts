@@ -9,6 +9,7 @@ import {
   examIdParamSchema,
   examSubjectParamSchema,
   listExamsSchema,
+  studentReportParamSchema,
   updateExamSchema,
   updateExamSubjectSchema,
 } from './exams.validation';
@@ -58,5 +59,11 @@ router.post(
 
 // Results.
 router.get('/:id/results', adminOrTeacher, validate({ params: examIdParamSchema }), examsController.results);
+router.get(
+  '/:id/report-card/:studentId/pdf',
+  adminOrTeacher,
+  validate({ params: studentReportParamSchema }),
+  examsController.reportCardPdf,
+);
 
 export const examRoutes = router;

@@ -22,7 +22,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
-**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3 `2151ad6`. N1 Student Portal — batch 4.
+**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3 `2151ad6`. N1 Student Portal — batch 4 `e7d2369`. Invoice PDF + Report-card PDF — batch 5.
 
 ---
 
@@ -85,12 +85,12 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Fees (M7)
 - `[ ]` P1 · L · Online payment gateway (Stripe/Razorpay) + webhook reconciliation.
-- `[ ]` P1 · S · PDF receipt on payment (needs 1.11).
+- `[x]` P1 · S · Invoice / fee-statement PDF (`GET /invoices/:id/pdf`) — batch 5.
 - `[ ]` P2 · M · Fee plans / installment schedules + auto late-fee.
 - `[ ]` P2 · S · Scholarships / structured discounts.
 
 ### Exams (M12)
-- `[ ]` P1 · M · Report-card PDF (needs 1.11).
+- `[x]` P1 · M · Report-card PDF (`GET /exams/:id/report-card/:studentId/pdf`, class-scoped) — batch 5.
 - `[ ]` P2 · M · Per-school configurable grade scheme (currently hard-coded A+…F).
 - `[ ]` P3 · M · GPA/CGPA, weighted terms, co-scholastic areas.
 

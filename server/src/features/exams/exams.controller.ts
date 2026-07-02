@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
+import { sendPdf } from '@/utils/pdf';
 import { examsService } from './exams.service';
 
 export const examsController = {
@@ -71,5 +72,14 @@ export const examsController = {
   results: asyncHandler(async (req: Request, res: Response) => {
     const data = await examsService.results(requireSchoolId(req.user), req.params.id as string);
     res.status(200).json({ success: true, data });
+  }),
+
+  reportCardPdf: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, filename } = await examsService.renderReportCardPdf(
+      requireSchoolId(req.user),
+      req.params.id as string,
+      req.params.studentId as string,
+    );
+    sendPdf(res, buffer, filename);
   }),
 };

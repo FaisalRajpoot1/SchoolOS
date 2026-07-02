@@ -12,6 +12,7 @@ import type {
   ListInvoicesQuery,
   UpdateInvoiceInput,
 } from './invoices.validation';
+import { buildInvoicePdf } from './invoice.pdf';
 
 interface Totals {
   total: number;
@@ -220,5 +221,36 @@ export const invoicesService = {
       await recomputeStatus(tx, invoiceId);
     });
     return this.getById(schoolId, invoiceId);
+  },
+
+  /** Renders an invoice as a PDF buffer with a suggested filename. */
+  async renderPdf(schoolId: string, id: string): Promise<{ buffer: Buffer; filename: string }> {
+    const [invoice, school] = await Promise.all([
+      this.getById(schoolId, id),
+      prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    ]);
+
+    const buffer = await buildInvoicePdf({
+      schoolName: school?.name ?? 'School',
+      invoiceNo: invoice.invoiceNo,
+      title: invoice.title,
+      status: invoice.status,
+      dueDate: invoice.dueDate ? invoice.dueDate.toISOString().slice(0, 10) : null,
+      studentName: `${invoice.student.firstName} ${invoice.student.lastName}`,
+      admissionNo: invoice.student.admissionNo,
+      items: invoice.items.map((it) => ({
+        description: it.description,
+        quantity: it.quantity,
+        amount: it.amount,
+      })),
+      payments: invoice.payments.map((p) => ({
+        paidAt: p.paidAt.toISOString().slice(0, 10),
+        method: p.method,
+        amount: p.amount,
+        reference: p.reference,
+      })),
+      totals: invoice.totals,
+    });
+    return { buffer, filename: `invoice-${invoice.invoiceNo}.pdf` };
   },
 };

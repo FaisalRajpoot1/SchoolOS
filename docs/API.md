@@ -190,6 +190,7 @@ Invoices & payments (amounts are whole units of the school's currency; line-item
 | POST   | `/invoices`                         | Create an invoice with line items (auto invoice #)           |
 | GET    | `/invoices`                         | List invoices (`page`, `limit`, `search`, `status`, `studentId`); each row carries `totals` |
 | GET    | `/invoices/:id`                     | Invoice detail (items, payments, `totals: {total,paid,balance}`) |
+| GET    | `/invoices/:id/pdf`                 | Download the invoice / fee statement as a PDF                |
 | PATCH  | `/invoices/:id`                     | Update title/dueDate/notes                                   |
 | POST   | `/invoices/:id/cancel`              | Cancel an invoice                                            |
 | DELETE | `/invoices/:id`                     | Delete an invoice                                            |
@@ -220,6 +221,7 @@ Exam management is `SCHOOL_ADMIN`; marks entry and results are `SCHOOL_ADMIN` + 
 | GET    | `/exams/:id/subjects/:examSubjectId/marks` | Marks roster for one subject                                      |
 | POST   | `/exams/:id/subjects/:examSubjectId/marks` | Bulk upsert marks (`{ records:[{ studentId, marksObtained?, isAbsent?, remark? }] }`) |
 | GET    | `/exams/:id/results`                       | Ranked results: per-student totals, percentage, grade, pass/fail  |
+| GET    | `/exams/:id/report-card/:studentId/pdf`    | Download a student's report card for the exam as a PDF (admin/teacher) |
 
 Grade scale: A+ ≥90, A ≥80, B ≥70, C ≥60, D ≥50, E ≥40, else F.
 

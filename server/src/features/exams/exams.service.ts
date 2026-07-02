@@ -7,6 +7,7 @@ import {
   type PaginationMeta,
 } from '@/utils/pagination';
 import { gradeForPercentage } from './grade';
+import { buildReportCardPdf } from './reportCard.pdf';
 import type {
   BulkMarksInput,
   CreateExamInput,
@@ -294,5 +295,75 @@ export const examsService = {
       subjectCount: examSubjects.length,
       results: ranked,
     };
+  },
+
+  /** Renders a single student's report card for an exam as a PDF. */
+  async renderReportCardPdf(
+    schoolId: string,
+    examId: string,
+    studentId: string,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const exam = await assertExam(schoolId, examId);
+
+    const [student, examSubjects, school] = await Promise.all([
+      prisma.student.findFirst({
+        // Scope to the exam's class so a student who never sat it 404s
+        // instead of rendering a bogus all-zero report card.
+        where: { id: studentId, schoolId, classId: exam.classId },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          admissionNo: true,
+          class: { select: { name: true } },
+        },
+      }),
+      prisma.examSubject.findMany({
+        where: { examId },
+        select: {
+          maxMarks: true,
+          passMarks: true,
+          subject: { select: { name: true } },
+          marks: { where: { studentId }, select: { marksObtained: true, isAbsent: true } },
+        },
+      }),
+      prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    ]);
+    if (!student) throw ApiError.notFound('Student not found');
+
+    let obtained = 0;
+    let totalMax = 0;
+    let failed = false;
+    const subjects = examSubjects.map((es) => {
+      totalMax += es.maxMarks;
+      const mark = es.marks[0];
+      const score = mark && !mark.isAbsent ? (mark.marksObtained ?? 0) : 0;
+      obtained += score;
+      const passed = !!mark && !mark.isAbsent && score >= es.passMarks;
+      if (!passed) failed = true;
+      return {
+        name: es.subject.name,
+        maxMarks: es.maxMarks,
+        marksObtained: mark && !mark.isAbsent ? mark.marksObtained : null,
+        isAbsent: mark?.isAbsent ?? false,
+        passed,
+      };
+    });
+    const percentage = totalMax > 0 ? Math.round((obtained / totalMax) * 10000) / 100 : 0;
+
+    const buffer = await buildReportCardPdf({
+      schoolName: school?.name ?? 'School',
+      examName: exam.name,
+      studentName: `${student.firstName} ${student.lastName}`,
+      admissionNo: student.admissionNo,
+      className: student.class?.name ?? null,
+      subjects,
+      obtained,
+      totalMax,
+      percentage,
+      grade: gradeForPercentage(percentage),
+      passed: !failed && subjects.length > 0,
+    });
+    return { buffer, filename: `report-card-${student.admissionNo}-${exam.name}.pdf` };
   },
 };

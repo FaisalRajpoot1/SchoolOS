@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
 import { ApiError } from '@/utils/ApiError';
+import { sendPdf } from '@/utils/pdf';
 import { invoicesService } from './invoices.service';
 
 export const invoicesController = {
@@ -18,6 +19,14 @@ export const invoicesController = {
   getById: asyncHandler(async (req: Request, res: Response) => {
     const invoice = await invoicesService.getById(requireSchoolId(req.user), req.params.id as string);
     res.status(200).json({ success: true, data: { invoice } });
+  }),
+
+  pdf: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, filename } = await invoicesService.renderPdf(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    sendPdf(res, buffer, filename);
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {

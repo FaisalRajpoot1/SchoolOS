@@ -19,6 +19,7 @@ router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.ACCOUNTANT));
 router.post('/', validate({ body: createInvoiceSchema }), invoicesController.create);
 router.get('/', validate({ query: listInvoicesSchema }), invoicesController.list);
 router.get('/:id', validate({ params: invoiceIdParamSchema }), invoicesController.getById);
+router.get('/:id/pdf', validate({ params: invoiceIdParamSchema }), invoicesController.pdf);
 router.patch(
   '/:id',
   validate({ params: invoiceIdParamSchema, body: updateInvoiceSchema }),
