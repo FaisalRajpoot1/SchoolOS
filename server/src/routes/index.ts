@@ -31,6 +31,7 @@ import { certificateRoutes } from '@/features/certificates/certificates.routes';
 import { reportRoutes } from '@/features/reports/reports.routes';
 import { settingsRoutes } from '@/features/settings/settings.routes';
 import { aiRoutes } from '@/features/ai/ai.routes';
+import { admissionRoutes } from '@/features/admissions/admissions.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -70,6 +71,7 @@ router.use('/certificates', certificateRoutes);
 router.use('/reports', reportRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/ai', aiRoutes);
+router.use('/admissions', admissionRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

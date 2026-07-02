@@ -64,6 +64,8 @@ import { AssignmentDetailPage } from '@/features/assignments/pages/AssignmentDet
 import { CertificatesListPage } from '@/features/certificates/pages/CertificatesListPage';
 import { CertificateDetailPage } from '@/features/certificates/pages/CertificateDetailPage';
 import { VerifyCertificatePage } from '@/pages/VerifyCertificatePage';
+import { ApplyPage } from '@/features/admissions/pages/ApplyPage';
+import { AdmissionsPage } from '@/features/admissions/pages/AdmissionsPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -81,6 +83,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/verify-certificate/:code', element: <VerifyCertificatePage /> },
+  { path: '/apply/:schoolId', element: <ApplyPage /> },
 
   // Authenticated app shell.
   {
@@ -170,6 +173,7 @@ export const router = createBrowserRouter([
               { path: '/students', element: <StudentsListPage /> },
               { path: '/students/new', element: <AdmitStudentPage /> },
               { path: '/students/import', element: <BulkImportPage /> },
+              { path: '/admissions', element: <AdmissionsPage /> },
               { path: '/students/:id', element: <StudentDetailPage /> },
               { path: '/teachers', element: <TeachersListPage /> },
               { path: '/teachers/new', element: <AddTeacherPage /> },

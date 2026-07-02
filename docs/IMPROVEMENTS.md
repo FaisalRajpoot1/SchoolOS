@@ -157,7 +157,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | # | Module | Pri | Eff | Notes |
 |---|--------|-----|-----|-------|
 | N1 | `[x]` **Student Portal** — student login (Student.userId), admin provisioning (`POST /students/:id/portal-access`), `/student-portal/*` own-data endpoints, client portal page + STUDENT dashboard/nav; shared `portalData` helpers deduped with parent portal | P1 | M | Done — batch 4 |
-| N2 | `[ ]` **Online Admissions / Enquiry** (public application form → admissions pipeline → convert to student) | P1 | L | Adds a growth/funnel story to the product |
+| N2 | `[x]` **Online Admissions / Enquiry** — public `/apply/:schoolId` form → admin pipeline (status flow) → convert-to-student. `AdmissionApplication` model, public+admin endpoints. Done — batch 8 |
 | N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
 | N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |
 | N5 | `[ ]` **Health / Medical records** (infirmary visits, allergies, vaccinations) | P3 | M | |

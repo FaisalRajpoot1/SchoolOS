@@ -772,6 +772,26 @@ async function main(): Promise<void> {
     });
   }
 
+  // A demo admission enquiry (public application).
+  const existingApplication = await prisma.admissionApplication.findFirst({
+    where: { schoolId: school.id },
+  });
+  if (!existingApplication) {
+    await prisma.admissionApplication.create({
+      data: {
+        schoolId: school.id,
+        applicantFirstName: 'Zara',
+        applicantLastName: 'Ahmed',
+        gender: 'FEMALE',
+        guardianName: 'Bilal Ahmed',
+        guardianPhone: '03007654321',
+        guardianEmail: 'bilal.ahmed@example.com',
+        desiredClass: 'Grade 1',
+        message: 'Interested in admission for the upcoming term.',
+      },
+    });
+  }
+
   // eslint-disable-next-line no-console
   console.log('✅ Seed complete');
   // eslint-disable-next-line no-console

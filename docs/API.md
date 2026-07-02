@@ -79,6 +79,22 @@ The student resolves from their login (`Student.userId`); no id is accepted, so 
 | GET    | `/student-portal/assignments`| Own section assignments + submission status    |
 | GET    | `/student-portal/results`   | Own published exam results (per-exam grade)     |
 
+## Admissions — Module N2
+
+Public application funnel + admin pipeline. The public endpoints sit before the auth guard; the apply form is rate-limited.
+
+| Method | Path                          | Auth         | Description                                                    |
+| ------ | ----------------------------- | ------------ | ------------------------------------------------------------- |
+| GET    | `/admissions/schools/:schoolId` | public     | Minimal `{ id, name }` for an active school (drives the form) |
+| POST   | `/admissions/apply`           | public       | Submit an enquiry (`{ schoolId, applicant…, guardian… }`)     |
+| GET    | `/admissions`                 | SCHOOL_ADMIN | List applications (`status` filter, paginated)               |
+| GET    | `/admissions/:id`             | SCHOOL_ADMIN | Application detail                                            |
+| PATCH  | `/admissions/:id/status`      | SCHOOL_ADMIN | Set status (SUBMITTED / REVIEWING / ACCEPTED / REJECTED)      |
+| POST   | `/admissions/:id/convert`     | SCHOOL_ADMIN | Convert to an enrolled student (optional `classId`/`sectionId`); marks CONVERTED |
+| DELETE | `/admissions/:id`             | SCHOOL_ADMIN | Delete an application                                        |
+
+Public apply page: `/apply/:schoolId` (client route). Statuses: `SUBMITTED`, `REVIEWING`, `ACCEPTED`, `REJECTED`, `CONVERTED`.
+
 ## Schools — Module 2
 
 Platform administration (role `SUPER_ADMIN`):

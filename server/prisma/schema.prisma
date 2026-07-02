@@ -176,40 +176,41 @@ model School {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users                User[]
-  academicYears        AcademicYear[]
-  classes              Class[]
-  subjects             Subject[]
-  students             Student[]
-  teachers             Teacher[]
-  attendanceRecords    AttendanceRecord[]
-  feeCategories        FeeCategory[]
-  invoices             Invoice[]
-  payments             Payment[]
-  exams                Exam[]
-  homeworks            Homework[]
-  auditLogs            AuditLog[]
-  parents              Parent[]
-  assignments          Assignment[]
-  timetableSlots       TimetableSlot[]
-  bookCategories       BookCategory[]
-  books                Book[]
-  bookIssues           BookIssue[]
-  vehicles             Vehicle[]
-  transportRoutes      TransportRoute[]
-  transportAllocations TransportAllocation[]
-  announcements        Announcement[]
-  hostels              Hostel[]
-  hostelAllocations    HostelAllocation[]
-  suppliers            Supplier[]
-  inventoryItems       InventoryItem[]
-  stockTransactions    StockTransaction[]
-  employees            Employee[]
-  leaveRequests        LeaveRequest[]
-  payslips             Payslip[]
-  events               Event[]
-  certificates         Certificate[]
-  apiKeys              ApiKey[]
+  users                 User[]
+  academicYears         AcademicYear[]
+  classes               Class[]
+  subjects              Subject[]
+  students              Student[]
+  teachers              Teacher[]
+  attendanceRecords     AttendanceRecord[]
+  feeCategories         FeeCategory[]
+  invoices              Invoice[]
+  payments              Payment[]
+  exams                 Exam[]
+  homeworks             Homework[]
+  auditLogs             AuditLog[]
+  parents               Parent[]
+  assignments           Assignment[]
+  timetableSlots        TimetableSlot[]
+  bookCategories        BookCategory[]
+  books                 Book[]
+  bookIssues            BookIssue[]
+  vehicles              Vehicle[]
+  transportRoutes       TransportRoute[]
+  transportAllocations  TransportAllocation[]
+  announcements         Announcement[]
+  hostels               Hostel[]
+  hostelAllocations     HostelAllocation[]
+  suppliers             Supplier[]
+  inventoryItems        InventoryItem[]
+  stockTransactions     StockTransaction[]
+  employees             Employee[]
+  leaveRequests         LeaveRequest[]
+  payslips              Payslip[]
+  events                Event[]
+  certificates          Certificate[]
+  apiKeys               ApiKey[]
+  admissionApplications AdmissionApplication[]
 
   @@map("schools")
 }
@@ -369,6 +370,7 @@ model Student {
   transportAllocation   TransportAllocation?
   hostelAllocation      HostelAllocation?
   certificates          Certificate[]
+  admissionApplication  AdmissionApplication?
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -1229,6 +1231,42 @@ model ApiKey {
 
   @@index([schoolId])
   @@map("api_keys")
+}
+
+enum AdmissionStatus {
+  SUBMITTED
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  CONVERTED
+}
+
+/// A prospective-student admission enquiry submitted via the public form. Tenant-scoped.
+model AdmissionApplication {
+  id                 String          @id @default(uuid())
+  applicantFirstName String
+  applicantLastName  String
+  gender             Gender?
+  dateOfBirth        DateTime?
+  guardianName       String
+  guardianPhone      String
+  guardianEmail      String?
+  desiredClass       String?
+  message            String?
+  status             AdmissionStatus @default(SUBMITTED)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Set when an accepted application is converted into a Student.
+  studentId String?  @unique
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId])
+  @@index([status])
+  @@map("admission_applications")
 }
 
 /// A teacher's HR/profile record, linked one-to-one to a login User. Tenant-scoped.
