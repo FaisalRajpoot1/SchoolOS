@@ -86,7 +86,7 @@ export const dashboardService = {
       finance: {
         invoiced,
         collected,
-        outstanding: invoiced - collected,
+        outstanding: Math.max(0, invoiced - collected),
         byStatus,
       },
       recentInvoices,

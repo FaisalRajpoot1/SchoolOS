@@ -117,7 +117,7 @@ export const reportsService = {
     return {
       invoiced,
       collected,
-      outstanding: invoiced - collected,
+      outstanding: Math.max(0, invoiced - collected),
       byStatus,
       topDefaulters,
     };

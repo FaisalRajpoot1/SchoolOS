@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 import { ApiError } from '@/utils/ApiError';
+import { mapPrismaError } from '@/utils/prismaError';
 import { logger } from '@/utils/logger';
 import { isProduction } from '@/config/env';
 
@@ -34,6 +36,10 @@ export const errorHandler = (
     statusCode = 422;
     message = 'Validation failed';
     details = err.flatten();
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError && mapPrismaError(err.code)) {
+    const mapped = mapPrismaError(err.code)!;
+    statusCode = mapped.statusCode;
+    message = mapped.message;
   } else if (err instanceof Error) {
     message = err.message;
   }

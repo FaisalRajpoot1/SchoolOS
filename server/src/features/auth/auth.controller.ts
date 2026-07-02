@@ -36,15 +36,6 @@ const sendAuth = (
 };
 
 export const authController = {
-  register: asyncHandler(async (req: Request, res: Response) => {
-    const result = await authService.register(req.body, sessionContext(req));
-    await recordAudit('auth.register', auditFromRequest(req, {
-      userId: result.user.id,
-      schoolId: result.user.schoolId,
-    }));
-    sendAuth(res, result, 201);
-  }),
-
   login: asyncHandler(async (req: Request, res: Response) => {
     const result = await authService.login(req.body, sessionContext(req));
     await recordAudit('auth.login', auditFromRequest(req, {

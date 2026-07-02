@@ -50,6 +50,9 @@ export const payrollService = {
       deductions: input.deductions,
       tax: input.tax,
     };
+    if (computeNet(amounts) < 0) {
+      throw ApiError.badRequest('Net pay cannot be negative; check deductions and tax');
+    }
 
     try {
       return await prisma.payslip.create({
@@ -147,6 +150,9 @@ export const payrollService = {
       deductions: input.deductions ?? existing.deductions,
       tax: input.tax ?? existing.tax,
     };
+    if (computeNet(amounts) < 0) {
+      throw ApiError.badRequest('Net pay cannot be negative; check deductions and tax');
+    }
 
     await prisma.payslip.update({
       where: { id },

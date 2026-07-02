@@ -33,10 +33,12 @@ export const aiService = {
       }),
     ]);
 
+    // Only average marks with a positive maximum, to avoid divide-by-zero.
+    const scored = marks.filter((m) => m.examSubject.maxMarks > 0);
     const avg =
-      marks.length > 0
+      scored.length > 0
         ? Math.round(
-            (marks.reduce((acc, m) => acc + (m.marksObtained ?? 0) / m.examSubject.maxMarks, 0) / marks.length) * 100,
+            (scored.reduce((acc, m) => acc + (m.marksObtained ?? 0) / m.examSubject.maxMarks, 0) / scored.length) * 100,
           )
         : 0;
     const marked = attendance.reduce((acc, a) => acc + a._count._all, 0);

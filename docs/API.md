@@ -17,7 +17,6 @@ token is an httpOnly cookie set by the server.
 
 | Method | Path             | Auth   | Description                              |
 | ------ | ---------------- | ------ | ---------------------------------------- |
-| POST   | `/auth/register` | —      | Register a user in a school              |
 | POST   | `/auth/login`    | —      | Login (email + password + schoolId)      |
 | POST   | `/auth/refresh`  | cookie | Rotate refresh token, issue access token |
 | POST   | `/auth/logout`   | cookie | Revoke refresh token                     |
@@ -35,7 +34,7 @@ token is an httpOnly cookie set by the server.
 | ------ | ------------- | ---------------------------------------------------------- |
 | GET    | `/audit-logs` | List audit events (`page`, `limit`, `action`, `userId`)    |
 
-Auth events are recorded automatically: `auth.register`, `auth.login`, `auth.logout`, `auth.password_reset_requested`, `auth.password_reset`, `auth.password_changed`, `auth.session_revoked`, `auth.sessions_revoked_others`.
+Users are provisioned by admins via the students/teachers/parents modules — there is no public self-registration. Auth events are recorded automatically: `auth.login`, `auth.logout`, `auth.password_reset_requested`, `auth.password_reset`, `auth.password_changed`, `auth.session_revoked`, `auth.sessions_revoked_others`.
 
 ## Parents — Module 5 admin (role `SCHOOL_ADMIN`, tenant-scoped)
 

@@ -190,6 +190,9 @@ export const invoicesService = {
     if (invoice.status === 'CANCELLED') {
       throw ApiError.badRequest('Cannot record a payment on a cancelled invoice');
     }
+    if (input.amount > invoice.totals.balance) {
+      throw ApiError.badRequest('Payment exceeds the outstanding balance');
+    }
     await prisma.$transaction(async (tx) => {
       await tx.payment.create({
         data: {

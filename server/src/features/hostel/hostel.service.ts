@@ -135,16 +135,20 @@ export const hostelService = {
     if (!student) throw ApiError.badRequest('Invalid student for this school');
     const room = await assertRoom(schoolId, input.roomId);
 
-    const occupied = await prisma.hostelAllocation.count({
-      where: { roomId: input.roomId, NOT: { studentId } },
-    });
-    if (occupied >= room.capacity) throw ApiError.conflict('This room is full');
+    // Re-check capacity inside the transaction so the count and the write are
+    // consistent, closing the check-then-act window against concurrent allocations.
+    return prisma.$transaction(async (tx) => {
+      const occupied = await tx.hostelAllocation.count({
+        where: { roomId: input.roomId, NOT: { studentId } },
+      });
+      if (occupied >= room.capacity) throw ApiError.conflict('This room is full');
 
-    return prisma.hostelAllocation.upsert({
-      where: { studentId },
-      update: { roomId: input.roomId, bedLabel: input.bedLabel ?? null },
-      create: { schoolId, studentId, roomId: input.roomId, bedLabel: input.bedLabel ?? null },
-      include: allocationInclude,
+      return tx.hostelAllocation.upsert({
+        where: { studentId },
+        update: { roomId: input.roomId, bedLabel: input.bedLabel ?? null },
+        create: { schoolId, studentId, roomId: input.roomId, bedLabel: input.bedLabel ?? null },
+        include: allocationInclude,
+      });
     });
   },
 

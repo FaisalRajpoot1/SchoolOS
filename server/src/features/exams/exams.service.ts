@@ -273,8 +273,11 @@ export const examsService = {
       };
     });
 
-    // Dense rank by marks obtained (descending).
-    const ranked = [...rows].sort((a, b) => b.obtained - a.obtained);
+    // Dense rank by marks obtained (descending); tie-break by student id so
+    // the ordering of equal scores is stable across calls.
+    const ranked = [...rows].sort(
+      (a, b) => b.obtained - a.obtained || a.student.id.localeCompare(b.student.id),
+    );
     let rank = 0;
     let prev: number | null = null;
     for (const row of ranked) {

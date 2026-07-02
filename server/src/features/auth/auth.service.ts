@@ -5,7 +5,7 @@ import { hashPassword, verifyPassword } from '@/utils/password';
 import { signAccessToken } from '@/utils/jwt';
 import { generateRefreshToken, hashToken } from '@/utils/tokens';
 import { PASSWORD_RESET_TTL_MS, REFRESH_TOKEN_TTL_MS } from '@/config/constants';
-import type { LoginInput, RegisterInput } from './auth.validation';
+import type { LoginInput } from './auth.validation';
 
 /** Public, safe-to-serialize view of a user. */
 export interface PublicUser {
@@ -64,32 +64,6 @@ const issueTokens = async (user: User, context?: SessionContext): Promise<AuthRe
 
 export const authService = {
   /** Registers a new user within a school tenant. */
-  async register(input: RegisterInput, context?: SessionContext): Promise<AuthResult> {
-    const school = await prisma.school.findUnique({ where: { id: input.schoolId } });
-    if (!school || !school.isActive) {
-      throw ApiError.badRequest('Invalid school');
-    }
-
-    const existing = await prisma.user.findUnique({
-      where: { schoolId_email: { schoolId: input.schoolId, email: input.email } },
-    });
-    if (existing) {
-      throw ApiError.conflict('An account with this email already exists');
-    }
-
-    const user = await prisma.user.create({
-      data: {
-        email: input.email,
-        passwordHash: await hashPassword(input.password),
-        firstName: input.firstName,
-        lastName: input.lastName,
-        schoolId: input.schoolId,
-      },
-    });
-
-    return issueTokens(user, context);
-  },
-
   /** Authenticates a user with email + password scoped to a school. */
   async login(input: LoginInput, context?: SessionContext): Promise<AuthResult> {
     const user = await prisma.user.findUnique({
@@ -131,11 +105,16 @@ export const authService = {
       throw ApiError.forbidden('Account is disabled');
     }
 
-    // Single-use rotation, carrying forward the session's origin metadata.
-    await prisma.refreshToken.update({
-      where: { id: stored.id },
+    // Single-use rotation: the atomic revoke is the gate, so two concurrent
+    // requests with the same token can't both mint a new session — only the
+    // one that flips revokedAt proceeds.
+    const revoked = await prisma.refreshToken.updateMany({
+      where: { id: stored.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+    if (revoked.count === 0) {
+      throw ApiError.unauthorized('Invalid or expired session');
+    }
 
     return issueTokens(stored.user, {
       userAgent: context?.userAgent ?? stored.userAgent,

@@ -173,7 +173,14 @@ export const libraryService = {
     if (!student) throw ApiError.badRequest('Invalid student for this school');
 
     return prisma.$transaction(async (tx) => {
-      const issue = await tx.bookIssue.create({
+      // Conditional decrement enforces availability atomically under concurrency.
+      const claimed = await tx.book.updateMany({
+        where: { id: bookId, availableCopies: { gt: 0 } },
+        data: { availableCopies: { decrement: 1 } },
+      });
+      if (claimed.count === 0) throw ApiError.badRequest('No copies available to issue');
+
+      return tx.bookIssue.create({
         data: {
           schoolId,
           bookId,
@@ -182,11 +189,6 @@ export const libraryService = {
         },
         include: issueInclude,
       });
-      await tx.book.update({
-        where: { id: bookId },
-        data: { availableCopies: { decrement: 1 } },
-      });
-      return issue;
     });
   },
 

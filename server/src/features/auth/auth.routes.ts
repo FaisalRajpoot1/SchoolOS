@@ -7,7 +7,6 @@ import {
   changePasswordSchema,
   forgotPasswordSchema,
   loginSchema,
-  registerSchema,
   resetPasswordSchema,
   sessionIdParamSchema,
 } from './auth.validation';
@@ -23,8 +22,8 @@ const authLimiter = rateLimit({
 
 const router = Router();
 
-// Public credential endpoints.
-router.post('/register', authLimiter, validate({ body: registerSchema }), authController.register);
+// Public credential endpoints. Account provisioning is admin-driven (see the
+// students/teachers/parents modules), so there is no public self-registration.
 router.post('/login', authLimiter, validate({ body: loginSchema }), authController.login);
 router.post('/refresh', authController.refresh);
 router.post('/logout', authController.logout);

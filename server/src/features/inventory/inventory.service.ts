@@ -151,9 +151,23 @@ export const inventoryService = {
       throw ApiError.badRequest(`Insufficient stock (available: ${item.quantity})`);
     }
 
-    const delta = input.type === 'IN' ? input.quantity : -input.quantity;
-
     return prisma.$transaction(async (tx) => {
+      if (input.type === 'OUT') {
+        // Conditional decrement prevents stock going negative under concurrency.
+        const claimed = await tx.inventoryItem.updateMany({
+          where: { id: itemId, quantity: { gte: input.quantity } },
+          data: { quantity: { decrement: input.quantity } },
+        });
+        if (claimed.count === 0) {
+          throw ApiError.badRequest(`Insufficient stock (available: ${item.quantity})`);
+        }
+      } else {
+        await tx.inventoryItem.update({
+          where: { id: itemId },
+          data: { quantity: { increment: input.quantity } },
+        });
+      }
+
       await tx.stockTransaction.create({
         data: {
           schoolId,
@@ -165,9 +179,9 @@ export const inventoryService = {
           supplierId: input.supplierId ?? null,
         },
       });
-      return tx.inventoryItem.update({
+
+      return tx.inventoryItem.findUniqueOrThrow({
         where: { id: itemId },
-        data: { quantity: { increment: delta } },
         include: { supplier: { select: { id: true, name: true } } },
       });
     });
