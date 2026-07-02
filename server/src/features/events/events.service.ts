@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { buildEventIcs, icsDateTime } from './event.ics';
 import type {
   CalendarQuery,
   CreateEventInput,
@@ -107,5 +108,21 @@ export const eventsService = {
       orderBy: { startDate: 'asc' },
       take: 200,
     });
+  },
+
+  /** Renders an event the caller may see as a downloadable iCalendar (.ics). */
+  async renderIcs(
+    schoolId: string,
+    role: UserRole,
+    id: string,
+  ): Promise<{ content: string; filename: string }> {
+    const event = await prisma.event.findFirst({
+      where: { id, schoolId, audience: { in: audiencesForRole(role) } },
+    });
+    if (!event) throw ApiError.notFound('Event not found');
+    return {
+      content: buildEventIcs(event, icsDateTime(new Date())),
+      filename: `event-${event.id}.ics`,
+    };
   },
 };

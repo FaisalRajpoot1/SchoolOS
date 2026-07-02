@@ -1,5 +1,8 @@
+import { eventsApi } from '../events.api';
 import type { EventType, SchoolEvent } from '../events.types';
 import { formatEventWhen } from '../format';
+import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const typeBadge: Record<EventType, string> = {
   GENERAL: 'bg-slate-100 text-slate-600',
@@ -21,6 +24,17 @@ export function EventItem({ event }: { event: SchoolEvent }) {
           {event.audience !== 'ALL' ? ` · ${event.audience}` : ''}
         </p>
         {event.description && <p className="mt-1 text-sm text-slate-600">{event.description}</p>}
+        <button
+          type="button"
+          onClick={() => {
+            void eventsApi.downloadIcs(event.id).catch((error: unknown) => {
+              toast.error(getApiErrorMessage(error, 'Could not download calendar file'));
+            });
+          }}
+          className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+        >
+          Add to calendar
+        </button>
       </div>
       <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${typeBadge[event.type]}`}>
         {event.type}

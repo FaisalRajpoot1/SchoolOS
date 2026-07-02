@@ -15,8 +15,9 @@ const router = Router();
 
 router.use(authenticate);
 
-// Calendar feed is readable by any authenticated user.
+// Calendar feed + per-event .ics are readable by any authenticated user.
 router.get('/calendar', validate({ query: calendarQuerySchema }), eventsController.calendar);
+router.get('/:id/ics', validate({ params: eventIdParamSchema }), eventsController.ics);
 
 // Management is school-admin only.
 router.post('/', authorize(UserRole.SCHOOL_ADMIN), validate({ body: createEventSchema }), eventsController.create);

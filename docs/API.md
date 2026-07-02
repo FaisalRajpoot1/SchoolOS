@@ -419,6 +419,7 @@ School calendar. The calendar feed is readable by any authenticated user (audien
 | Method | Path                | Auth          | Description                                                     |
 | ------ | ------------------- | ------------- | -------------------------------------------------------------- |
 | GET    | `/events/calendar`  | any           | Events overlapping `[from, to]` (defaults to the next 60 days) for the caller's role |
+| GET    | `/events/:id/ics`   | any           | Download one event as an iCalendar (`.ics`) file (audience-filtered by role) |
 | POST   | `/events`           | SCHOOL_ADMIN  | Create an event (`type`, `audience`, dates, `location`, `allDay`) |
 | GET    | `/events`           | SCHOOL_ADMIN  | Manage list (paginated, `type` filter)                        |
 | GET    | `/events/:id`       | SCHOOL_ADMIN  | Get one                                                        |

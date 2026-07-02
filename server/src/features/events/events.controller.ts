@@ -30,6 +30,18 @@ export const eventsController = {
     res.status(204).send();
   }),
 
+  ics: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const { content, filename } = await eventsService.renderIcs(
+      requireSchoolId(req.user),
+      req.user.role,
+      req.params.id as string,
+    );
+    res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(content);
+  }),
+
   /** Calendar feed for the current user (empty for accounts without a school). */
   calendar: asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) throw ApiError.unauthorized();

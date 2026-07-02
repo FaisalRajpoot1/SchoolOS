@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type {
   CreateEventPayload,
   ListEventsParams,
@@ -23,5 +24,8 @@ export const eventsApi = {
   },
   async remove(id: string): Promise<void> {
     await api.delete(`/events/${id}`);
+  },
+  async downloadIcs(id: string): Promise<void> {
+    await downloadFile(`/events/${id}/ics`, `event-${id}.ics`);
   },
 };
