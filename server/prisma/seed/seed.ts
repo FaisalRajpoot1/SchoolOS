@@ -407,6 +407,24 @@ async function main(): Promise<void> {
     });
   }
 
+  // A demo student-portal login for the first student (ADM-00001).
+  if (firstStudent && !firstStudent.userId) {
+    const studentUser = await prisma.user.create({
+      data: {
+        email: 'student@demo.school',
+        passwordHash,
+        firstName: firstStudent.firstName,
+        lastName: firstStudent.lastName,
+        role: UserRole.STUDENT,
+        schoolId: school.id,
+      },
+    });
+    await prisma.student.update({
+      where: { id: firstStudent.id },
+      data: { userId: studentUser.id },
+    });
+  }
+
   // A couple of Monday timetable slots for Grade 1 / Section A.
   if (sectionA) {
     const mathSubject = subjects.find((s) => s.code === 'MATH');

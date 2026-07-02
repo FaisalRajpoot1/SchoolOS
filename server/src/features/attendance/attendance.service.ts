@@ -144,6 +144,7 @@ export const attendanceService = {
     if (query.to) dateFilter.lte = toDateOnly(query.to);
     const where: Prisma.AttendanceRecordWhereInput = {
       studentId,
+      schoolId,
       ...(query.from || query.to ? { date: dateFilter } : {}),
     };
 

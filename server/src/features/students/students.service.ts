@@ -1,6 +1,7 @@
-import { type Guardian, Prisma, type Student } from '@prisma/client';
+import { type Guardian, Prisma, type Student, UserRole } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
+import { hashPassword } from '@/utils/password';
 import {
   buildPaginationMeta,
   toPrismaPagination,
@@ -10,6 +11,7 @@ import type {
   CreateStudentInput,
   GuardianInput,
   ListStudentsQuery,
+  PortalAccessInput,
   UpdateStudentInput,
 } from './students.validation';
 
@@ -175,5 +177,49 @@ export const studentsService = {
     const guardian = await prisma.guardian.findFirst({ where: { id: guardianId, studentId } });
     if (!guardian) throw ApiError.notFound('Guardian not found');
     await prisma.guardian.delete({ where: { id: guardianId } });
+  },
+
+  // ---- Student-portal access ----
+  /** Creates (or resets) a STUDENT login account linked to this student. */
+  async setPortalAccess(
+    schoolId: string,
+    studentId: string,
+    input: PortalAccessInput,
+  ): Promise<{ email: string }> {
+    const student = await prisma.student.findFirst({
+      where: { id: studentId, schoolId },
+      select: { id: true, firstName: true, lastName: true, userId: true },
+    });
+    if (!student) throw ApiError.notFound('Student not found');
+
+    const passwordHash = await hashPassword(input.password);
+    try {
+      if (student.userId) {
+        await prisma.user.update({
+          where: { id: student.userId },
+          data: { email: input.email, passwordHash, isActive: true },
+        });
+      } else {
+        await prisma.$transaction(async (tx) => {
+          const user = await tx.user.create({
+            data: {
+              email: input.email,
+              passwordHash,
+              firstName: student.firstName,
+              lastName: student.lastName,
+              role: UserRole.STUDENT,
+              schoolId,
+            },
+          });
+          await tx.student.update({ where: { id: student.id }, data: { userId: user.id } });
+        });
+      }
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw ApiError.conflict('A user with this email already exists');
+      }
+      throw err;
+    }
+    return { email: input.email };
   },
 };

@@ -71,6 +71,7 @@ import { ParentsListPage } from '@/features/parents/pages/ParentsListPage';
 import { AddParentPage } from '@/features/parents/pages/AddParentPage';
 import { ParentDetailPage } from '@/features/parents/pages/ParentDetailPage';
 import { ChildPage } from '@/features/portal/pages/ChildPage';
+import { StudentPortalPage } from '@/features/studentPortal/pages/StudentPortalPage';
 
 /** Application route tree. Feature routes are nested under the app shell. */
 export const router = createBrowserRouter([
@@ -103,6 +104,11 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute roles={['PARENT']} />,
             children: [{ path: '/portal/children/:studentId', element: <ChildPage /> }],
+          },
+          // STUDENT portal.
+          {
+            element: <ProtectedRoute roles={['STUDENT']} />,
+            children: [{ path: '/student', element: <StudentPortalPage /> }],
           },
           // School and platform admins.
           {

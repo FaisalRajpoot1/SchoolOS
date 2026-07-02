@@ -183,6 +183,17 @@ function ParentDashboard() {
   );
 }
 
+function StudentDashboard() {
+  return (
+    <Card>
+      <p className="text-sm text-slate-500">Student portal</p>
+      <Link to="/student" className="text-lg font-semibold text-brand-600">
+        View my attendance, fees, homework &amp; results →
+      </Link>
+    </Card>
+  );
+}
+
 function SuperAdminDashboard() {
   return (
     <Card>
@@ -215,6 +226,8 @@ export function DashboardPage() {
         <SchoolAdminDashboard />
       ) : user?.role === 'PARENT' ? (
         <ParentDashboard />
+      ) : user?.role === 'STUDENT' ? (
+        <StudentDashboard />
       ) : (
         <Card>
           <p className="text-sm text-slate-500">Your role</p>

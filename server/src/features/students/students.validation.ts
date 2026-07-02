@@ -59,6 +59,13 @@ export const listStudentsSchema = paginationSchema.extend({
 });
 
 export const studentIdParamSchema = z.object({ id: z.string().uuid() });
+
+export const portalAccessSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8, 'Password must be at least 8 characters').max(72),
+  })
+  .strict();
 export const guardianIdParamSchema = z.object({
   id: z.string().uuid(),
   guardianId: z.string().uuid(),
@@ -68,3 +75,4 @@ export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
 export type ListStudentsQuery = z.infer<typeof listStudentsSchema>;
 export type GuardianInput = z.infer<typeof guardianInputSchema>;
+export type PortalAccessInput = z.infer<typeof portalAccessSchema>;

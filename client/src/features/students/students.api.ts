@@ -58,4 +58,15 @@ export const studentsApi = {
   async removeGuardian(studentId: string, guardianId: string): Promise<void> {
     await api.delete(`/students/${studentId}/guardians/${guardianId}`);
   },
+
+  async setPortalAccess(
+    studentId: string,
+    payload: { email: string; password: string },
+  ): Promise<{ email: string }> {
+    const { data } = await api.post<{ data: { email: string } }>(
+      `/students/${studentId}/portal-access`,
+      payload,
+    );
+    return data.data;
+  },
 };

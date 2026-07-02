@@ -13,6 +13,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/student', label: 'My School', roles: ['STUDENT'] },
   { to: '/schools', label: 'Schools', roles: ['SUPER_ADMIN'] },
   { to: '/students', label: 'Students', roles: ['SCHOOL_ADMIN'] },
   { to: '/teachers', label: 'Teachers', roles: ['SCHOOL_ADMIN'] },

@@ -22,7 +22,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
-**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3.
+**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3 `2151ad6`. N1 Student Portal — batch 4.
 
 ---
 
@@ -156,7 +156,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 | # | Module | Pri | Eff | Notes |
 |---|--------|-----|-----|-------|
-| N1 | `[ ]` **Student Portal** (student login: timetable, homework, results, attendance, fees) | P1 | M | Natural pairing with Parent Portal; reuses existing services; high demo value |
+| N1 | `[x]` **Student Portal** — student login (Student.userId), admin provisioning (`POST /students/:id/portal-access`), `/student-portal/*` own-data endpoints, client portal page + STUDENT dashboard/nav; shared `portalData` helpers deduped with parent portal | P1 | M | Done — batch 4 |
 | N2 | `[ ]` **Online Admissions / Enquiry** (public application form → admissions pipeline → convert to student) | P1 | L | Adds a growth/funnel story to the product |
 | N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
 | N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |

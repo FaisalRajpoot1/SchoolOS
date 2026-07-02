@@ -8,6 +8,7 @@ import {
   guardianIdParamSchema,
   guardianInputSchema,
   listStudentsSchema,
+  portalAccessSchema,
   setStudentStatusSchema,
   studentIdParamSchema,
   updateGuardianSchema,
@@ -33,6 +34,13 @@ router.patch(
   studentsController.setStatus,
 );
 router.delete('/:id', validate({ params: studentIdParamSchema }), studentsController.remove);
+
+// Enable/reset a student-portal login for the student.
+router.post(
+  '/:id/portal-access',
+  validate({ params: studentIdParamSchema, body: portalAccessSchema }),
+  studentsController.setPortalAccess,
+);
 
 // Guardians (nested under a student).
 router.post(

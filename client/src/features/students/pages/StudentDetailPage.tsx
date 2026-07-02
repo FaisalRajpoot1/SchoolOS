@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
 import {
   useAddGuardian,
   useDeleteStudent,
@@ -9,6 +10,7 @@ import {
   useStudent,
   useUpdateStudent,
 } from '../useStudents';
+import { studentsApi } from '../students.api';
 import { STUDENT_STATUSES, type GuardianPayload, type StudentStatus } from '../students.types';
 import { useClass, useClasses } from '@/features/academics/useAcademics';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +18,7 @@ import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 function Detail({ label, value }: { label: string; value: string | null }) {
   return (
@@ -211,6 +214,56 @@ export function StudentDetailPage() {
           </Button>
         </form>
       </Card>
+
+      <PortalAccessCard studentId={id} />
     </div>
+  );
+}
+
+/** Admin control to create/reset a student-portal login for the student. */
+function PortalAccessCard({ studentId }: { studentId: string }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const mutation = useMutation({
+    mutationFn: () => studentsApi.setPortalAccess(studentId, { email, password }),
+    onSuccess: () => {
+      toast.success('Student portal access saved');
+      setPassword('');
+    },
+  });
+
+  return (
+    <Card className="space-y-4">
+      <div>
+        <h2 className="font-semibold">Student portal access</h2>
+        <p className="text-sm text-slate-500">
+          Create or reset the student's login for the student portal.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TextField
+          label="Login email"
+          type="email"
+          placeholder="student@school.edu"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          placeholder="At least 8 characters"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      {mutation.isError && <p className="text-sm text-red-600">{getApiErrorMessage(mutation.error)}</p>}
+      <Button
+        disabled={!email || password.length < 8}
+        isLoading={mutation.isPending}
+        onClick={() => mutation.mutate()}
+      >
+        Save access
+      </Button>
+    </Card>
   );
 }

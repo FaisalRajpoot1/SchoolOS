@@ -348,6 +348,10 @@ model Student {
   schoolId String
   school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
+  // Optional student-portal login account (role STUDENT). One-to-one.
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   // Current placement; nulled (not deleted) if the class/section is removed.
   classId   String?
   class     Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
@@ -1283,6 +1287,7 @@ model User {
   refreshTokens       RefreshToken[]
   teacher             Teacher?
   parent              Parent?
+  student             Student?
   attendanceRecords   AttendanceRecord[]   @relation("AttendanceRecorder")
   paymentsRecorded    Payment[]            @relation("PaymentRecorder")
   passwordResetTokens PasswordResetToken[]

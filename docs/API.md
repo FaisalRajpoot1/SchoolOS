@@ -60,6 +60,21 @@ Users are provisioned by admins via the students/teachers/parents modules — th
 
 Every portal route verifies the student is linked to the calling parent (403 otherwise).
 
+Admins provision a student's own login via `POST /students/:id/portal-access` (`{ email, password }`, role `SCHOOL_ADMIN`), which creates/resets a `STUDENT` account linked to the student.
+
+## Student Portal — Module 5b (role `STUDENT`, own data only)
+
+The student resolves from their login (`Student.userId`); no id is accepted, so a student can only ever read their own records.
+
+| Method | Path                        | Description                                     |
+| ------ | --------------------------- | ----------------------------------------------- |
+| GET    | `/student-portal/me`        | Own profile + class/section                     |
+| GET    | `/student-portal/attendance`| Own attendance history + counts (`from`, `to`)  |
+| GET    | `/student-portal/invoices`  | Own invoices with balances                      |
+| GET    | `/student-portal/homework`  | Own section homework + submission status        |
+| GET    | `/student-portal/assignments`| Own section assignments + submission status    |
+| GET    | `/student-portal/results`   | Own published exam results (per-exam grade)     |
+
 ## Schools — Module 2
 
 Platform administration (role `SUPER_ADMIN`):
