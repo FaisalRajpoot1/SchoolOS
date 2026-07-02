@@ -365,6 +365,7 @@ Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bo
 | POST   | `/payroll/payslips`               | Create one payslip (basic defaults to the employee's salary)  |
 | GET    | `/payroll/payslips`               | List (`employeeId`, `periodMonth`, `periodYear`, `status`)     |
 | GET    | `/payroll/payslips/:id`           | Payslip detail                                               |
+| GET    | `/payroll/payslips/:id/pdf`       | Download the payslip as a PDF                                |
 | PATCH  | `/payroll/payslips/:id`           | Edit amounts (DRAFT only; recomputes net)                    |
 | POST   | `/payroll/payslips/:id/pay`       | Mark paid (sets `paidAt`)                                    |
 | DELETE | `/payroll/payslips/:id`           | Delete a payslip                                            |
@@ -396,6 +397,7 @@ Management is `SCHOOL_ADMIN` + `RECEPTIONIST`; verification is **public** (for Q
 | POST   | `/certificates`               | SCHOOL_ADMIN / RECEPTIONIST | Issue (auto serial + verification code; body auto-generated from a template unless provided) |
 | GET    | `/certificates`               | SCHOOL_ADMIN / RECEPTIONIST | List (`studentId`, `type`, `search`)                          |
 | GET    | `/certificates/:id`           | SCHOOL_ADMIN / RECEPTIONIST | Certificate detail                                            |
+| GET    | `/certificates/:id/pdf`       | SCHOOL_ADMIN / RECEPTIONIST | Download the certificate as a PDF (with a QR to the verify page) |
 | DELETE | `/certificates/:id`           | SCHOOL_ADMIN / RECEPTIONIST | Delete                                                        |
 
 Types: `BONAFIDE`, `CHARACTER`, `TRANSFER`, `LEAVING`. Each issued certificate carries a unique `verificationCode`; the client renders a printable certificate and a public verify link (`/verify-certificate/:code`).

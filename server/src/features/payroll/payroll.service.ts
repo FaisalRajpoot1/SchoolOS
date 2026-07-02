@@ -12,6 +12,12 @@ import type {
   ListPayslipsQuery,
   UpdatePayslipInput,
 } from './payroll.validation';
+import { buildPayslipPdf } from './payslip.pdf';
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 interface Amounts {
   basicSalary: number;
@@ -171,5 +177,35 @@ export const payrollService = {
   async remove(schoolId: string, id: string): Promise<void> {
     await assertPayslip(schoolId, id);
     await prisma.payslip.delete({ where: { id } });
+  },
+
+  /** Renders a payslip as a PDF buffer with a suggested filename. */
+  async renderPdf(schoolId: string, id: string): Promise<{ buffer: Buffer; filename: string }> {
+    const [payslip, school] = await Promise.all([
+      this.getById(schoolId, id),
+      prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    ]);
+
+    const buffer = await buildPayslipPdf({
+      schoolName: school?.name ?? 'School',
+      employeeName: `${payslip.employee.firstName} ${payslip.employee.lastName}`,
+      employeeCode: payslip.employee.employeeCode,
+      period: `${MONTHS[payslip.periodMonth - 1] ?? payslip.periodMonth} ${payslip.periodYear}`,
+      amounts: {
+        basicSalary: payslip.basicSalary,
+        allowances: payslip.allowances,
+        bonus: payslip.bonus,
+        deductions: payslip.deductions,
+        tax: payslip.tax,
+        netPay: payslip.netPay,
+      },
+      status: payslip.status,
+      paidAt: payslip.paidAt ? payslip.paidAt.toISOString().slice(0, 10) : null,
+    });
+
+    const filename = `payslip-${payslip.employee.employeeCode}-${payslip.periodYear}-${String(
+      payslip.periodMonth,
+    ).padStart(2, '0')}.pdf`;
+    return { buffer, filename };
   },
 };

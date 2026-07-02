@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
+import { sendPdf } from '@/utils/pdf';
 import { payrollService } from './payroll.service';
 
 export const payrollController = {
@@ -31,6 +32,14 @@ export const payrollController = {
       req.body,
     );
     res.status(200).json({ success: true, data: { payslip } });
+  }),
+
+  pdf: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, filename } = await payrollService.renderPdf(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    sendPdf(res, buffer, filename);
   }),
 
   pay: asyncHandler(async (req: Request, res: Response) => {

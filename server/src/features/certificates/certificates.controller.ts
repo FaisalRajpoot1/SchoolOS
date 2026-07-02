@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
+import { sendPdf } from '@/utils/pdf';
 import { certificatesService } from './certificates.service';
 
 export const certificatesController = {
@@ -17,6 +18,14 @@ export const certificatesController = {
   getById: asyncHandler(async (req: Request, res: Response) => {
     const certificate = await certificatesService.getById(requireSchoolId(req.user), req.params.id as string);
     res.status(200).json({ success: true, data: { certificate } });
+  }),
+
+  pdf: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, filename } = await certificatesService.renderPdf(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    sendPdf(res, buffer, filename);
   }),
 
   remove: asyncHandler(async (req: Request, res: Response) => {

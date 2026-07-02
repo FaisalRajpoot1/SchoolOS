@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type {
   CreatePayslipPayload,
   ListPayslipsParams,
@@ -39,5 +40,8 @@ export const payrollApi = {
   },
   async remove(id: string): Promise<void> {
     await api.delete(`/payroll/payslips/${id}`);
+  },
+  downloadPdf(id: string): Promise<void> {
+    return downloadFile(`/payroll/payslips/${id}/pdf`, `payslip-${id}.pdf`);
   },
 };

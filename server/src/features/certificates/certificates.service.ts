@@ -7,7 +7,9 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { env } from '@/config/env';
 import { generateBody, titleForType } from './template';
+import { buildCertificatePdf } from './certificate.pdf';
 import type { CreateCertificateInput, ListCertificatesQuery } from './certificates.validation';
 
 const studentSelect = {
@@ -105,6 +107,25 @@ export const certificatesService = {
     });
     if (!certificate) throw ApiError.notFound('Certificate not found');
     return certificate;
+  },
+
+  /** Renders a certificate as a printable PDF (with a QR to the verify page). */
+  async renderPdf(schoolId: string, id: string): Promise<{ buffer: Buffer; filename: string }> {
+    const [certificate, school] = await Promise.all([
+      this.getById(schoolId, id),
+      prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    ]);
+
+    const buffer = await buildCertificatePdf({
+      schoolName: school?.name ?? 'School',
+      title: certificate.title,
+      serialNo: certificate.serialNo,
+      body: certificate.body,
+      issueDate: certificate.issueDate.toISOString().slice(0, 10),
+      verificationCode: certificate.verificationCode,
+      verifyUrl: `${env.CLIENT_URL}/verify-certificate/${certificate.verificationCode}`,
+    });
+    return { buffer, filename: `certificate-${certificate.serialNo}.pdf` };
   },
 
   async remove(schoolId: string, id: string): Promise<void> {

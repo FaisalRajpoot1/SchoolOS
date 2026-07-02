@@ -21,6 +21,7 @@ router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.RECEPTIONIST)
 router.post('/', validate({ body: createCertificateSchema }), certificatesController.issue);
 router.get('/', validate({ query: listCertificatesSchema }), certificatesController.list);
 router.get('/:id', validate({ params: certificateIdParamSchema }), certificatesController.getById);
+router.get('/:id/pdf', validate({ params: certificateIdParamSchema }), certificatesController.pdf);
 router.delete('/:id', validate({ params: certificateIdParamSchema }), certificatesController.remove);
 
 export const certificateRoutes = router;

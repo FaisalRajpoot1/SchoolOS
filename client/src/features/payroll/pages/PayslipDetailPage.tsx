@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDeletePayslip, usePayPayslip, usePayslip, useUpdatePayslip } from '../usePayroll';
+import { payrollApi } from '../payroll.api';
 import { MONTHS } from '../payroll.types';
 import { formatAmount } from '@/features/fees/format';
 import { Button } from '@/components/ui/Button';
@@ -34,6 +35,8 @@ export function PayslipDetailPage() {
   const [amounts, setAmounts] = useState<Amounts>({
     basicSalary: '', allowances: '', bonus: '', deductions: '', tax: '',
   });
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (payslip.data) {
@@ -65,6 +68,18 @@ export function PayslipDetailPage() {
     navigate('/payroll/payslips', { replace: true });
   };
 
+  const handleDownload = async (): Promise<void> => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      await payrollApi.downloadPdf(id);
+    } catch (err) {
+      setDownloadError(getApiErrorMessage(err));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const save = (): void => {
     update.mutate({
       basicSalary: Number(amounts.basicSalary) || 0,
@@ -91,8 +106,13 @@ export function PayslipDetailPage() {
             {p.paidAt ? ` · paid ${p.paidAt.slice(0, 10)}` : ''}
           </p>
         </div>
-        <Button variant="danger" onClick={handleDelete} isLoading={remove.isPending}>Delete</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleDownload} isLoading={downloading}>Download PDF</Button>
+          <Button variant="danger" onClick={handleDelete} isLoading={remove.isPending}>Delete</Button>
+        </div>
       </div>
+
+      {downloadError && <p className="text-sm text-red-600">{downloadError}</p>}
 
       <Card className="space-y-3">
         {FIELDS.map((f) => (

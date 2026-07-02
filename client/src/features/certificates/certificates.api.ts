@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { downloadFile } from '@/lib/download';
 import type {
   Certificate,
   CreateCertificatePayload,
@@ -28,5 +29,8 @@ export const certificatesApi = {
   async verify(code: string): Promise<VerifyResult> {
     const { data } = await api.get<{ data: VerifyResult }>(`/certificates/verify/${code}`);
     return data.data;
+  },
+  downloadPdf(id: string, serialNo: string): Promise<void> {
+    return downloadFile(`/certificates/${id}/pdf`, `certificate-${serialNo}.pdf`);
   },
 };

@@ -22,7 +22,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
-**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `pending`.
+**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2.
 
 ---
 
@@ -40,7 +40,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 1.8 | `[ ]` Docker + docker-compose (Postgres + server + client) for one-command local run | P2 | M | DEBT |
 | 1.9 | `[ ]` Background job queue (BullMQ/Redis) for emails, PDF generation, bulk jobs | P3 | L | DEBT |
 | 1.10 | `[ ]` File upload/storage service (S3-compatible) for photos, attachments, documents | P2 | M | FEAT |
-| 1.11 | `[ ]` PDF generation service (payslips, receipts, certificates, report cards) | P1 | M | FEAT |
+| 1.11 | `[x]` PDF generation service (pdfkit + qrcode; `utils/pdf.renderPdf`/`sendPdf`) — used by payslips + certificates | P1 | M | FEAT |
 | 1.12 | `[ ]` Notification providers (email via Resend/SES, SMS, push) behind a provider interface | P2 | L | FEAT |
 | 1.13 | `[ ]` Soft-delete / archival for core records instead of hard delete (recoverability + FK safety) | P3 | M | DEBT |
 | 1.14 | `[ ]` Deployment configs: Dockerfiles + Render/Railway (server) + Vercel (client) + prod CORS/cookies | P2 | M | DEBT |
