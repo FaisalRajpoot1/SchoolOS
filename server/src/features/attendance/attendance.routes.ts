@@ -8,6 +8,7 @@ import {
   rosterQuerySchema,
   studentHistoryQuerySchema,
   studentIdParamSchema,
+  summaryQuerySchema,
 } from './attendance.validation';
 
 const router = Router();
@@ -16,6 +17,7 @@ const router = Router();
 router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER));
 
 router.get('/', validate({ query: rosterQuerySchema }), attendanceController.roster);
+router.get('/summary', validate({ query: summaryQuerySchema }), attendanceController.summary);
 router.post('/', validate({ body: bulkMarkSchema }), attendanceController.bulkMark);
 router.get(
   '/students/:studentId',

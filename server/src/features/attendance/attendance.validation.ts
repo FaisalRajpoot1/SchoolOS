@@ -33,6 +33,13 @@ export const studentHistoryQuerySchema = z.object({
 
 export const studentIdParamSchema = z.object({ studentId: z.string().uuid() });
 
+export const summaryQuerySchema = z.object({
+  sectionId: z.string().uuid(),
+  month: z.coerce.number().int().min(1).max(12),
+  year: z.coerce.number().int().min(2000).max(2100),
+});
+
 export type RosterQuery = z.infer<typeof rosterQuerySchema>;
 export type BulkMarkInput = z.infer<typeof bulkMarkSchema>;
 export type StudentHistoryQuery = z.infer<typeof studentHistoryQuerySchema>;
+export type SummaryQuery = z.infer<typeof summaryQuerySchema>;

@@ -19,6 +19,7 @@ import { TeachersListPage } from '@/features/teachers/pages/TeachersListPage';
 import { AddTeacherPage } from '@/features/teachers/pages/AddTeacherPage';
 import { TeacherDetailPage } from '@/features/teachers/pages/TeacherDetailPage';
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage';
+import { AttendanceSummaryPage } from '@/features/attendance/pages/AttendanceSummaryPage';
 import { ReportsPage } from '@/features/reports/pages/ReportsPage';
 import { SettingsHubPage } from '@/features/settings/pages/SettingsHubPage';
 import { AiInsightsPage } from '@/features/ai/pages/AiInsightsPage';
@@ -179,6 +180,7 @@ export const router = createBrowserRouter([
               { path: '/teachers/new', element: <AddTeacherPage /> },
               { path: '/teachers/:id', element: <TeacherDetailPage /> },
               { path: '/attendance', element: <AttendancePage /> },
+              { path: '/attendance/summary', element: <AttendanceSummaryPage /> },
               { path: '/fees/invoices', element: <InvoicesListPage /> },
               { path: '/fees/invoices/new', element: <CreateInvoicePage /> },
               { path: '/fees/invoices/:id', element: <InvoiceDetailPage /> },

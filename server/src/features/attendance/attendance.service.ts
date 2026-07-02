@@ -1,7 +1,7 @@
 import { type AttendanceStatus, Prisma, type UserRole } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
-import type { BulkMarkInput, StudentHistoryQuery } from './attendance.validation';
+import type { BulkMarkInput, StudentHistoryQuery, SummaryQuery } from './attendance.validation';
 
 type Actor = { id: string; role: UserRole };
 
@@ -170,5 +170,51 @@ export const attendanceService = {
     for (const g of grouped) counts[g.status] = g._count.status;
 
     return { student, counts, records };
+  },
+
+  /** Per-student attendance totals for a section over a calendar month. */
+  async summary(schoolId: string, actor: Actor, query: SummaryQuery) {
+    const section = await assertSection(schoolId, query.sectionId);
+    await assertSectionAccess(schoolId, actor, query.sectionId);
+
+    const from = toDateOnly(new Date(Date.UTC(query.year, query.month - 1, 1)));
+    const to = toDateOnly(new Date(Date.UTC(query.year, query.month, 1)));
+
+    const [students, grouped] = await Promise.all([
+      prisma.student.findMany({
+        where: { schoolId, sectionId: query.sectionId, status: 'ACTIVE' },
+        select: { id: true, firstName: true, lastName: true, admissionNo: true },
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+      }),
+      prisma.attendanceRecord.groupBy({
+        by: ['studentId', 'status'],
+        where: { schoolId, sectionId: query.sectionId, date: { gte: from, lt: to } },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const byStudent = new Map<string, Record<AttendanceStatus, number>>();
+    for (const g of grouped) {
+      const entry =
+        byStudent.get(g.studentId) ?? { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+      entry[g.status] = g._count._all;
+      byStudent.set(g.studentId, entry);
+    }
+
+    const rows = students.map((student) => {
+      const c = byStudent.get(student.id) ?? { PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0 };
+      const marked = c.PRESENT + c.ABSENT + c.LATE + c.LEAVE;
+      return {
+        student,
+        present: c.PRESENT,
+        absent: c.ABSENT,
+        late: c.LATE,
+        leave: c.LEAVE,
+        marked,
+        rate: marked > 0 ? Math.round((c.PRESENT / marked) * 100) : 0,
+      };
+    });
+
+    return { section, month: query.month, year: query.year, rows };
   },
 };

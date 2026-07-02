@@ -191,6 +191,7 @@ Assignments (in the Classes module):
 | GET    | `/attendance`                   | Roster for a section/date (`sectionId`, `date`) — each active student + recorded status |
 | POST   | `/attendance`                   | Bulk mark/update a section/date (`{ sectionId, date, records:[{ studentId, status, remark? }] }`); upserts |
 | GET    | `/attendance/students/:studentId` | A student's records over a range (`from`, `to`) with per-status counts |
+| GET    | `/attendance/summary`           | Per-student monthly totals for a section (`sectionId`, `month`, `year`) + present-rate |
 
 Attendance statuses: `PRESENT`, `ABSENT`, `LATE`, `LEAVE`.
 

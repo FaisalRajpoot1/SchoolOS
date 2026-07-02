@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useClass, useClasses } from '@/features/academics/useAcademics';
 import { useBulkMarkAttendance, useRoster } from '../useAttendance';
 import { ATTENDANCE_STATUSES, type AttendanceStatus } from '../attendance.types';
@@ -83,9 +84,12 @@ export function AttendancePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Attendance</h1>
-        <p className="text-slate-500">Take daily attendance for a class section.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Attendance</h1>
+          <p className="text-slate-500">Take daily attendance for a class section.</p>
+        </div>
+        <Link to="/attendance/summary" className="text-sm text-brand-600">Monthly summary →</Link>
       </div>
 
       <Card className="flex flex-wrap items-end gap-3">

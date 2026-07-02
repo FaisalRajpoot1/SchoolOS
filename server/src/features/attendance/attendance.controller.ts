@@ -37,4 +37,14 @@ export const attendanceController = {
     );
     res.status(200).json({ success: true, data: result });
   }),
+
+  summary: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const result = await attendanceService.summary(
+      requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
+      req.query as never,
+    );
+    res.status(200).json({ success: true, data: result });
+  }),
 };

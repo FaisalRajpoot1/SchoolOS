@@ -71,7 +71,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Attendance (M6)
 - `[ ]` P1 · M · Teacher section-scoping (0.1).
-- `[ ]` P2 · S · Monthly summary + CSV export per class.
+- `[x]` P2 · S · Monthly attendance summary (`GET /attendance/summary`) + CSV export — batch 10.
 - `[ ]` P2 · M · Auto-notify parents on absence (needs 1.12).
 - `[ ]` P3 · M · Period-wise attendance (vs day-level).
 

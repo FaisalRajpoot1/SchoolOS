@@ -20,3 +20,10 @@ export const useBulkMarkAttendance = (sectionId: string, date: string) => {
     onSuccess: (data) => qc.setQueryData(keys.roster(sectionId, date), data),
   });
 };
+
+export const useAttendanceSummary = (sectionId: string, month: number, year: number) =>
+  useQuery({
+    queryKey: ['attendance', 'summary', sectionId, month, year],
+    queryFn: () => attendanceApi.summary(sectionId, month, year),
+    enabled: !!sectionId,
+  });
