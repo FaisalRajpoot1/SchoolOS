@@ -83,6 +83,21 @@ library, transport, hostel, inventory, HR & payroll, parent portal, announcement
 events, certificates with public verification, an admin dashboard, reports with CSV
 export, API keys, and an AI assistant. Endpoint reference: [`docs/API.md`](docs/API.md).
 
+## Testing & CI
+
+The server has a [Vitest](https://vitest.dev) unit suite for its pure logic
+(pagination, tenant guard, token hashing, grade scale, certificate templates,
+validation schemas) — no database required:
+
+```bash
+cd server && npm test        # run once
+cd server && npm run test:watch
+```
+
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs
+typecheck, lint, tests, and build for the server, and lint + build for the
+client, on every push and pull request to `main`.
+
 ## Documentation
 
 See [`MASTER_PROJECT_GUIDE.md`](MASTER_PROJECT_GUIDE.md) for engineering standards and [`reqs.md`](reqs.md) for the full feature/module breakdown.
