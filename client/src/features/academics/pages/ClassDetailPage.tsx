@@ -3,8 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useClass,
+  useClasses,
   useCreateSection,
   useDeleteSection,
   useSetClassSubjects,
@@ -13,11 +15,13 @@ import {
   useSubjects,
 } from '../useAcademics';
 import { useTeacherOptions } from '@/features/teachers/useTeachers';
+import { studentsApi } from '@/features/students/students.api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const sectionSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -235,6 +239,88 @@ export function ClassDetailPage() {
           </ul>
         </Card>
       )}
+
+      <PromoteCard fromClassId={classId} fromClassName={detail.data.name} />
     </div>
+  );
+}
+
+/** Batch-promote a class's active students to another class, or graduate them. */
+function PromoteCard({ fromClassId, fromClassName }: { fromClassId: string; fromClassName: string }) {
+  const queryClient = useQueryClient();
+  const classes = useClasses();
+  const [toClassId, setToClassId] = useState('');
+  const [graduate, setGraduate] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async (): Promise<void> => {
+    if (!graduate && !toClassId) return;
+    const confirmed = window.confirm(
+      graduate
+        ? `Graduate all active students of ${fromClassName}? This cannot be undone.`
+        : `Promote all active students of ${fromClassName} to the selected class? Their section will be cleared.`,
+    );
+    if (!confirmed) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await studentsApi.promote({
+        fromClassId,
+        toClassId: graduate ? undefined : toClassId,
+        graduate,
+      });
+      toast.success(
+        res.graduated
+          ? `Graduated ${res.moved} student(s)`
+          : `Promoted ${res.moved} student(s)`,
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['students'] }),
+        queryClient.invalidateQueries({ queryKey: ['classes'] }),
+      ]);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card className="space-y-4">
+      <div>
+        <h2 className="font-semibold">Promote / graduate students</h2>
+        <p className="text-sm text-slate-500">
+          Moves all <span className="font-medium">active</span> students of {fromClassName} at once.
+          Promotion clears their section (re-assign in the target class).
+        </p>
+      </div>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-52 flex-1">
+          <Select
+            label="Promote to class"
+            value={toClassId}
+            onChange={(e) => setToClassId(e.target.value)}
+            disabled={graduate}
+          >
+            <option value="">Select target class</option>
+            {classes.data
+              ?.filter((c) => c.id !== fromClassId)
+              .map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+          </Select>
+        </div>
+        <label className="flex items-center gap-2 pb-2 text-sm text-slate-600">
+          <input type="checkbox" checked={graduate} onChange={(e) => setGraduate(e.target.checked)} />
+          Graduate instead
+        </label>
+        <Button disabled={!graduate && !toClassId} isLoading={busy} onClick={run}>
+          {graduate ? 'Graduate' : 'Promote'}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </Card>
   );
 }

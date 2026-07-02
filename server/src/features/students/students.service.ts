@@ -13,6 +13,7 @@ import type {
   GuardianInput,
   ListStudentsQuery,
   PortalAccessInput,
+  PromoteStudentsInput,
   UpdateStudentInput,
 } from './students.validation';
 
@@ -273,6 +274,60 @@ export const studentsService = {
       failed: results.filter((r) => !r.ok).length,
       results,
     };
+  },
+
+  // ---- Promotion / rollover ----
+  /**
+   * Moves all ACTIVE students of `fromClassId` to a target class (optionally a
+   * section), or — when `graduate` is set — marks them GRADUATED. Atomic
+   * updateMany; returns how many students were affected.
+   */
+  async promote(schoolId: string, input: PromoteStudentsInput): Promise<{ moved: number; graduated: boolean }> {
+    const from = await prisma.class.findFirst({
+      where: { id: input.fromClassId, schoolId },
+      select: { id: true },
+    });
+    if (!from) throw ApiError.badRequest('Invalid source class');
+
+    const activeInClass = {
+      schoolId,
+      classId: input.fromClassId,
+      status: 'ACTIVE',
+    } satisfies Prisma.StudentWhereInput;
+
+    if (input.graduate) {
+      const res = await prisma.student.updateMany({
+        where: activeInClass,
+        data: { status: 'GRADUATED' },
+      });
+      return { moved: res.count, graduated: true };
+    }
+
+    if (!input.toClassId) throw ApiError.badRequest('A target class is required');
+    if (input.toClassId === input.fromClassId) {
+      throw ApiError.badRequest('Target class must differ from the source class');
+    }
+    const to = await prisma.class.findFirst({
+      where: { id: input.toClassId, schoolId },
+      select: { id: true },
+    });
+    if (!to) throw ApiError.badRequest('Invalid target class');
+
+    let sectionId: string | null = null;
+    if (input.toSectionId) {
+      const section = await prisma.section.findFirst({
+        where: { id: input.toSectionId, classId: input.toClassId },
+        select: { id: true },
+      });
+      if (!section) throw ApiError.badRequest('Section does not belong to the target class');
+      sectionId = section.id;
+    }
+
+    const res = await prisma.student.updateMany({
+      where: activeInClass,
+      data: { classId: input.toClassId, sectionId },
+    });
+    return { moved: res.count, graduated: false };
   },
 
   // ---- Student-portal access ----

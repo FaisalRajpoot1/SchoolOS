@@ -36,6 +36,8 @@ token is an httpOnly cookie set by the server.
 
 `POST /students/bulk-import` (`{ rows[], dryRun }`, role `SCHOOL_ADMIN`) validates and (unless `dryRun`) creates a batch of up to 500 students; class/section are matched by name within the tenant and each row succeeds or fails independently (per-row results returned).
 
+`POST /students/promote` (`{ fromClassId, toClassId?, toSectionId?, graduate }`, role `SCHOOL_ADMIN`) moves all ACTIVE students of `fromClassId` to a target class (optional section) via an atomic `updateMany`, or — with `graduate: true` — marks them `GRADUATED`. Returns `{ moved, graduated }`.
+
 Users are provisioned by admins via the students/teachers/parents modules — there is no public self-registration. Auth events are recorded automatically: `auth.login`, `auth.logout`, `auth.password_reset_requested`, `auth.password_reset`, `auth.password_changed`, `auth.session_revoked`, `auth.sessions_revoked_others`.
 
 ## Parents — Module 5 admin (role `SCHOOL_ADMIN`, tenant-scoped)

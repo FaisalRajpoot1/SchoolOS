@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { bulkImportSchema, importRowSchema } from './students.validation';
+import { bulkImportSchema, importRowSchema, promoteStudentsSchema } from './students.validation';
+
+const uuid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+
+describe('promoteStudentsSchema', () => {
+  it('accepts a move to a target class', () => {
+    expect(promoteStudentsSchema.safeParse({ fromClassId: uuid, toClassId: uuid }).success).toBe(true);
+  });
+
+  it('accepts graduation without a target class', () => {
+    expect(promoteStudentsSchema.safeParse({ fromClassId: uuid, graduate: true }).success).toBe(true);
+  });
+
+  it('rejects neither target nor graduate', () => {
+    expect(promoteStudentsSchema.safeParse({ fromClassId: uuid }).success).toBe(false);
+  });
+});
 
 describe('importRowSchema', () => {
   it('accepts a minimal valid row', () => {

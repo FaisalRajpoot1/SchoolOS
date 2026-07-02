@@ -10,6 +10,7 @@ import {
   guardianInputSchema,
   listStudentsSchema,
   portalAccessSchema,
+  promoteStudentsSchema,
   setStudentStatusSchema,
   studentIdParamSchema,
   updateGuardianSchema,
@@ -23,6 +24,7 @@ router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN));
 // Students.
 router.post('/', validate({ body: createStudentSchema }), studentsController.create);
 router.post('/bulk-import', validate({ body: bulkImportSchema }), studentsController.bulkImport);
+router.post('/promote', validate({ body: promoteStudentsSchema }), studentsController.promote);
 router.get('/', validate({ query: listStudentsSchema }), studentsController.list);
 router.get('/:id', validate({ params: studentIdParamSchema }), studentsController.getById);
 router.patch(

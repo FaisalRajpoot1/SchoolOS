@@ -77,6 +77,19 @@ export const studentsApi = {
     });
     return data.data;
   },
+
+  async promote(payload: {
+    fromClassId: string;
+    toClassId?: string;
+    toSectionId?: string;
+    graduate?: boolean;
+  }): Promise<{ moved: number; graduated: boolean }> {
+    const { data } = await api.post<{ data: { moved: number; graduated: boolean } }>(
+      '/students/promote',
+      payload,
+    );
+    return data.data;
+  },
 };
 
 export interface ImportRow {

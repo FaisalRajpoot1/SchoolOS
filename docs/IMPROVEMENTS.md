@@ -62,7 +62,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 ### Students (M3)
 - `[x]` P1 · M · Bulk CSV import with validation + dry-run preview (`POST /students/bulk-import`, class/section by name) — batch 6.
 - `[ ]` P2 · S · Student photo upload (needs 1.10).
-- `[ ]` P2 · M · Class promotion / year rollover (batch advance students).
+- `[x]` P2 · M · Class promotion / year rollover — `POST /students/promote` (move active cohort to a class, or graduate) — batch 7.
 - `[ ]` P3 · S · ID-card generation (needs 1.11).
 
 ### Teachers (M4)

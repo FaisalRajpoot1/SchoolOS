@@ -92,6 +92,22 @@ export const bulkImportSchema = z
   })
   .strict();
 
+/** Promote active students from one class to another, or graduate them. */
+export const promoteStudentsSchema = z
+  .object({
+    fromClassId: z.string().uuid(),
+    toClassId: z.string().uuid().optional(),
+    toSectionId: z.string().uuid().optional(),
+    graduate: z.boolean().default(false),
+  })
+  .strict()
+  .refine((d) => d.graduate || !!d.toClassId, {
+    message: 'Provide a target class or set graduate',
+  })
+  .refine((d) => !(d.graduate && d.toClassId), {
+    message: 'Choose either promote or graduate, not both',
+  });
+
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
 export type ListStudentsQuery = z.infer<typeof listStudentsSchema>;
@@ -99,3 +115,4 @@ export type GuardianInput = z.infer<typeof guardianInputSchema>;
 export type PortalAccessInput = z.infer<typeof portalAccessSchema>;
 export type ImportRow = z.infer<typeof importRowSchema>;
 export type BulkImportInput = z.infer<typeof bulkImportSchema>;
+export type PromoteStudentsInput = z.infer<typeof promoteStudentsSchema>;
