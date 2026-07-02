@@ -15,6 +15,9 @@ const generationLimiter = rateLimit({
   limit: 30,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  // Keyed per authenticated user (this runs after `authenticate`), so quota is
+  // per-account rather than shared across a school's public IP.
+  keyGenerator: (req) => req.user?.id ?? 'anonymous',
   message: { success: false, message: 'Too many AI generation requests; please try again later' },
 });
 

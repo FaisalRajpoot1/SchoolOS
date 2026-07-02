@@ -26,8 +26,10 @@ export const homeworkController = {
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const homework = await homeworkService.update(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.body,
     );
@@ -35,7 +37,12 @@ export const homeworkController = {
   }),
 
   remove: asyncHandler(async (req: Request, res: Response) => {
-    await homeworkService.remove(requireSchoolId(req.user), req.params.id as string);
+    if (!req.user) throw ApiError.unauthorized();
+    await homeworkService.remove(
+      requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
+      req.params.id as string,
+    );
     res.status(204).send();
   }),
 
@@ -49,8 +56,10 @@ export const homeworkController = {
   }),
 
   recordSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await homeworkService.recordSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
       req.body,
@@ -59,8 +68,10 @@ export const homeworkController = {
   }),
 
   gradeSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await homeworkService.gradeSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
       req.body,
@@ -69,8 +80,10 @@ export const homeworkController = {
   }),
 
   removeSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await homeworkService.removeSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
     );

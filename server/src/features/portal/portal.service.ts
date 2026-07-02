@@ -64,7 +64,14 @@ export const portalService = {
 
   async childAttendance(userId: string, studentId: string, query: AttendanceQuery) {
     const { parent } = await getParentAndChild(userId, studentId);
-    return attendanceService.studentHistory(parent.schoolId, studentId, query);
+    // Ownership is already enforced above; the parent actor bypasses the
+    // teacher-only section check in studentHistory.
+    return attendanceService.studentHistory(
+      parent.schoolId,
+      { id: userId, role: 'PARENT' },
+      studentId,
+      query,
+    );
   },
 
   async childInvoices(userId: string, studentId: string) {

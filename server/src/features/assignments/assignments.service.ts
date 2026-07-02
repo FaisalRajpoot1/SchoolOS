@@ -39,6 +39,24 @@ const resolveTeacherId = async (
   return teacher?.id ?? null;
 };
 
+type Actor = { id: string; role: UserRole };
+
+/** Loads an assignment and, for a TEACHER, requires that they authored it. Admins pass. */
+const assertAssignmentOwned = async (
+  schoolId: string,
+  actor: Actor,
+  id: string,
+): Promise<Assignment> => {
+  const assignment = await assertAssignment(schoolId, id);
+  if (actor.role === 'TEACHER') {
+    const teacherId = await resolveTeacherId(schoolId, actor.id, actor.role);
+    if (!teacherId || assignment.teacherId !== teacherId) {
+      throw ApiError.forbidden('You can only manage your own assignments');
+    }
+  }
+  return assignment;
+};
+
 const assertSectionInClass = async (
   schoolId: string,
   classId: string,
@@ -126,8 +144,8 @@ export const assignmentsService = {
     return assignment;
   },
 
-  async update(schoolId: string, id: string, input: UpdateAssignmentInput) {
-    await assertAssignment(schoolId, id);
+  async update(schoolId: string, actor: Actor, id: string, input: UpdateAssignmentInput) {
+    await assertAssignmentOwned(schoolId, actor, id);
     if (input.subjectId) {
       const subject = await prisma.subject.findFirst({ where: { id: input.subjectId, schoolId } });
       if (!subject) throw ApiError.badRequest('Invalid subject for this school');
@@ -136,8 +154,8 @@ export const assignmentsService = {
     return this.getById(schoolId, id);
   },
 
-  async remove(schoolId: string, id: string): Promise<void> {
-    await assertAssignment(schoolId, id);
+  async remove(schoolId: string, actor: Actor, id: string): Promise<void> {
+    await assertAssignmentOwned(schoolId, actor, id);
     await prisma.assignment.delete({ where: { id } });
   },
 
@@ -166,11 +184,12 @@ export const assignmentsService = {
 
   async recordSubmission(
     schoolId: string,
+    actor: Actor,
     assignmentId: string,
     studentId: string,
     input: RecordSubmissionInput,
   ) {
-    const assignment = await assertAssignment(schoolId, assignmentId);
+    const assignment = await assertAssignmentOwned(schoolId, actor, assignmentId);
     const student = await prisma.student.findFirst({
       where: { id: studentId, schoolId, sectionId: assignment.sectionId },
       select: { id: true },
@@ -203,11 +222,12 @@ export const assignmentsService = {
 
   async gradeSubmission(
     schoolId: string,
+    actor: Actor,
     assignmentId: string,
     studentId: string,
     input: GradeSubmissionInput,
   ) {
-    const assignment = await assertAssignment(schoolId, assignmentId);
+    const assignment = await assertAssignmentOwned(schoolId, actor, assignmentId);
     if (input.marks != null && input.marks > assignment.maxMarks) {
       throw ApiError.badRequest(`Marks cannot exceed the maximum of ${assignment.maxMarks}`);
     }
@@ -224,8 +244,8 @@ export const assignmentsService = {
     return this.submissionsRoster(schoolId, assignmentId);
   },
 
-  async removeSubmission(schoolId: string, assignmentId: string, studentId: string) {
-    await assertAssignment(schoolId, assignmentId);
+  async removeSubmission(schoolId: string, actor: Actor, assignmentId: string, studentId: string) {
+    await assertAssignmentOwned(schoolId, actor, assignmentId);
     await prisma.assignmentSubmission.deleteMany({ where: { assignmentId, studentId } });
     return this.submissionsRoster(schoolId, assignmentId);
   },

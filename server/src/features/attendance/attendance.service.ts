@@ -1,7 +1,35 @@
-import { type AttendanceStatus, Prisma } from '@prisma/client';
+import { type AttendanceStatus, Prisma, type UserRole } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
 import type { BulkMarkInput, StudentHistoryQuery } from './attendance.validation';
+
+type Actor = { id: string; role: UserRole };
+
+/**
+ * For a TEACHER, require they teach the section — either as its class teacher
+ * or as a subject teacher of the section's class. Other roles (SCHOOL_ADMIN)
+ * are unrestricted. Throws 403 otherwise.
+ */
+const assertSectionAccess = async (schoolId: string, actor: Actor, sectionId: string): Promise<void> => {
+  if (actor.role !== 'TEACHER') return;
+  const teacher = await prisma.teacher.findFirst({
+    where: { schoolId, userId: actor.id },
+    select: { id: true },
+  });
+  if (!teacher) throw ApiError.forbidden('No teacher profile for this account');
+  const section = await prisma.section.findFirst({
+    where: {
+      id: sectionId,
+      class: { schoolId },
+      OR: [
+        { classTeacherId: teacher.id },
+        { class: { classSubjects: { some: { teacherId: teacher.id } } } },
+      ],
+    },
+    select: { id: true },
+  });
+  if (!section) throw ApiError.forbidden('You are not assigned to this section');
+};
 
 /** Normalizes a timestamp to a UTC date-only value (matches the @db.Date column). */
 const toDateOnly = (d: Date): Date =>
@@ -25,8 +53,9 @@ export interface RosterEntry {
 
 export const attendanceService = {
   /** Active students in a section plus their recorded status for the given date. */
-  async roster(schoolId: string, sectionId: string, date: Date): Promise<RosterEntry[]> {
+  async roster(schoolId: string, actor: Actor, sectionId: string, date: Date): Promise<RosterEntry[]> {
     await assertSection(schoolId, sectionId);
+    await assertSectionAccess(schoolId, actor, sectionId);
     const day = toDateOnly(date);
 
     const [students, records] = await Promise.all([
@@ -49,17 +78,15 @@ export const attendanceService = {
   },
 
   /** Upserts attendance for a section/date. Returns the refreshed roster. */
-  async bulkMark(
-    schoolId: string,
-    recordedById: string,
-    input: BulkMarkInput,
-  ): Promise<RosterEntry[]> {
+  async bulkMark(schoolId: string, actor: Actor, input: BulkMarkInput): Promise<RosterEntry[]> {
     await assertSection(schoolId, input.sectionId);
+    await assertSectionAccess(schoolId, actor, input.sectionId);
+    const recordedById = actor.id;
     const day = toDateOnly(input.date);
 
-    // Only allow marking students currently enrolled in this section.
+    // Only allow marking students actively enrolled in this section (matches the roster).
     const enrolled = await prisma.student.findMany({
-      where: { schoolId, sectionId: input.sectionId },
+      where: { schoolId, sectionId: input.sectionId, status: 'ACTIVE' },
       select: { id: true },
     });
     const enrolledIds = new Set(enrolled.map((s) => s.id));
@@ -91,16 +118,26 @@ export const attendanceService = {
       ),
     );
 
-    return this.roster(schoolId, input.sectionId, day);
+    return this.roster(schoolId, actor, input.sectionId, day);
   },
 
   /** A student's attendance records over a range, with per-status counts. */
-  async studentHistory(schoolId: string, studentId: string, query: StudentHistoryQuery) {
+  async studentHistory(
+    schoolId: string,
+    actor: Actor,
+    studentId: string,
+    query: StudentHistoryQuery,
+  ) {
     const student = await prisma.student.findFirst({
       where: { id: studentId, schoolId },
-      select: { id: true, firstName: true, lastName: true, admissionNo: true },
+      select: { id: true, firstName: true, lastName: true, admissionNo: true, sectionId: true },
     });
     if (!student) throw ApiError.notFound('Student not found');
+    // A teacher may only view history for a student in a section they teach.
+    if (actor.role === 'TEACHER') {
+      if (!student.sectionId) throw ApiError.forbidden('You are not assigned to this student');
+      await assertSectionAccess(schoolId, actor, student.sectionId);
+    }
 
     const dateFilter: Prisma.DateTimeFilter = {};
     if (query.from) dateFilter.gte = toDateOnly(query.from);

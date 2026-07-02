@@ -26,8 +26,10 @@ export const assignmentsController = {
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const assignment = await assignmentsService.update(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.body,
     );
@@ -35,7 +37,12 @@ export const assignmentsController = {
   }),
 
   remove: asyncHandler(async (req: Request, res: Response) => {
-    await assignmentsService.remove(requireSchoolId(req.user), req.params.id as string);
+    if (!req.user) throw ApiError.unauthorized();
+    await assignmentsService.remove(
+      requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
+      req.params.id as string,
+    );
     res.status(204).send();
   }),
 
@@ -48,8 +55,10 @@ export const assignmentsController = {
   }),
 
   recordSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await assignmentsService.recordSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
       req.body,
@@ -58,8 +67,10 @@ export const assignmentsController = {
   }),
 
   gradeSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await assignmentsService.gradeSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
       req.body,
@@ -68,8 +79,10 @@ export const assignmentsController = {
   }),
 
   removeSubmission: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
     const data = await assignmentsService.removeSubmission(
       requireSchoolId(req.user),
+      { id: req.user.id, role: req.user.role },
       req.params.id as string,
       req.params.studentId as string,
     );

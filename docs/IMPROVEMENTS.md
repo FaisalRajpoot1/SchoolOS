@@ -20,6 +20,9 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 0.1 | `[ ]` Attendance: scope TEACHER writes/reads to their assigned sections (currently any teacher, any section) | P1 | M | SEC |
 | 0.2 | `[ ]` Homework/Assignments: only the owning teacher (or admin) may grade/delete submissions | P1 | M | SEC |
 | 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
+| 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
+
+**Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `pending`.
 
 ---
 

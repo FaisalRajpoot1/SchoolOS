@@ -39,6 +39,20 @@ const resolveTeacherId = async (
   return teacher?.id ?? null;
 };
 
+type Actor = { id: string; role: UserRole };
+
+/** Loads homework and, for a TEACHER, requires that they authored it. Admins pass. */
+const assertHomeworkOwned = async (schoolId: string, actor: Actor, id: string): Promise<Homework> => {
+  const homework = await assertHomework(schoolId, id);
+  if (actor.role === 'TEACHER') {
+    const teacherId = await resolveTeacherId(schoolId, actor.id, actor.role);
+    if (!teacherId || homework.teacherId !== teacherId) {
+      throw ApiError.forbidden('You can only manage your own homework');
+    }
+  }
+  return homework;
+};
+
 /** Validates a section belongs to the given class within the tenant. */
 const assertSectionInClass = async (
   schoolId: string,
@@ -116,15 +130,15 @@ export const homeworkService = {
     return homework;
   },
 
-  async update(schoolId: string, id: string, input: UpdateHomeworkInput) {
-    await assertHomework(schoolId, id);
+  async update(schoolId: string, actor: Actor, id: string, input: UpdateHomeworkInput) {
+    await assertHomeworkOwned(schoolId, actor, id);
     if (input.subjectId) await assertSubject(schoolId, input.subjectId);
     await prisma.homework.update({ where: { id }, data: input });
     return this.getById(schoolId, id);
   },
 
-  async remove(schoolId: string, id: string): Promise<void> {
-    await assertHomework(schoolId, id);
+  async remove(schoolId: string, actor: Actor, id: string): Promise<void> {
+    await assertHomeworkOwned(schoolId, actor, id);
     await prisma.homework.delete({ where: { id } });
   },
 
@@ -154,11 +168,12 @@ export const homeworkService = {
 
   async recordSubmission(
     schoolId: string,
+    actor: Actor,
     homeworkId: string,
     studentId: string,
     input: RecordSubmissionInput,
   ) {
-    const homework = await assertHomework(schoolId, homeworkId);
+    const homework = await assertHomeworkOwned(schoolId, actor, homeworkId);
     const student = await prisma.student.findFirst({
       where: { id: studentId, schoolId, sectionId: homework.sectionId },
       select: { id: true },
@@ -191,11 +206,12 @@ export const homeworkService = {
 
   async gradeSubmission(
     schoolId: string,
+    actor: Actor,
     homeworkId: string,
     studentId: string,
     input: GradeSubmissionInput,
   ) {
-    await assertHomework(schoolId, homeworkId);
+    await assertHomeworkOwned(schoolId, actor, homeworkId);
     const submission = await prisma.homeworkSubmission.findFirst({
       where: { homeworkId, studentId },
     });
@@ -213,8 +229,8 @@ export const homeworkService = {
     return this.submissionsRoster(schoolId, homeworkId);
   },
 
-  async removeSubmission(schoolId: string, homeworkId: string, studentId: string) {
-    await assertHomework(schoolId, homeworkId);
+  async removeSubmission(schoolId: string, actor: Actor, homeworkId: string, studentId: string) {
+    await assertHomeworkOwned(schoolId, actor, homeworkId);
     await prisma.homeworkSubmission.deleteMany({ where: { homeworkId, studentId } });
     return this.submissionsRoster(schoolId, homeworkId);
   },
