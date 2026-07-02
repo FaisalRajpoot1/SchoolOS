@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { auditMutations } from '@/middlewares/audit.middleware';
 import { healthRoutes } from '@/features/health/health.routes';
 import { authRoutes } from '@/features/auth/auth.routes';
 import { schoolRoutes } from '@/features/schools/schools.routes';
@@ -38,6 +39,9 @@ import { admissionRoutes } from '@/features/admissions/admissions.routes';
  * New feature modules register their router here.
  */
 const router = Router();
+
+// Audit every authenticated mutation (best-effort; see the middleware).
+router.use(auditMutations);
 
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);

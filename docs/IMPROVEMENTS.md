@@ -35,7 +35,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 1.3 | `[x]` Global toast system (`lib/toast` store + `Toaster`); used for success/info feedback (errors stay inline to avoid double-reporting) | P1 | S | UX |
 | 1.4 | `[~]` `Spinner` + `EmptyState` primitives created and applied to certificates/payslips lists; roll out to remaining list/detail pages incrementally | P2 | M | UX |
 | 1.5 | `[ ]` Per-user rate limiting (keyGenerator on `req.user.id`) in addition to per-IP | P2 | S | SEC |
-| 1.6 | `[ ]` Expand audit logging beyond auth to all sensitive mutations (create/update/delete on students, fees, payroll, etc.) | P2 | M | SEC |
+| 1.6 | `[x]` Audit-mutations middleware records every authenticated non-GET 2xx request (route pattern + params, no bodies) — batch 9 | P2 | M | SEC |
 | 1.7 | `[ ]` OpenAPI/Swagger spec generated from Zod (`zod-to-openapi`) + Swagger UI | P2 | M | FEAT |
 | 1.8 | `[ ]` Docker + docker-compose (Postgres + server + client) for one-command local run | P2 | M | DEBT |
 | 1.9 | `[ ]` Background job queue (BullMQ/Redis) for emails, PDF generation, bulk jobs | P3 | L | DEBT |

@@ -34,6 +34,8 @@ token is an httpOnly cookie set by the server.
 | ------ | ------------- | ---------------------------------------------------------- |
 | GET    | `/audit-logs` | List audit events (`page`, `limit`, `action`, `userId`)    |
 
+Beyond the semantic `auth.*` events, **every authenticated mutation** (non-GET, 2xx) is recorded automatically by a middleware — the `action` is `METHOD /api/v1/<route pattern>` and the metadata carries the path params. Request bodies are never logged.
+
 `POST /students/bulk-import` (`{ rows[], dryRun }`, role `SCHOOL_ADMIN`) validates and (unless `dryRun`) creates a batch of up to 500 students; class/section are matched by name within the tenant and each row succeeds or fails independently (per-row results returned).
 
 `POST /students/promote` (`{ fromClassId, toClassId?, toSectionId?, graduate }`, role `SCHOOL_ADMIN`) moves all ACTIVE students of `fromClassId` to a target class (optional section) via an atomic `updateMany`, or — with `graduate: true` — marks them `GRADUATED`. Returns `{ moved, graduated }`.
