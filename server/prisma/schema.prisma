@@ -212,6 +212,8 @@ model School {
   apiKeys               ApiKey[]
   admissionApplications AdmissionApplication[]
   behaviorRecords       BehaviorRecord[]
+  medicalProfiles       MedicalProfile[]
+  infirmaryVisits       InfirmaryVisit[]
 
   @@map("schools")
 }
@@ -373,6 +375,8 @@ model Student {
   certificates          Certificate[]
   admissionApplication  AdmissionApplication?
   behaviorRecords       BehaviorRecord[]
+  medicalProfile        MedicalProfile?
+  infirmaryVisits       InfirmaryVisit[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -1254,6 +1258,63 @@ model BehaviorRecord {
   @@map("behavior_records")
 }
 
+enum VisitOutcome {
+  RESOLVED
+  SENT_HOME
+  REFERRED
+  MONITORING
+}
+
+/// A student's standing medical profile (one per student).
+model MedicalProfile {
+  id                    String   @id @default(uuid())
+  bloodGroup            String?
+  heightCm              Int?
+  weightKg              Int?
+  allergies             String?
+  conditions            String?
+  medications           String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId String  @unique
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@map("medical_profiles")
+}
+
+/// A single infirmary / sick-bay visit logged for a student.
+model InfirmaryVisit {
+  id           String       @id @default(uuid())
+  reason       String
+  treatment    String?
+  temperatureC Float?
+  outcome      VisitOutcome @default(RESOLVED)
+  visitedOn    DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  recordedById String?
+  recordedBy   User?   @relation("InfirmaryRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId])
+  @@index([studentId])
+  @@map("infirmary_visits")
+}
+
 /// An issued certificate for a student, with a public verification code.
 model Certificate {
   id               String          @id @default(uuid())
@@ -1394,6 +1455,7 @@ model User {
   announcements       Announcement[]       @relation("AnnouncementAuthor")
   eventRsvps          EventRsvp[]
   behaviorRecords     BehaviorRecord[]     @relation("BehaviorRecorder")
+  infirmaryVisits     InfirmaryVisit[]     @relation("InfirmaryRecorder")
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])

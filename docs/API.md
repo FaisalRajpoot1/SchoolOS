@@ -499,3 +499,18 @@ Merits, demerits, and incident notes logged against students. Recording and view
 | DELETE | `/behavior/:id`                         | SCHOOL_ADMIN            | Delete a record                                        |
 
 Types: `MERIT`, `DEMERIT`, `INCIDENT`.
+
+## Medical / Health — Module N5 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+Student medical profiles (one per student) and an infirmary visit log. All routes are `SCHOOL_ADMIN`-only (medical data is sensitive). Mounted at `/medical` (the system health-check owns `/health`). A profile PUT is a full replace — omitted fields are cleared. `bmi` is derived from `heightCm`/`weightKg` (null if either is missing).
+
+| Method | Path                                    | Description                                                  |
+| ------ | --------------------------------------- | ------------------------------------------------------------ |
+| GET    | `/medical/students/:studentId/profile`  | Get a student's medical profile (or `null`) with derived `bmi` |
+| PUT    | `/medical/students/:studentId/profile`  | Upsert the profile (`bloodGroup`, `heightCm`, `weightKg`, `allergies`, `conditions`, `medications`, emergency contact, `notes`) |
+| GET    | `/medical/visits`                       | List infirmary visits (paginated; `studentId`, `outcome` filters) |
+| POST   | `/medical/visits`                       | Log a visit (`studentId`, `reason`, `treatment?`, `temperatureC?`, `outcome`, `visitedOn?`) |
+| GET    | `/medical/visits/:id`                   | Get one visit                                                |
+| DELETE | `/medical/visits/:id`                   | Delete a visit                                               |
+
+Visit outcomes: `RESOLVED`, `SENT_HOME`, `REFERRED`, `MONITORING`. Blood groups: `A±`, `B±`, `O±`, `AB±`.

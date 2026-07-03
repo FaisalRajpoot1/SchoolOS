@@ -68,6 +68,7 @@ import { VerifyCertificatePage } from '@/pages/VerifyCertificatePage';
 import { ApplyPage } from '@/features/admissions/pages/ApplyPage';
 import { AdmissionsPage } from '@/features/admissions/pages/AdmissionsPage';
 import { BehaviorPage } from '@/features/behavior/pages/BehaviorPage';
+import { MedicalPage } from '@/features/medical/pages/MedicalPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -177,6 +178,7 @@ export const router = createBrowserRouter([
               { path: '/students/import', element: <BulkImportPage /> },
               { path: '/admissions', element: <AdmissionsPage /> },
               { path: '/behavior', element: <BehaviorPage /> },
+              { path: '/medical', element: <MedicalPage /> },
               { path: '/students/:id', element: <StudentDetailPage /> },
               { path: '/teachers', element: <TeachersListPage /> },
               { path: '/teachers/new', element: <AddTeacherPage /> },

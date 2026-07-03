@@ -160,7 +160,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | N2 | `[x]` **Online Admissions / Enquiry** — public `/apply/:schoolId` form → admin pipeline (status flow) → convert-to-student. `AdmissionApplication` model, public+admin endpoints. Done — batch 8 |
 | N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
 | N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |
-| N5 | `[ ]` **Health / Medical records** (infirmary visits, allergies, vaccinations) | P3 | M | |
+| N5 | `[~]` **Health / Medical records** (infirmary visits, allergies, vaccinations) — batch 15: `MedicalProfile` (1:1) + `InfirmaryVisit` models + migration; `/medical` admin-only endpoints (profile upsert w/ derived BMI, visit CRUD); pure `bmi` helper + tests; admin Medical page (student picker → profile editor + visit log). Vaccination records still open. | P3 | M | Mostly done — batch 15 |
 | N6 | `[x]` **Disciplinary / Behavior records** (incidents, merits/demerits) — batch 14: `BehaviorRecord` model + migration, `/behavior` CRUD + `/behavior/students/:id/summary` (merits/demerits/incidents/netPoints), signed-points rule (merit ≥ 0, demerit ≤ 0), pure `summarizeBehavior` + unit tests, admin Behaviour page (add/filter/delete) + nav. | P3 | S | Done — batch 14 |
 | N7 | `[ ]` **Visitor / Gate management** | P3 | S | |
 | N8 | `[ ]` **LMS / Online classes** (content, video links, quizzes) | P3 | L | Large; own initiative |
