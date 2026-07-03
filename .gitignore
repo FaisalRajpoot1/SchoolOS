@@ -11,6 +11,10 @@ out/
 .vite/
 .turbo/
 
+# ---------- Uploaded document blobs (Module N4 local storage) ----------
+uploads/
+server/uploads/
+
 # ---------- Environment ----------
 .env
 .env.*

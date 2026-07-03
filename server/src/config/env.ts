@@ -24,6 +24,11 @@ const envSchema = z.object({
   // endpoints fall back to a deterministic rules-based engine.
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   AI_MODEL: z.string().default('claude-opus-4-8'),
+
+  // Local filesystem root for uploaded documents (Module N4). Swap the storage
+  // backend for S3/GCS later without touching callers.
+  UPLOAD_DIR: z.string().default('./uploads'),
+  MAX_UPLOAD_MB: z.coerce.number().int().positive().max(100).default(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

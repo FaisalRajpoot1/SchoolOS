@@ -70,6 +70,7 @@ import { AdmissionsPage } from '@/features/admissions/pages/AdmissionsPage';
 import { BehaviorPage } from '@/features/behavior/pages/BehaviorPage';
 import { MedicalPage } from '@/features/medical/pages/MedicalPage';
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
+import { DocumentsPage } from '@/features/documents/pages/DocumentsPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -181,6 +182,7 @@ export const router = createBrowserRouter([
               { path: '/admissions', element: <AdmissionsPage /> },
               { path: '/behavior', element: <BehaviorPage /> },
               { path: '/medical', element: <MedicalPage /> },
+              { path: '/documents', element: <DocumentsPage /> },
               { path: '/students/:id', element: <StudentDetailPage /> },
               { path: '/teachers', element: <TeachersListPage /> },
               { path: '/teachers/new', element: <AddTeacherPage /> },

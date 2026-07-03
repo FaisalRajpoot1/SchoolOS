@@ -528,3 +528,17 @@ An in-app inbox: each user sees and manages only their own notifications. Produc
 | DELETE | `/notifications/:id`          | Delete one of the caller's notifications                       |
 
 Types: `GENERAL`, `ANNOUNCEMENT`, `EVENT`, `BEHAVIOR`, `ATTENDANCE`, `FEE`. A notification carries an optional `link` (in-app path) and `body`. Fan-out is best-effort — a delivery failure never fails the triggering action.
+
+## Documents — Module N4 (role `SCHOOL_ADMIN`, tenant-scoped)
+
+A secure document store: files are held by a pluggable storage backend (local filesystem by default via `UPLOAD_DIR`; swap for S3/GCS without touching callers) with metadata in Postgres. A document optionally attaches to one student **or** one employee, else it is school-level. All routes are `SCHOOL_ADMIN`-only. Uploads are `multipart/form-data` (field `file`), capped at `MAX_UPLOAD_MB` (default 10) and restricted to an allow-list of extensions (PDF, images, Office, CSV, TXT). Storage keys are server-generated (`uuid.ext`) so a filename can never traverse the storage root; downloads are streamed with a sanitized `Content-Disposition` filename and `attachment` disposition.
+
+| Method | Path                       | Description                                                              |
+| ------ | -------------------------- | ------------------------------------------------------------------------ |
+| POST   | `/documents`               | Upload (`file` + `title`, `category`, optional `studentId`/`employeeId`) |
+| GET    | `/documents`               | List (paginated; `studentId`, `employeeId`, `category` filters)          |
+| GET    | `/documents/:id`           | Get one document's metadata                                              |
+| GET    | `/documents/:id/download`  | Download the file (authenticated, tenant-scoped)                         |
+| DELETE | `/documents/:id`           | Delete the metadata row and its stored file                             |
+
+Categories: `GENERAL`, `ID_PROOF`, `CERTIFICATE`, `REPORT`, `MEDICAL`, `CONTRACT`, `OTHER`.
