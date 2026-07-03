@@ -51,7 +51,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Auth & Security (M1)
 - `[ ]` P2 · M · Two-factor auth (TOTP) + backup codes.
-- `[ ]` P2 · S · Login lockout / backoff after N failed attempts per account.
+- `[x]` P2 · S · Login lockout / backoff after N failed attempts per account — batch 19: per-account counter (atomic increment) + temporary lock (`MAX_FAILED_LOGINS`/`LOGIN_LOCKOUT_MINUTES`), `429` while locked, timing equalized (dummy bcrypt on the locked path), reset on success; pure `lockout` helpers + tests.
 - `[ ]` P3 · M · Email verification on account creation; password-strength meter on client.
 - `[ ]` P3 · M · Google OAuth sign-in.
 

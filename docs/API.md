@@ -17,7 +17,7 @@ token is an httpOnly cookie set by the server.
 
 | Method | Path             | Auth   | Description                              |
 | ------ | ---------------- | ------ | ---------------------------------------- |
-| POST   | `/auth/login`    | —      | Login (email + password + schoolId)      |
+| POST   | `/auth/login`    | —      | Login (email + password + schoolId). After `MAX_FAILED_LOGINS` (default 5) wrong passwords the account locks for `LOGIN_LOCKOUT_MINUTES` (default 15) → `429` |
 | POST   | `/auth/refresh`  | cookie | Rotate refresh token, issue access token |
 | POST   | `/auth/logout`   | cookie | Revoke refresh token                     |
 | GET    | `/auth/me`       | Bearer | Current user profile                     |

@@ -29,6 +29,11 @@ const envSchema = z.object({
   // backend for S3/GCS later without touching callers.
   UPLOAD_DIR: z.string().default('./uploads'),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().max(100).default(10),
+
+  // Login lockout: after MAX_FAILED_LOGINS wrong passwords, the account is
+  // locked for LOGIN_LOCKOUT_MINUTES.
+  MAX_FAILED_LOGINS: z.coerce.number().int().positive().max(20).default(5),
+  LOGIN_LOCKOUT_MINUTES: z.coerce.number().int().positive().max(1440).default(15),
 });
 
 const parsed = envSchema.safeParse(process.env);

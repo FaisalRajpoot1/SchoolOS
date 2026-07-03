@@ -1,11 +1,29 @@
 import type { User } from '@prisma/client';
 import { prisma } from '@/db/prisma';
+import { env } from '@/config/env';
 import { ApiError } from '@/utils/ApiError';
 import { hashPassword, verifyPassword } from '@/utils/password';
 import { signAccessToken } from '@/utils/jwt';
 import { generateRefreshToken, hashToken } from '@/utils/tokens';
 import { PASSWORD_RESET_TTL_MS, REFRESH_TOKEN_TTL_MS } from '@/config/constants';
+import {
+  clearedState,
+  isLocked,
+  lockUntil,
+  reachedLockThreshold,
+  type LockoutPolicy,
+} from './lockout';
 import type { LoginInput } from './auth.validation';
+
+const lockoutPolicy = (): LockoutPolicy => ({
+  maxAttempts: env.MAX_FAILED_LOGINS,
+  lockoutMs: env.LOGIN_LOCKOUT_MINUTES * 60 * 1000,
+});
+
+// A well-formed bcrypt hash that no password matches. Comparing against it keeps
+// the timing of the "no user" and "locked" paths in line with a real check, so
+// they don't become an account-existence oracle.
+const DUMMY_HASH = '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinv';
 
 /** Public, safe-to-serialize view of a user. */
 export interface PublicUser {
@@ -66,16 +84,45 @@ export const authService = {
   /** Registers a new user within a school tenant. */
   /** Authenticates a user with email + password scoped to a school. */
   async login(input: LoginInput, context?: SessionContext): Promise<AuthResult> {
+    const now = new Date();
+    const policy = lockoutPolicy();
     const user = await prisma.user.findUnique({
       where: { schoolId_email: { schoolId: input.schoolId, email: input.email } },
     });
 
+    // Reject while locked. Still run a comparison so the response time matches
+    // the normal path (the 429 vs 401 status is an accepted enumeration
+    // tradeoff — lockout inherently reveals a real account; provisioning is
+    // admin-only, so enumeration value is low).
+    if (user && isLocked(user.lockedUntil, now)) {
+      await verifyPassword(input.password, DUMMY_HASH);
+      throw ApiError.tooManyRequests(
+        'Account temporarily locked after too many failed attempts. Try again later.',
+      );
+    }
+
     // Constant-ish response: always run a comparison to limit user enumeration.
     const passwordOk = user
       ? await verifyPassword(input.password, user.passwordHash)
-      : await verifyPassword(input.password, '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinv');
+      : await verifyPassword(input.password, DUMMY_HASH);
 
     if (!user || !passwordOk) {
+      // Count the failure atomically so parallel guesses can't collapse into a
+      // single increment; lock once the threshold is reached. Disabled accounts
+      // aren't counted (they can't log in anyway).
+      if (user && user.isActive) {
+        const { failedLoginAttempts } = await prisma.user.update({
+          where: { id: user.id },
+          data: { failedLoginAttempts: { increment: 1 } },
+          select: { failedLoginAttempts: true },
+        });
+        if (reachedLockThreshold(failedLoginAttempts, policy)) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginAttempts: 0, lockedUntil: lockUntil(now, policy) },
+          });
+        }
+      }
       throw ApiError.unauthorized('Invalid credentials');
     }
     if (!user.isActive) {
@@ -84,7 +131,7 @@ export const authService = {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { ...clearedState(), lastLoginAt: now },
     });
 
     return issueTokens(user, context);
