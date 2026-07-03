@@ -39,7 +39,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 1.7 | `[ ]` OpenAPI/Swagger spec generated from Zod (`zod-to-openapi`) + Swagger UI | P2 | M | FEAT |
 | 1.8 | `[ ]` Docker + docker-compose (Postgres + server + client) for one-command local run | P2 | M | DEBT |
 | 1.9 | `[ ]` Background job queue (BullMQ/Redis) for emails, PDF generation, bulk jobs | P3 | L | DEBT |
-| 1.10 | `[ ]` File upload/storage service (S3-compatible) for photos, attachments, documents | P2 | M | FEAT |
+| 1.10 | `[x]` File upload/storage service — pluggable `FileStorage` (`utils/fileStorage`) + multer upload middleware; local-disk backend (path-traversal-guarded), S3/GCS swappable without touching callers — batch 17 (documents) / 18 (photos) | P2 | M | FEAT |
 | 1.11 | `[x]` PDF generation service (pdfkit + qrcode; `utils/pdf.renderPdf`/`sendPdf`) — used by payslips + certificates | P1 | M | FEAT |
 | 1.12 | `[ ]` Notification providers (email via Resend/SES, SMS, push) behind a provider interface | P2 | L | FEAT |
 | 1.13 | `[ ]` Soft-delete / archival for core records instead of hard delete (recoverability + FK safety) | P3 | M | DEBT |
@@ -56,17 +56,20 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · M · Google OAuth sign-in.
 
 ### School Setup (M2)
-- `[ ]` P2 · S · School logo/branding upload (needs 1.10).
+- `[x]` P2 · S · School logo/branding upload — batch 18: `/settings/logo` upload/serve/delete + logo panel on School Settings.
 - `[ ]` P3 · L · Subscription/plan + billing per school; feature flags per plan.
 
 ### Students (M3)
 - `[x]` P1 · M · Bulk CSV import with validation + dry-run preview (`POST /students/bulk-import`, class/section by name) — batch 6.
-- `[ ]` P2 · S · Student photo upload (needs 1.10).
+- `[x]` P2 · S · Student photo upload — batch 18: `/students/:id/photo` upload/serve/delete (image-only, inline), avatars in list + upload panel on detail; shared `Avatar`/`useObjectUrl`.
 - `[x]` P2 · M · Class promotion / year rollover — `POST /students/promote` (move active cohort to a class, or graduate) — batch 7.
 - `[ ]` P3 · S · ID-card generation (needs 1.11).
 
+### Students (M3) — follow-ups
+- `[ ]` P3 · S · Photo thumbnails / batch avatar endpoint for lists (avatars currently fetch one blob per row; a client object-URL cache dedups remounts — batch 18 — but first render is still N requests).
+
 ### Teachers (M4)
-- `[ ]` P2 · S · Photo + qualification/document attachments.
+- `[ ]` P2 · S · Photo + qualification/document attachments (reuse batch-17/18 storage + `Avatar`).
 - `[ ]` P3 · S · Per-teacher workload view (periods, subjects, sections).
 
 ### Attendance (M6)

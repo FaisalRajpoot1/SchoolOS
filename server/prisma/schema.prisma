@@ -153,6 +153,9 @@ model School {
   email   String?
   phone   String?
   logoUrl String?
+  // Storage key for an uploaded logo (served via /settings/logo); takes
+  // precedence over the external logoUrl when present.
+  logoKey String?
 
   // Profile / address.
   websiteUrl String?
@@ -346,6 +349,8 @@ model Student {
   email         String?
   phone         String?
   address       String?
+  // Storage key for the student's profile photo (served via /students/:id/photo).
+  photoKey      String?
   status        StudentStatus @default(ACTIVE)
   admissionDate DateTime      @default(now())
   createdAt     DateTime      @default(now())

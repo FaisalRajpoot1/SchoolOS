@@ -542,3 +542,18 @@ A secure document store: files are held by a pluggable storage backend (local fi
 | DELETE | `/documents/:id`           | Delete the metadata row and its stored file                             |
 
 Categories: `GENERAL`, `ID_PROOF`, `CERTIFICATE`, `REPORT`, `MEDICAL`, `CONTRACT`, `OTHER`.
+
+## Photos & Branding — Module N4b (role `SCHOOL_ADMIN`, tenant-scoped)
+
+Student profile photos and a school logo, stored via the same file-storage backend as documents. Uploads are `multipart/form-data` (field `file`), image-only (PNG/JPG/WEBP/GIF — **SVG excluded**), with server-generated keys and a MIME derived from the validated extension. Images are served **inline** with `Content-Type` from the stored extension; because auth is bearer-token (not cookie) based, a direct browser navigation without the token returns 401, so images cannot be embedded cross-site with the user's credentials.
+
+| Method | Path                      | Description                                                    |
+| ------ | ------------------------- | ------------------------------------------------------------- |
+| POST   | `/students/:id/photo`     | Upload/replace a student's photo (`file`)                     |
+| GET    | `/students/:id/photo`     | Fetch the student's photo (inline image; 404 if none)         |
+| DELETE | `/students/:id/photo`     | Remove the student's photo                                    |
+| POST   | `/settings/logo`          | Upload/replace the caller's school logo (`file`)              |
+| GET    | `/settings/logo`          | Fetch the school logo (inline image; 404 if none)             |
+| DELETE | `/settings/logo`          | Remove the school logo                                        |
+
+`Student.photoKey` and `School.logoKey` hold the storage keys (null when unset); `School.logoKey` takes precedence over the external `logoUrl`.

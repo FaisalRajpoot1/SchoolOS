@@ -3,7 +3,7 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { documentsController } from './documents.controller';
-import { uploadSingle } from './upload.middleware';
+import { uploadSingle } from '@/utils/fileUpload';
 import {
   createDocumentSchema,
   documentIdParamSchema,

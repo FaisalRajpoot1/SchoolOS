@@ -6,6 +6,8 @@ import { useClasses } from '@/features/academics/useAcademics';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
+import { Avatar } from '@/components/ui/Avatar';
+import { photosApi } from '@/features/photos/photos.api';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 const statusBadge: Record<StudentStatus, string> = {
@@ -115,7 +117,13 @@ export function StudentsListPage() {
                 <tr key={s.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                   <td className="px-6 py-3 font-mono text-xs text-slate-600">{s.admissionNo}</td>
                   <td className="px-6 py-3 font-medium">
-                    <Link to={`/students/${s.id}`} className="text-brand-700">
+                    <Link to={`/students/${s.id}`} className="flex items-center gap-2 text-brand-700">
+                      <Avatar
+                        src={photosApi.studentPhotoUrl(s.id)}
+                        name={`${s.firstName} ${s.lastName}`}
+                        hasImage={!!s.photoKey}
+                        size={28}
+                      />
                       {s.firstName} {s.lastName}
                     </Link>
                   </td>

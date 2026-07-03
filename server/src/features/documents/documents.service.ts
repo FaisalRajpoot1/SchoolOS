@@ -7,7 +7,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
-import { fileStorage } from './fileStorage';
+import { fileStorage } from '@/utils/fileStorage';
 import { buildStorageKey, mimeForExtension, safeExtension } from './storageKey';
 import type { CreateDocumentInput, ListDocumentsQuery } from './documents.validation';
 

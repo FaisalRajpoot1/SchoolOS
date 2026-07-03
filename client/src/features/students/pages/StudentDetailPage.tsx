@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
+import { StudentPhotoPanel } from '@/features/photos/StudentPhotoPanel';
 import { getApiErrorMessage } from '@/lib/apiError';
 import { toast } from '@/lib/toast';
 
@@ -90,6 +91,13 @@ export function StudentDetailPage() {
             {s.firstName} {s.lastName}
           </h1>
           <p className="font-mono text-xs text-slate-500">{s.admissionNo}</p>
+          <div className="mt-3">
+            <StudentPhotoPanel
+              studentId={s.id}
+              name={`${s.firstName} ${s.lastName}`}
+              initialHasPhoto={!!s.photoKey}
+            />
+          </div>
         </div>
         <Button variant="danger" onClick={handleDelete} isLoading={deleteStudent.isPending}>
           Delete

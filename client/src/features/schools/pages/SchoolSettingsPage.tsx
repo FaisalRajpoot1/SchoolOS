@@ -6,6 +6,7 @@ import { AcademicYearsPanel } from '@/features/academicYears/components/Academic
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { TextField } from '@/components/ui/TextField';
+import { SchoolLogoPanel } from '@/features/photos/SchoolLogoPanel';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 interface ProfileForm {
@@ -88,6 +89,11 @@ export function SchoolSettingsPage() {
         <h1 className="text-2xl font-bold">School settings</h1>
         <p className="text-slate-500">Manage your school profile, branding, and sessions.</p>
       </div>
+
+      <Card className="space-y-3">
+        <h2 className="font-semibold">Logo</h2>
+        <SchoolLogoPanel initialHasLogo={!!school.data?.logoKey} />
+      </Card>
 
       <form onSubmit={onSubmit} className="space-y-6">
         <Card className="space-y-4">

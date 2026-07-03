@@ -5,6 +5,7 @@ export interface School {
   email: string | null;
   phone: string | null;
   logoUrl: string | null;
+  logoKey: string | null;
   websiteUrl: string | null;
   address: string | null;
   city: string | null;

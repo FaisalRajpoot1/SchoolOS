@@ -37,6 +37,7 @@ export interface StudentListItem {
   status: StudentStatus;
   class: NamedRef | null;
   section: NamedRef | null;
+  photoKey: string | null;
   _count: { guardians: number };
 }
 
@@ -52,6 +53,7 @@ export interface StudentDetail {
   address: string | null;
   status: StudentStatus;
   admissionDate: string;
+  photoKey: string | null;
   class: NamedRef | null;
   section: NamedRef | null;
   guardians: Guardian[];

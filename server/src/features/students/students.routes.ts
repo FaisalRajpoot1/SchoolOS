@@ -3,6 +3,8 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { studentsController } from './students.controller';
+import { photosController } from '@/features/photos/photos.controller';
+import { uploadSingle } from '@/utils/fileUpload';
 import {
   bulkImportSchema,
   createStudentSchema,
@@ -38,6 +40,20 @@ router.patch(
   studentsController.setStatus,
 );
 router.delete('/:id', validate({ params: studentIdParamSchema }), studentsController.remove);
+
+// Profile photo (served inline; fetched with a bearer token).
+router.post(
+  '/:id/photo',
+  validate({ params: studentIdParamSchema }),
+  uploadSingle('file'),
+  photosController.setStudentPhoto,
+);
+router.get('/:id/photo', validate({ params: studentIdParamSchema }), photosController.getStudentPhoto);
+router.delete(
+  '/:id/photo',
+  validate({ params: studentIdParamSchema }),
+  photosController.deleteStudentPhoto,
+);
 
 // Enable/reset a student-portal login for the student.
 router.post(
