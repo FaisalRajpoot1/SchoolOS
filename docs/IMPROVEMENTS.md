@@ -130,6 +130,10 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 ### Events (M20)
 - `[~]` P3 · S · RSVP + iCal export + reminders. — iCal (`.ics`) per-event export done (batch 11); RSVP done (batch 13): `EventRsvp` model + migration, audience-scoped `GET/PUT/DELETE /events/:id/rsvp` (own response + counts), admin `GET /events/:id/rsvps` attendee list, pure `summarizeRsvps` + unit tests, RSVP buttons with counts on the calendar page. Reminders still open.
 
+### Notifications (N3)
+- `[ ]` P2 · M · Move notification fan-out off the request hot path to a background job/queue (currently synchronous `createMany`, capped at 5000 recipients per publish with a logged overflow warning — see `notifications.service.ts`). Add redelivery/reconciliation since fan-out is best-effort.
+- `[ ]` P3 · M · Real delivery channels (email/SMS/push) behind the same `notify*` producers; more producers (events, attendance, fees).
+
 ### Certificates (M21)
 - `[ ]` P1 · M · PDF certificate with embedded QR to the verify URL (needs 1.11).
 - `[ ]` P3 · M · Admin template editor.
@@ -158,7 +162,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 |---|--------|-----|-----|-------|
 | N1 | `[x]` **Student Portal** — student login (Student.userId), admin provisioning (`POST /students/:id/portal-access`), `/student-portal/*` own-data endpoints, client portal page + STUDENT dashboard/nav; shared `portalData` helpers deduped with parent portal | P1 | M | Done — batch 4 |
 | N2 | `[x]` **Online Admissions / Enquiry** — public `/apply/:schoolId` form → admin pipeline (status flow) → convert-to-student. `AdmissionApplication` model, public+admin endpoints. Done — batch 8 |
-| N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
+| N3 | `[~]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) — batch 16: `Notification` model + migration; `/notifications` own-inbox (list/unread-count/mark-read/mark-all/delete) + reusable `notify`/`notifyUsers`/`notifyAudience(Safe)` producers; pure `rolesForAudience` (inverts audience visibility) + tests; announcement publish fans out to the audience (author excluded, best-effort); client inbox page + nav unread badge (60s poll). In-app inbox done; email/SMS/push delivery channels still open. | P2 | M | Mostly done — batch 16 |
 | N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |
 | N5 | `[~]` **Health / Medical records** (infirmary visits, allergies, vaccinations) — batch 15: `MedicalProfile` (1:1) + `InfirmaryVisit` models + migration; `/medical` admin-only endpoints (profile upsert w/ derived BMI, visit CRUD); pure `bmi` helper + tests; admin Medical page (student picker → profile editor + visit log). Vaccination records still open. | P3 | M | Mostly done — batch 15 |
 | N6 | `[x]` **Disciplinary / Behavior records** (incidents, merits/demerits) — batch 14: `BehaviorRecord` model + migration, `/behavior` CRUD + `/behavior/students/:id/summary` (merits/demerits/incidents/netPoints), signed-points rule (merit ≥ 0, demerit ≤ 0), pure `summarizeBehavior` + unit tests, admin Behaviour page (add/filter/delete) + nav. | P3 | S | Done — batch 14 |

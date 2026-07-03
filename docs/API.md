@@ -514,3 +514,17 @@ Student medical profiles (one per student) and an infirmary visit log. All route
 | DELETE | `/medical/visits/:id`                   | Delete a visit                                               |
 
 Visit outcomes: `RESOLVED`, `SENT_HOME`, `REFERRED`, `MONITORING`. Blood groups: `A±`, `B±`, `O±`, `AB±`.
+
+## Notifications — Module N3 (any authenticated user, tenant-scoped)
+
+An in-app inbox: each user sees and manages only their own notifications. Producers in other modules deliver notifications via an internal helper — publishing an announcement fans one out to every active user whose role receives its audience (the author is excluded).
+
+| Method | Path                          | Description                                                     |
+| ------ | ----------------------------- | -------------------------------------------------------------- |
+| GET    | `/notifications`              | List own notifications (paginated; `unread=true` filter)       |
+| GET    | `/notifications/unread-count` | Count of the caller's unread notifications                     |
+| POST   | `/notifications/read-all`     | Mark all of the caller's notifications read (`{ updated }`)    |
+| POST   | `/notifications/:id/read`     | Mark one notification read                                     |
+| DELETE | `/notifications/:id`          | Delete one of the caller's notifications                       |
+
+Types: `GENERAL`, `ANNOUNCEMENT`, `EVENT`, `BEHAVIOR`, `ATTENDANCE`, `FEE`. A notification carries an optional `link` (in-app path) and `body`. Fan-out is best-effort — a delivery failure never fails the triggering action.

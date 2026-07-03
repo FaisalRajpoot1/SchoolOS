@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import type {
   CreateAnnouncementInput,
   ListAnnouncementsQuery,
@@ -41,7 +42,7 @@ const assertAnnouncement = async (schoolId: string, id: string): Promise<void> =
 
 export const announcementsService = {
   async create(schoolId: string, authorId: string, input: CreateAnnouncementInput) {
-    return prisma.announcement.create({
+    const announcement = await prisma.announcement.create({
       data: {
         schoolId,
         authorId,
@@ -54,6 +55,22 @@ export const announcementsService = {
       },
       include: authorSelect,
     });
+
+    // Fan out an inbox notification to the audience (best-effort — a delivery
+    // failure must not fail the publish). The author is excluded.
+    await notificationsService.notifyAudienceSafe(
+      schoolId,
+      announcement.audience,
+      {
+        type: 'ANNOUNCEMENT',
+        title: `New notice: ${announcement.title}`,
+        body: announcement.body.slice(0, 280),
+        link: '/announcements',
+      },
+      authorId,
+    );
+
+    return announcement;
   },
 
   async list(

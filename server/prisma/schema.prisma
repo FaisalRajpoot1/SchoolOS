@@ -214,6 +214,7 @@ model School {
   behaviorRecords       BehaviorRecord[]
   medicalProfiles       MedicalProfile[]
   infirmaryVisits       InfirmaryVisit[]
+  notifications         Notification[]
 
   @@map("schools")
 }
@@ -1315,6 +1316,36 @@ model InfirmaryVisit {
   @@map("infirmary_visits")
 }
 
+enum NotificationType {
+  GENERAL
+  ANNOUNCEMENT
+  EVENT
+  BEHAVIOR
+  ATTENDANCE
+  FEE
+}
+
+/// An in-app inbox notification delivered to a single user.
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType @default(GENERAL)
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([schoolId])
+  @@map("notifications")
+}
+
 /// An issued certificate for a student, with a public verification code.
 model Certificate {
   id               String          @id @default(uuid())
@@ -1456,6 +1487,7 @@ model User {
   eventRsvps          EventRsvp[]
   behaviorRecords     BehaviorRecord[]     @relation("BehaviorRecorder")
   infirmaryVisits     InfirmaryVisit[]     @relation("InfirmaryRecorder")
+  notifications       Notification[]
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])
