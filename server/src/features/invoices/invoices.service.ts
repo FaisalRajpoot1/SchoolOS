@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import type {
   AddPaymentInput,
   CreateInvoiceInput,
@@ -117,6 +118,13 @@ export const invoicesService = {
         },
         include: detailInclude,
       });
+
+      await notificationsService.notifyGuardiansSafe(schoolId, [input.studentId], {
+        type: 'FEE',
+        title: `New invoice ${invoice.invoiceNo}`,
+        body: `${invoice.title} — total ${invoice.total}.`,
+      });
+
       return withTotals(invoice);
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {

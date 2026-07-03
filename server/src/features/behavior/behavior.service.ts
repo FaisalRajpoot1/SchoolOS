@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import { summarizeBehavior, type BehaviorSummary } from './behavior.summary';
 import type {
   CreateBehaviorInput,
@@ -46,10 +47,14 @@ const normalizePoints = (type: BehaviorRecord['type'], points: number): number =
   return 0;
 };
 
+/** Title-case label for a behaviour type (e.g. MERIT → "Merit"). */
+const labelForType = (type: BehaviorRecord['type']): string =>
+  type.charAt(0) + type.slice(1).toLowerCase();
+
 export const behaviorService = {
   async create(schoolId: string, recordedById: string, input: CreateBehaviorInput) {
     await assertStudent(schoolId, input.studentId);
-    return prisma.behaviorRecord.create({
+    const record = await prisma.behaviorRecord.create({
       data: {
         schoolId,
         studentId: input.studentId,
@@ -62,6 +67,14 @@ export const behaviorService = {
       },
       include: recordInclude,
     });
+
+    await notificationsService.notifyGuardiansSafe(schoolId, [input.studentId], {
+      type: 'BEHAVIOR',
+      title: `${labelForType(record.type)}: ${record.title}`,
+      body: `${record.student.firstName} ${record.student.lastName} — ${labelForType(record.type).toLowerCase()} recorded.`,
+    });
+
+    return record;
   },
 
   async list(
