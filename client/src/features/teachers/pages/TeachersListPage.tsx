@@ -5,6 +5,8 @@ import { STAFF_STATUSES, type StaffStatus } from '../teachers.types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
+import { Avatar } from '@/components/ui/Avatar';
+import { photosApi } from '@/features/photos/photos.api';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 const statusBadge: Record<StaffStatus, string> = {
@@ -90,7 +92,13 @@ export function TeachersListPage() {
                 <tr key={t.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                   <td className="px-6 py-3 font-mono text-xs text-slate-600">{t.employeeNo}</td>
                   <td className="px-6 py-3 font-medium">
-                    <Link to={`/teachers/${t.id}`} className="text-brand-700">
+                    <Link to={`/teachers/${t.id}`} className="flex items-center gap-2 text-brand-700">
+                      <Avatar
+                        src={photosApi.teacherPhotoUrl(t.id)}
+                        name={`${t.firstName} ${t.lastName}`}
+                        hasImage={!!t.photoKey}
+                        size={28}
+                      />
                       {t.firstName} {t.lastName}
                     </Link>
                   </td>

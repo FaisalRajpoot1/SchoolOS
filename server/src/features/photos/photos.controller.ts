@@ -31,6 +31,25 @@ export const photosController = {
     res.status(204).send();
   }),
 
+  // ---- Teacher photo ----
+  setTeacherPhoto: asyncHandler(async (req: Request, res: Response) => {
+    await photosService.setTeacherPhoto(requireSchoolId(req.user), req.params.id as string, req.file);
+    res.status(200).json({ success: true, data: { hasPhoto: true } });
+  }),
+
+  getTeacherPhoto: asyncHandler(async (req: Request, res: Response) => {
+    const { buffer, mimeType } = await photosService.getTeacherPhoto(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    sendImage(res, buffer, mimeType);
+  }),
+
+  deleteTeacherPhoto: asyncHandler(async (req: Request, res: Response) => {
+    await photosService.deleteTeacherPhoto(requireSchoolId(req.user), req.params.id as string);
+    res.status(204).send();
+  }),
+
   // ---- School logo ----
   setSchoolLogo: asyncHandler(async (req: Request, res: Response) => {
     await photosService.setSchoolLogo(requireSchoolId(req.user), req.file);

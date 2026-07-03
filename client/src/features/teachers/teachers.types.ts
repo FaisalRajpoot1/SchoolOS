@@ -17,6 +17,7 @@ export interface TeacherListItem {
   lastName: string;
   email: string;
   status: StaffStatus;
+  photoKey: string | null;
   _count: { classSections: number; subjectAssignments: number };
 }
 
@@ -34,6 +35,7 @@ export interface TeacherDetail {
   salary: number | null;
   joiningDate: string;
   status: StaffStatus;
+  photoKey: string | null;
   user: { id: string; email: string; isActive: boolean } | null;
   classSections: { id: string; name: string; class: NamedRef }[];
   subjectAssignments: {

@@ -557,6 +557,9 @@ Student profile photos and a school logo, stored via the same file-storage backe
 | POST   | `/students/:id/photo`     | Upload/replace a student's photo (`file`)                     |
 | GET    | `/students/:id/photo`     | Fetch the student's photo (inline image; 404 if none)         |
 | DELETE | `/students/:id/photo`     | Remove the student's photo                                    |
+| POST   | `/teachers/:id/photo`     | Upload/replace a teacher's photo (`file`)                     |
+| GET    | `/teachers/:id/photo`     | Fetch the teacher's photo (inline image; 404 if none)         |
+| DELETE | `/teachers/:id/photo`     | Remove the teacher's photo                                    |
 | POST   | `/settings/logo`          | Upload/replace the caller's school logo (`file`)              |
 | GET    | `/settings/logo`          | Fetch the school logo (inline image; 404 if none)             |
 | DELETE | `/settings/logo`          | Remove the school logo                                        |

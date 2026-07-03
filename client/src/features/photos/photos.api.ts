@@ -9,12 +9,19 @@ const postImage = async (url: string, file: File): Promise<void> => {
 
 export const photosApi = {
   studentPhotoUrl: (studentId: string): string => `/students/${studentId}/photo`,
+  teacherPhotoUrl: (teacherId: string): string => `/teachers/${teacherId}/photo`,
   logoUrl: (): string => '/settings/logo',
 
   uploadStudentPhoto: (studentId: string, file: File): Promise<void> =>
     postImage(`/students/${studentId}/photo`, file),
   deleteStudentPhoto: async (studentId: string): Promise<void> => {
     await api.delete(`/students/${studentId}/photo`);
+  },
+
+  uploadTeacherPhoto: (teacherId: string, file: File): Promise<void> =>
+    postImage(`/teachers/${teacherId}/photo`, file),
+  deleteTeacherPhoto: async (teacherId: string): Promise<void> => {
+    await api.delete(`/teachers/${teacherId}/photo`);
   },
 
   uploadLogo: (file: File): Promise<void> => postImage('/settings/logo', file),

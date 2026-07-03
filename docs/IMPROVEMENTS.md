@@ -70,7 +70,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · S · Photo thumbnails / batch avatar endpoint for lists (avatars currently fetch one blob per row; a client object-URL cache dedups remounts — batch 18 — but first render is still N requests).
 
 ### Teachers (M4)
-- `[ ]` P2 · S · Photo + qualification/document attachments (reuse batch-17/18 storage + `Avatar`).
+- `[~]` P2 · S · Photo + qualification/document attachments — batch 21: teacher photo upload/serve/delete (`/teachers/:id/photo`, image-only, inline), avatars in list + `PhotoPanel` on detail (generalized from the student panel). Document attachments still open (reuse the documents module's `employeeId` owner or add a teacher owner).
 - `[ ]` P3 · S · Per-teacher workload view (periods, subjects, sections).
 
 ### Attendance (M6)

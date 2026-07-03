@@ -8,6 +8,8 @@ import { STAFF_STATUSES, type StaffStatus } from '../teachers.types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
+import { PhotoPanel } from '@/features/photos/PhotoPanel';
+import { photosApi } from '@/features/photos/photos.api';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 function Detail({ label, value }: { label: string; value: string | null }) {
@@ -48,6 +50,15 @@ export function TeacherDetailPage() {
             {t.firstName} {t.lastName}
           </h1>
           <p className="font-mono text-xs text-slate-500">{t.employeeNo}</p>
+          <div className="mt-3">
+            <PhotoPanel
+              src={photosApi.teacherPhotoUrl(t.id)}
+              name={`${t.firstName} ${t.lastName}`}
+              initialHasPhoto={!!t.photoKey}
+              upload={(file) => photosApi.uploadTeacherPhoto(t.id, file)}
+              remove={() => photosApi.deleteTeacherPhoto(t.id)}
+            />
+          </div>
         </div>
         <Button variant="danger" onClick={handleDelete} isLoading={deleteTeacher.isPending}>
           Delete

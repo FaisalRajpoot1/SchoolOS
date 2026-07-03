@@ -78,6 +78,47 @@ export const photosService = {
     await fileStorage.remove(student.photoKey);
   },
 
+  // ---- Teacher photo ----
+
+  async setTeacherPhoto(schoolId: string, teacherId: string, file: UploadedFile | undefined) {
+    const teacher = await prisma.teacher.findFirst({
+      where: { id: teacherId, schoolId },
+      select: { id: true, photoKey: true },
+    });
+    if (!teacher) throw ApiError.notFound('Teacher not found');
+
+    const { key, buffer } = await prepareImage(file);
+    await fileStorage.save(key, buffer);
+    try {
+      await prisma.teacher.update({ where: { id: teacher.id }, data: { photoKey: key } });
+    } catch (err) {
+      await fileStorage.remove(key);
+      throw err;
+    }
+    if (teacher.photoKey && teacher.photoKey !== key) await fileStorage.remove(teacher.photoKey);
+  },
+
+  async getTeacherPhoto(schoolId: string, teacherId: string): Promise<ImageResponse> {
+    const teacher = await prisma.teacher.findFirst({
+      where: { id: teacherId, schoolId },
+      select: { photoKey: true },
+    });
+    if (!teacher) throw ApiError.notFound('Teacher not found');
+    if (!teacher.photoKey) throw ApiError.notFound('No photo for this teacher');
+    return readImage(teacher.photoKey, extOf(teacher.photoKey));
+  },
+
+  async deleteTeacherPhoto(schoolId: string, teacherId: string): Promise<void> {
+    const teacher = await prisma.teacher.findFirst({
+      where: { id: teacherId, schoolId },
+      select: { id: true, photoKey: true },
+    });
+    if (!teacher) throw ApiError.notFound('Teacher not found');
+    if (!teacher.photoKey) return;
+    await prisma.teacher.update({ where: { id: teacher.id }, data: { photoKey: null } });
+    await fileStorage.remove(teacher.photoKey);
+  },
+
   // ---- School logo ----
 
   async setSchoolLogo(schoolId: string, file: UploadedFile | undefined) {

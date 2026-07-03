@@ -1483,6 +1483,8 @@ model Teacher {
   dateOfBirth     DateTime?
   qualification   String?
   experienceYears Int?
+  // Storage key for the teacher's profile photo (served via /teachers/:id/photo).
+  photoKey        String?
   /// Monthly salary in major currency units (school's currency).
   salary          Int?
   joiningDate     DateTime    @default(now())

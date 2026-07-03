@@ -3,6 +3,8 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { teachersController } from './teachers.controller';
+import { photosController } from '@/features/photos/photos.controller';
+import { uploadSingle } from '@/utils/fileUpload';
 import {
   createTeacherSchema,
   listTeachersSchema,
@@ -29,5 +31,19 @@ router.patch(
   teachersController.setStatus,
 );
 router.delete('/:id', validate({ params: teacherIdParamSchema }), teachersController.remove);
+
+// Profile photo (served inline; fetched with a bearer token).
+router.post(
+  '/:id/photo',
+  validate({ params: teacherIdParamSchema }),
+  uploadSingle('file'),
+  photosController.setTeacherPhoto,
+);
+router.get('/:id/photo', validate({ params: teacherIdParamSchema }), photosController.getTeacherPhoto);
+router.delete(
+  '/:id/photo',
+  validate({ params: teacherIdParamSchema }),
+  photosController.deleteTeacherPhoto,
+);
 
 export const teacherRoutes = router;
