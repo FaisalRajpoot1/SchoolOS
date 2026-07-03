@@ -39,7 +39,8 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | 1.7 | `[ ]` OpenAPI/Swagger spec generated from Zod (`zod-to-openapi`) + Swagger UI | P2 | M | FEAT |
 | 1.8 | `[ ]` Docker + docker-compose (Postgres + server + client) for one-command local run | P2 | M | DEBT |
 | 1.9 | `[ ]` Background job queue (BullMQ/Redis) for emails, PDF generation, bulk jobs | P3 | L | DEBT |
-| 1.10 | `[x]` File upload/storage service — pluggable `FileStorage` (`utils/fileStorage`) + multer upload middleware; local-disk backend (path-traversal-guarded), S3/GCS swappable without touching callers — batch 17 (documents) / 18 (photos) | P2 | M | FEAT |
+| 1.10 | `[x]` File upload/storage service — pluggable `FileStorage` (`utils/fileStorage`) + multer upload middleware; local-disk backend (path-traversal-guarded), S3/GCS swappable without touching callers — batch 17 (documents) / 18 (photos) / 23 (attachments) | P2 | M | FEAT |
+| 1.15 | `[ ]` Orphaned-blob GC: DB-level `onDelete: Cascade` (documents, photos, attachments) removes rows but not stored files; add a reaper job (or route deletes through the service) so blobs are cleaned up on parent delete | P3 | M | DEBT |
 | 1.11 | `[x]` PDF generation service (pdfkit + qrcode; `utils/pdf.renderPdf`/`sendPdf`) — used by payslips + certificates | P1 | M | FEAT |
 | 1.12 | `[ ]` Notification providers (email via Resend/SES, SMS, push) behind a provider interface | P2 | L | FEAT |
 | 1.13 | `[ ]` Soft-delete / archival for core records instead of hard delete (recoverability + FK safety) | P3 | M | DEBT |
@@ -100,7 +101,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Homework (M10) / Assignments (M11)
 - `[ ]` P1 · M · Owner-only grading (0.2).
-- `[ ]` P2 · M · Real file attachments for tasks & submissions (needs 1.10).
+- `[~]` P2 · M · Real file attachments for tasks & submissions — batch 23: task attachments (`Attachment` model + shared attachments store/controller reused across both modules; `/{homework,assignments}/:id/attachments` upload/list/download/delete; owning-teacher-or-admin to write, any admin/teacher to read; image+doc allow-list, server-derived MIME, tenant+owner scoped). Submission-file uploads still open.
 
 ### Library (M13)
 - `[ ]` P3 · M · Reservations/holds + barcode lookup.

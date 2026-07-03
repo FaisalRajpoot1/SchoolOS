@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { attachmentsService, type UploadedFile } from '@/features/attachments/attachments.service';
 import type {
   CreateAssignmentInput,
   GradeSubmissionInput,
@@ -157,6 +158,32 @@ export const assignmentsService = {
   async remove(schoolId: string, actor: Actor, id: string): Promise<void> {
     await assertAssignmentOwned(schoolId, actor, id);
     await prisma.assignment.delete({ where: { id } });
+  },
+
+  // ---- Attachments ----
+  async listAttachments(schoolId: string, assignmentId: string) {
+    await assertAssignment(schoolId, assignmentId);
+    return attachmentsService.list(schoolId, { assignmentId });
+  },
+
+  async addAttachment(schoolId: string, actor: Actor, assignmentId: string, file: UploadedFile) {
+    await assertAssignmentOwned(schoolId, actor, assignmentId);
+    return attachmentsService.create(schoolId, actor.id, { assignmentId }, file);
+  },
+
+  async downloadAttachment(schoolId: string, assignmentId: string, attachmentId: string) {
+    await assertAssignment(schoolId, assignmentId);
+    return attachmentsService.download(schoolId, { assignmentId }, attachmentId);
+  },
+
+  async removeAttachment(
+    schoolId: string,
+    actor: Actor,
+    assignmentId: string,
+    attachmentId: string,
+  ): Promise<void> {
+    await assertAssignmentOwned(schoolId, actor, assignmentId);
+    await attachmentsService.remove(schoolId, { assignmentId }, attachmentId);
   },
 
   // ---- Submissions ----

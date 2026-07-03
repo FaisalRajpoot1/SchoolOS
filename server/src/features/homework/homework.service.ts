@@ -6,6 +6,7 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
+import { attachmentsService, type UploadedFile } from '@/features/attachments/attachments.service';
 import type {
   CreateHomeworkInput,
   GradeSubmissionInput,
@@ -140,6 +141,32 @@ export const homeworkService = {
   async remove(schoolId: string, actor: Actor, id: string): Promise<void> {
     await assertHomeworkOwned(schoolId, actor, id);
     await prisma.homework.delete({ where: { id } });
+  },
+
+  // ---- Attachments ----
+  async listAttachments(schoolId: string, homeworkId: string) {
+    await assertHomework(schoolId, homeworkId);
+    return attachmentsService.list(schoolId, { homeworkId });
+  },
+
+  async addAttachment(schoolId: string, actor: Actor, homeworkId: string, file: UploadedFile) {
+    await assertHomeworkOwned(schoolId, actor, homeworkId);
+    return attachmentsService.create(schoolId, actor.id, { homeworkId }, file);
+  },
+
+  async downloadAttachment(schoolId: string, homeworkId: string, attachmentId: string) {
+    await assertHomework(schoolId, homeworkId);
+    return attachmentsService.download(schoolId, { homeworkId }, attachmentId);
+  },
+
+  async removeAttachment(
+    schoolId: string,
+    actor: Actor,
+    homeworkId: string,
+    attachmentId: string,
+  ): Promise<void> {
+    await assertHomeworkOwned(schoolId, actor, homeworkId);
+    await attachmentsService.remove(schoolId, { homeworkId }, attachmentId);
   },
 
   // ---- Submissions ----

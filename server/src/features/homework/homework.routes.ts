@@ -3,6 +3,10 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { homeworkController } from './homework.controller';
+import { homeworkService } from './homework.service';
+import { makeAttachmentsController } from '@/features/attachments/attachments.controller';
+import { attachmentParamSchema } from '@/features/attachments/attachments.validation';
+import { uploadSingle } from '@/utils/fileUpload';
 import {
   createHomeworkSchema,
   gradeSubmissionSchema,
@@ -12,6 +16,8 @@ import {
   submissionStudentParamSchema,
   updateHomeworkSchema,
 } from './homework.validation';
+
+const attachments = makeAttachmentsController(homeworkService);
 
 const router = Router();
 
@@ -27,6 +33,25 @@ router.patch(
   homeworkController.update,
 );
 router.delete('/:id', validate({ params: homeworkIdParamSchema }), homeworkController.remove);
+
+// Attachments (teacher brief/worksheet on the task).
+router.get('/:id/attachments', validate({ params: homeworkIdParamSchema }), attachments.list);
+router.post(
+  '/:id/attachments',
+  validate({ params: homeworkIdParamSchema }),
+  uploadSingle('file'),
+  attachments.upload,
+);
+router.get(
+  '/:id/attachments/:attachmentId',
+  validate({ params: attachmentParamSchema }),
+  attachments.download,
+);
+router.delete(
+  '/:id/attachments/:attachmentId',
+  validate({ params: attachmentParamSchema }),
+  attachments.remove,
+);
 
 // Submissions (keyed by student within a homework).
 router.get('/:id/submissions', validate({ params: homeworkIdParamSchema }), homeworkController.submissions);

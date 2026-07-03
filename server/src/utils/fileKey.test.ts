@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildStorageKey, mimeForExtension, safeDownloadName, safeExtension } from './storageKey';
+import { buildStorageKey, mimeForExtension, safeDownloadName, safeExtension } from './fileKey';
 
 describe('safeExtension', () => {
   it('accepts allow-listed extensions, case-insensitively', () => {

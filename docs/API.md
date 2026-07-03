@@ -265,6 +265,10 @@ Grade scale: A+ ≥90, A ≥80, B ≥70, C ≥60, D ≥50, E ≥40, else F.
 | GET    | `/homework/:id`                            | Homework detail + submission count                              |
 | PATCH  | `/homework/:id`                            | Update title/description/dueDate/attachment/subject            |
 | DELETE | `/homework/:id`                            | Delete homework                                                 |
+| GET    | `/homework/:id/attachments`                | List task attachments (any admin/teacher)                      |
+| POST   | `/homework/:id/attachments`                | Upload an attachment (`file`; owning teacher or admin)         |
+| GET    | `/homework/:id/attachments/:attachmentId`  | Download an attachment                                          |
+| DELETE | `/homework/:id/attachments/:attachmentId`  | Remove an attachment (owning teacher or admin)                 |
 | GET    | `/homework/:id/submissions`                | Section roster with each student's submission (or null)        |
 | PUT    | `/homework/:id/submissions/:studentId`     | Record/update a submission (computes `isLate` vs due date)     |
 | PATCH  | `/homework/:id/submissions/:studentId/grade` | Add feedback + marks                                          |
@@ -281,6 +285,10 @@ Like homework, but graded out of `maxMarks` with an optional rubric.
 | GET    | `/assignments/:id`                            | Detail (rubric criteria + submission count)                    |
 | PATCH  | `/assignments/:id`                            | Update title/instructions/maxMarks/dueDate/attachment/subject  |
 | DELETE | `/assignments/:id`                            | Delete assignment                                              |
+| GET    | `/assignments/:id/attachments`                | List task attachments (any admin/teacher)                      |
+| POST   | `/assignments/:id/attachments`                | Upload an attachment (`file`; owning teacher or admin)         |
+| GET    | `/assignments/:id/attachments/:attachmentId`  | Download an attachment                                          |
+| DELETE | `/assignments/:id/attachments/:attachmentId`  | Remove an attachment (owning teacher or admin)                 |
 | GET    | `/assignments/:id/submissions`                | Section roster + each student's submission                     |
 | PUT    | `/assignments/:id/submissions/:studentId`     | Record/update a submission (computes `isLate`)                  |
 | PATCH  | `/assignments/:id/submissions/:studentId/grade` | Grade (`marks` ≤ maxMarks, `feedback`)                       |

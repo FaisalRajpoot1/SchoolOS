@@ -11,6 +11,7 @@ import {
 import type { AssignmentSubmission } from '../assignments.types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { AttachmentsPanel } from '@/features/attachments/AttachmentsPanel';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 interface RowProps {
@@ -126,6 +127,8 @@ export function AssignmentDetailPage() {
           )}
         </Card>
       )}
+
+      <AttachmentsPanel basePath={`/assignments/${id}`} />
 
       <Card className="p-0">
         <div className="border-b border-slate-200 px-6 py-3 text-sm font-semibold">Submissions</div>

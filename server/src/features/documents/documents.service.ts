@@ -8,7 +8,7 @@ import {
   type PaginationMeta,
 } from '@/utils/pagination';
 import { fileStorage } from '@/utils/fileStorage';
-import { buildStorageKey, mimeForExtension, safeExtension } from './storageKey';
+import { buildStorageKey, mimeForExtension, safeExtension } from '@/utils/fileKey';
 import type { CreateDocumentInput, ListDocumentsQuery } from './documents.validation';
 
 const documentSelect = {

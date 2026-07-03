@@ -3,7 +3,7 @@ import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
 import { ApiError } from '@/utils/ApiError';
 import { documentsService } from './documents.service';
-import { safeDownloadName } from './storageKey';
+import { safeDownloadName } from '@/utils/fileKey';
 
 export const documentsController = {
   create: asyncHandler(async (req: Request, res: Response) => {
