@@ -17,7 +17,12 @@ token is an httpOnly cookie set by the server.
 
 | Method | Path             | Auth   | Description                              |
 | ------ | ---------------- | ------ | ---------------------------------------- |
-| POST   | `/auth/login`    | —      | Login (email + password + schoolId). After `MAX_FAILED_LOGINS` (default 5) wrong passwords the account locks for `LOGIN_LOCKOUT_MINUTES` (default 15) → `429` |
+| POST   | `/auth/login`    | —      | Login (email + password + schoolId, optional `totpCode`/`backupCode`). After `MAX_FAILED_LOGINS` (default 5) wrong passwords the account locks for `LOGIN_LOCKOUT_MINUTES` (default 15) → `429`. When 2FA is enabled, a correct password with no code returns `{ twoFactorRequired: true }` (no tokens) and the client resubmits with a code |
+| GET    | `/auth/2fa`      | Bearer | 2FA status (`enabled`, `backupCodesRemaining`) |
+| POST   | `/auth/2fa/setup` | Bearer | Begin TOTP setup → `{ secret, otpauthUrl, qrDataUrl }` (pending until enabled) |
+| POST   | `/auth/2fa/enable` | Bearer | Confirm setup with a `code`, enable 2FA → `{ backupCodes }` (shown once) |
+| POST   | `/auth/2fa/disable` | Bearer | Disable 2FA (requires the account `password`) |
+| POST   | `/auth/2fa/backup-codes` | Bearer | Regenerate backup codes (requires a current `code`) |
 | POST   | `/auth/refresh`  | cookie | Rotate refresh token, issue access token |
 | POST   | `/auth/logout`   | cookie | Revoke refresh token                     |
 | GET    | `/auth/me`       | Bearer | Current user profile                     |

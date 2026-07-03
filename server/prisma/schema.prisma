@@ -1520,6 +1520,10 @@ model User {
   // Login-lockout state (reset on a successful login).
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+  // Two-factor auth (TOTP). `totpSecret` is set once during setup; `totpEnabled`
+  // flips true only after the first code is verified.
+  totpSecret   String?
+  totpEnabled  Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -1541,11 +1545,27 @@ model User {
   infirmaryVisits     InfirmaryVisit[]     @relation("InfirmaryRecorder")
   notifications       Notification[]
   documents           Document[]           @relation("DocumentUploader")
+  backupCodes         BackupCode[]
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])
   @@index([schoolId])
   @@map("users")
+}
+
+/// A single-use two-factor recovery code (SHA-256 hashed). Consumed by setting
+/// `usedAt`; regenerated wholesale when the user asks for a fresh set.
+model BackupCode {
+  id        String    @id @default(uuid())
+  codeHash  String    @unique
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("backup_codes")
 }
 
 /// Hashed refresh tokens for rotation/revocation. One row per session.

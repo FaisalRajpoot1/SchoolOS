@@ -22,6 +22,13 @@ export interface LoginPayload {
   email: string;
   password: string;
   schoolId: string;
+  totpCode?: string;
+  backupCode?: string;
+}
+
+/** Login response when the password is correct but a 2FA code is still needed. */
+export interface TwoFactorRequired {
+  twoFactorRequired: true;
 }
 
 export interface RegisterPayload extends LoginPayload {

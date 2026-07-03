@@ -13,6 +13,7 @@ import {
   reachedLockThreshold,
   type LockoutPolicy,
 } from './lockout';
+import { twoFactorService } from './twoFactor.service';
 import type { LoginInput } from './auth.validation';
 
 const lockoutPolicy = (): LockoutPolicy => ({
@@ -48,6 +49,34 @@ export interface AuthResult {
   refreshToken: string;
 }
 
+/** Returned by login when the password is correct but a 2FA code is still needed. */
+export interface TwoFactorChallenge {
+  twoFactorRequired: true;
+}
+
+export const isTwoFactorChallenge = (
+  result: AuthResult | TwoFactorChallenge,
+): result is TwoFactorChallenge => 'twoFactorRequired' in result;
+
+/** Atomically records a failed login and locks the account at the threshold. */
+const recordLoginFailure = async (
+  userId: string,
+  now: Date,
+  policy: LockoutPolicy,
+): Promise<void> => {
+  const { failedLoginAttempts } = await prisma.user.update({
+    where: { id: userId },
+    data: { failedLoginAttempts: { increment: 1 } },
+    select: { failedLoginAttempts: true },
+  });
+  if (reachedLockThreshold(failedLoginAttempts, policy)) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginAttempts: 0, lockedUntil: lockUntil(now, policy) },
+    });
+  }
+};
+
 const toPublicUser = (user: User): PublicUser => ({
   id: user.id,
   email: user.email,
@@ -82,8 +111,11 @@ const issueTokens = async (user: User, context?: SessionContext): Promise<AuthRe
 
 export const authService = {
   /** Registers a new user within a school tenant. */
-  /** Authenticates a user with email + password scoped to a school. */
-  async login(input: LoginInput, context?: SessionContext): Promise<AuthResult> {
+  /** Authenticates a user with email + password (+ 2FA) scoped to a school. */
+  async login(
+    input: LoginInput,
+    context?: SessionContext,
+  ): Promise<AuthResult | TwoFactorChallenge> {
     const now = new Date();
     const policy = lockoutPolicy();
     const user = await prisma.user.findUnique({
@@ -108,25 +140,29 @@ export const authService = {
 
     if (!user || !passwordOk) {
       // Count the failure atomically so parallel guesses can't collapse into a
-      // single increment; lock once the threshold is reached. Disabled accounts
-      // aren't counted (they can't log in anyway).
-      if (user && user.isActive) {
-        const { failedLoginAttempts } = await prisma.user.update({
-          where: { id: user.id },
-          data: { failedLoginAttempts: { increment: 1 } },
-          select: { failedLoginAttempts: true },
-        });
-        if (reachedLockThreshold(failedLoginAttempts, policy)) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { failedLoginAttempts: 0, lockedUntil: lockUntil(now, policy) },
-          });
-        }
-      }
+      // single increment. Disabled accounts aren't counted (they can't log in).
+      if (user && user.isActive) await recordLoginFailure(user.id, now, policy);
       throw ApiError.unauthorized('Invalid credentials');
     }
     if (!user.isActive) {
       throw ApiError.forbidden('Account is disabled');
+    }
+
+    // Second factor: password is correct, but a 2FA-enabled account must also
+    // present a valid TOTP or single-use backup code.
+    if (user.totpEnabled) {
+      if (!input.totpCode && !input.backupCode) {
+        return { twoFactorRequired: true };
+      }
+      const ok = await twoFactorService.verifySecondFactor(user, {
+        totpCode: input.totpCode,
+        backupCode: input.backupCode,
+      });
+      if (!ok) {
+        // A wrong code counts toward lockout to bound brute force of the code.
+        await recordLoginFailure(user.id, now, policy);
+        throw ApiError.unauthorized('Invalid two-factor code');
+      }
     }
 
     await prisma.user.update({

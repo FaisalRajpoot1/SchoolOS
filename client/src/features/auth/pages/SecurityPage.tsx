@@ -7,6 +7,7 @@ import {
   useRevokeSession,
   useSessions,
 } from '../useAccount';
+import { TwoFactorPanel } from '../components/TwoFactorPanel';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { TextField } from '@/components/ui/TextField';
@@ -52,6 +53,8 @@ export function SecurityPage() {
         <h1 className="text-2xl font-bold">Security</h1>
         <p className="text-slate-500">Manage your password and active sessions.</p>
       </div>
+
+      <TwoFactorPanel />
 
       <Card className="space-y-4">
         <h2 className="font-semibold">Change password</h2>

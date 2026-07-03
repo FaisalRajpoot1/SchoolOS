@@ -9,6 +9,8 @@ import {
   loginSchema,
   resetPasswordSchema,
   sessionIdParamSchema,
+  twoFactorCodeSchema,
+  twoFactorDisableSchema,
 } from './auth.validation';
 
 /** Tighter rate limit on credential endpoints to slow brute-force attempts. */
@@ -56,5 +58,31 @@ router.delete(
   authController.revokeSession,
 );
 router.post('/sessions/revoke-others', authenticate, authController.revokeOtherSessions);
+
+// Two-factor auth (TOTP). Setup/enable/regenerate are rate-limited like other
+// credential operations.
+router.get('/2fa', authenticate, authController.twoFactorStatus);
+router.post('/2fa/setup', authenticate, authLimiter, authController.twoFactorSetup);
+router.post(
+  '/2fa/enable',
+  authenticate,
+  authLimiter,
+  validate({ body: twoFactorCodeSchema }),
+  authController.twoFactorEnable,
+);
+router.post(
+  '/2fa/disable',
+  authenticate,
+  authLimiter,
+  validate({ body: twoFactorDisableSchema }),
+  authController.twoFactorDisable,
+);
+router.post(
+  '/2fa/backup-codes',
+  authenticate,
+  authLimiter,
+  validate({ body: twoFactorCodeSchema }),
+  authController.twoFactorRegenerate,
+);
 
 export const authRoutes = router;

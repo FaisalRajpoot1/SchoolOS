@@ -9,6 +9,17 @@ export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
   schoolId: z.string().uuid(),
+  // Optional second factor (required only when the account has 2FA enabled).
+  totpCode: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code').optional(),
+  backupCode: z.string().trim().min(1).max(32).optional(),
+});
+
+export const twoFactorCodeSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+});
+
+export const twoFactorDisableSchema = z.object({
+  password: z.string().min(1),
 });
 
 export const forgotPasswordSchema = z.object({

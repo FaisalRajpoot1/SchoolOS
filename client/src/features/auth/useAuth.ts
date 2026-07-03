@@ -19,7 +19,10 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
-    onSuccess: apply,
+    onSuccess: (data) => {
+      // A 2FA challenge is not a completed login — wait for the coded resubmit.
+      if (!('twoFactorRequired' in data)) apply(data);
+    },
   });
 };
 

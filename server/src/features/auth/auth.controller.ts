@@ -4,7 +4,8 @@ import { ApiError } from '@/utils/ApiError';
 import { isProduction } from '@/config/env';
 import { REFRESH_COOKIE_NAME, REFRESH_TOKEN_TTL_MS } from '@/config/constants';
 import { auditFromRequest, recordAudit } from '@/features/audit/audit.service';
-import { authService, type SessionContext } from './auth.service';
+import { authService, isTwoFactorChallenge, type AuthResult, type SessionContext } from './auth.service';
+import { twoFactorService } from './twoFactor.service';
 
 const refreshCookieOptions: CookieOptions = {
   httpOnly: true,
@@ -23,11 +24,7 @@ const refreshCookie = (req: Request): string | undefined =>
   req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
 
 /** Writes the refresh token as an httpOnly cookie and returns the access token. */
-const sendAuth = (
-  res: Response,
-  result: Awaited<ReturnType<typeof authService.login>>,
-  status = 200,
-): void => {
+const sendAuth = (res: Response, result: AuthResult, status = 200): void => {
   res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, refreshCookieOptions);
   res.status(status).json({
     success: true,
@@ -38,11 +35,50 @@ const sendAuth = (
 export const authController = {
   login: asyncHandler(async (req: Request, res: Response) => {
     const result = await authService.login(req.body, sessionContext(req));
+    if (isTwoFactorChallenge(result)) {
+      // Password accepted; the client must resubmit with a 2FA code.
+      res.status(200).json({ success: true, data: { twoFactorRequired: true } });
+      return;
+    }
     await recordAudit('auth.login', auditFromRequest(req, {
       userId: result.user.id,
       schoolId: result.user.schoolId,
     }));
     sendAuth(res, result);
+  }),
+
+  twoFactorStatus: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const status = await twoFactorService.status(req.user.id);
+    res.status(200).json({ success: true, data: status });
+  }),
+
+  twoFactorSetup: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const data = await twoFactorService.setup(req.user.id);
+    res.status(200).json({ success: true, data });
+  }),
+
+  twoFactorEnable: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const data = await twoFactorService.enable(req.user.id, req.body.code);
+    // Turning on 2FA is a security-state change: revoke other sessions so a
+    // pre-existing (pre-2FA) session can't keep bypassing the second factor.
+    await authService.revokeOtherSessions(req.user.id, refreshCookie(req));
+    res.status(200).json({ success: true, data });
+  }),
+
+  twoFactorDisable: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    await twoFactorService.disable(req.user.id, req.body.password);
+    await authService.revokeOtherSessions(req.user.id, refreshCookie(req));
+    res.status(200).json({ success: true, message: 'Two-factor auth disabled.' });
+  }),
+
+  twoFactorRegenerate: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const data = await twoFactorService.regenerateBackupCodes(req.user.id, req.body.code);
+    res.status(200).json({ success: true, data });
   }),
 
   refresh: asyncHandler(async (req: Request, res: Response) => {

@@ -50,8 +50,9 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 ## 2. Per-module improvements
 
 ### Auth & Security (M1)
-- `[ ]` P2 · M · Two-factor auth (TOTP) + backup codes.
+- `[x]` P2 · M · Two-factor auth (TOTP) + backup codes — batch 20: `/auth/2fa/*` (setup w/ QR, enable, disable via password, regenerate); two-step login (`{ twoFactorRequired }` → resubmit with a code, no tokens until verified); single-use SHA-256-hashed backup codes (atomic consume); bad 2FA codes count toward lockout; Security-page panel + login backup-code fallback.
 - `[x]` P2 · S · Login lockout / backoff after N failed attempts per account — batch 19: per-account counter (atomic increment) + temporary lock (`MAX_FAILED_LOGINS`/`LOGIN_LOCKOUT_MINUTES`), `429` while locked, timing equalized (dummy bcrypt on the locked path), reset on success; pure `lockout` helpers + tests.
+- `[ ]` P3 · S · 2FA follow-ups (batch 20 accepted risks): encrypt `totpSecret` at rest (needs an app/KMS key) and reject TOTP replay within the ±1 window (track last-used step). Both low-likelihood for this app.
 - `[ ]` P3 · M · Email verification on account creation; password-strength meter on client.
 - `[ ]` P3 · M · Google OAuth sign-in.
 
