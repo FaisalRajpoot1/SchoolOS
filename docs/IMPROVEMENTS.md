@@ -161,7 +161,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 | N3 | `[ ]` **Notifications Center** (in-app inbox + unified delivery across email/SMS/push) | P2 | M | Ties together M19/events/attendance alerts |
 | N4 | `[ ]` **Document Management** (secure per-student/staff document store) | P2 | M | Needs 1.10 |
 | N5 | `[ ]` **Health / Medical records** (infirmary visits, allergies, vaccinations) | P3 | M | |
-| N6 | `[ ]` **Disciplinary / Behavior records** (incidents, merits/demerits) | P3 | S | |
+| N6 | `[x]` **Disciplinary / Behavior records** (incidents, merits/demerits) — batch 14: `BehaviorRecord` model + migration, `/behavior` CRUD + `/behavior/students/:id/summary` (merits/demerits/incidents/netPoints), signed-points rule (merit ≥ 0, demerit ≤ 0), pure `summarizeBehavior` + unit tests, admin Behaviour page (add/filter/delete) + nav. | P3 | S | Done — batch 14 |
 | N7 | `[ ]` **Visitor / Gate management** | P3 | S | |
 | N8 | `[ ]` **LMS / Online classes** (content, video links, quizzes) | P3 | L | Large; own initiative |
 | N9 | `[ ]` **Analytics / BI** (cross-module KPI trends over time) | P3 | M | Extends Reports |

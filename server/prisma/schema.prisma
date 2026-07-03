@@ -211,6 +211,7 @@ model School {
   certificates          Certificate[]
   apiKeys               ApiKey[]
   admissionApplications AdmissionApplication[]
+  behaviorRecords       BehaviorRecord[]
 
   @@map("schools")
 }
@@ -371,6 +372,7 @@ model Student {
   hostelAllocation      HostelAllocation?
   certificates          Certificate[]
   admissionApplication  AdmissionApplication?
+  behaviorRecords       BehaviorRecord[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -1218,6 +1220,40 @@ model EventRsvp {
   @@map("event_rsvps")
 }
 
+enum BehaviorType {
+  MERIT
+  DEMERIT
+  INCIDENT
+}
+
+/// A behaviour / disciplinary record logged against a student (merit, demerit,
+/// or a neutral incident note). `points` is the signed contribution to the
+/// student's running behaviour score.
+model BehaviorRecord {
+  id          String       @id @default(uuid())
+  type        BehaviorType
+  title       String
+  description String?
+  points      Int          @default(0)
+  occurredOn  DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // The staff member who logged it; nulled (not deleted) if that user is removed.
+  recordedById String?
+  recordedBy   User?   @relation("BehaviorRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId])
+  @@index([studentId])
+  @@map("behavior_records")
+}
+
 /// An issued certificate for a student, with a public verification code.
 model Certificate {
   id               String          @id @default(uuid())
@@ -1357,6 +1393,7 @@ model User {
   auditLogs           AuditLog[]
   announcements       Announcement[]       @relation("AnnouncementAuthor")
   eventRsvps          EventRsvp[]
+  behaviorRecords     BehaviorRecord[]     @relation("BehaviorRecorder")
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])

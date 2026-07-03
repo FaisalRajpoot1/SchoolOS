@@ -484,3 +484,18 @@ Insights are computed by a deterministic **rules engine** (always available). Re
 | POST   | `/ai/generate`       | SCHOOL_ADMIN / TEACHER | `{ kind: homework\|questions, subject, topic, grade, count }` → generated tasks/questions; `{ content, source }` |
 
 `source` is `"ai"` (Claude) or `"rules"` (fallback). No new tables — insights read existing attendance, marks, and invoice data. The server uses the official `@anthropic-ai/sdk`.
+
+## Behaviour / Discipline — Module N6 (tenant-scoped)
+
+Merits, demerits, and incident notes logged against students. Recording and viewing are `SCHOOL_ADMIN` + `TEACHER`; deletion is `SCHOOL_ADMIN`. `points` is a signed contribution to the student's running score — enforced ≥ 0 for a `MERIT` and ≤ 0 for a `DEMERIT` (`INCIDENT` is 0). The recording staff member is captured from the authenticated user.
+
+| Method | Path                                    | Auth                    | Description                                             |
+| ------ | --------------------------------------- | ----------------------- | ------------------------------------------------------ |
+| POST   | `/behavior`                             | SCHOOL_ADMIN / TEACHER  | Log a record (`studentId`, `type`, `title`, `points`, `occurredOn?`, `description?`) |
+| GET    | `/behavior`                             | SCHOOL_ADMIN / TEACHER  | List records (paginated; `studentId`, `type` filters)  |
+| GET    | `/behavior/students/:studentId/summary` | SCHOOL_ADMIN / TEACHER  | A student's tally (merits/demerits/incidents/netPoints) + 10 most recent |
+| GET    | `/behavior/:id`                         | SCHOOL_ADMIN / TEACHER  | Get one record                                         |
+| PATCH  | `/behavior/:id`                         | SCHOOL_ADMIN / TEACHER  | Update a record (re-checks the points/type sign rule)  |
+| DELETE | `/behavior/:id`                         | SCHOOL_ADMIN            | Delete a record                                        |
+
+Types: `MERIT`, `DEMERIT`, `INCIDENT`.
