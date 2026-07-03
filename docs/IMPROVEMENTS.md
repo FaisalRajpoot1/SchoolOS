@@ -123,7 +123,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Payroll (M18)
 - `[ ]` P1 · S · PDF payslip (needs 1.11).
-- `[ ]` P2 · M · Bank-transfer export file (CSV/NACHA); configurable tax slabs; YTD summary.
+- `[~]` P2 · M · Bank-transfer export file (CSV/NACHA); configurable tax slabs; YTD summary. — batch 29: per-period payroll register CSV export (`GET /payroll/register` + "Export CSV" button; employee code, name, salary components, net pay, status + totals row). True bank/NACHA file (needs employee bank fields), tax slabs, and YTD still open.
 
 ### Parent Portal (M5)
 - `[ ]` P1 · M · Online fee payment from portal (needs Fees gateway).

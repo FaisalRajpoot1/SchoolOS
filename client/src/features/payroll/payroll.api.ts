@@ -5,6 +5,7 @@ import type {
   ListPayslipsParams,
   PaginationMeta,
   Payslip,
+  PayslipStatus,
   UpdatePayslipPayload,
 } from './payroll.types';
 
@@ -44,4 +45,29 @@ export const payrollApi = {
   downloadPdf(id: string): Promise<void> {
     return downloadFile(`/payroll/payslips/${id}/pdf`, `payslip-${id}.pdf`);
   },
+  async register(periodMonth: number, periodYear: number): Promise<PayrollRegister> {
+    const { data } = await api.get<{ data: PayrollRegister }>('/payroll/register', {
+      params: { periodMonth, periodYear },
+    });
+    return data.data;
+  },
 };
+
+export interface RegisterRow {
+  employeeCode: string;
+  name: string;
+  basicSalary: number;
+  allowances: number;
+  bonus: number;
+  deductions: number;
+  tax: number;
+  netPay: number;
+  status: PayslipStatus;
+}
+
+export interface PayrollRegister {
+  periodMonth: number;
+  periodYear: number;
+  rows: RegisterRow[];
+  totals: Omit<RegisterRow, 'employeeCode' | 'name' | 'status'>;
+}

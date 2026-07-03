@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCreatePayslip, useGeneratePayslips, usePayslips } from '../usePayroll';
+import { payrollApi } from '../payroll.api';
 import { MONTHS, type PayslipStatus } from '../payroll.types';
 import { useEmployees } from '@/features/hr/useHr';
 import { formatAmount } from '@/features/fees/format';
@@ -9,7 +10,9 @@ import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { downloadCsv } from '@/lib/csv';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const thisYear = new Date().getFullYear();
 
@@ -27,6 +30,32 @@ export function PayslipsListPage() {
   });
   const generate = useGeneratePayslips();
   const create = useCreatePayslip();
+
+  const [exporting, setExporting] = useState(false);
+  const exportRegister = async (): Promise<void> => {
+    setExporting(true);
+    try {
+      const reg = await payrollApi.register(month, year);
+      if (reg.rows.length === 0) {
+        toast.info('No payslips for this period');
+        return;
+      }
+      downloadCsv(
+        `payroll-${reg.periodYear}-${String(reg.periodMonth).padStart(2, '0')}.csv`,
+        ['Employee code', 'Name', 'Basic', 'Allowances', 'Bonus', 'Deductions', 'Tax', 'Net pay', 'Status'],
+        [
+          ...reg.rows.map((r) => [
+            r.employeeCode, r.name, r.basicSalary, r.allowances, r.bonus, r.deductions, r.tax, r.netPay, r.status,
+          ]),
+          ['', 'TOTAL', reg.totals.basicSalary, reg.totals.allowances, reg.totals.bonus, reg.totals.deductions, reg.totals.tax, reg.totals.netPay, ''],
+        ],
+      );
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Could not export payroll'));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const [employeeId, setEmployeeId] = useState('');
   const [bonus, setBonus] = useState('');
@@ -50,9 +79,14 @@ export function PayslipsListPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Payroll</h1>
-        <p className="text-slate-500">Monthly payslips for staff.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Payroll</h1>
+          <p className="text-slate-500">Monthly payslips for staff.</p>
+        </div>
+        <Button variant="secondary" onClick={exportRegister} isLoading={exporting}>
+          Export CSV
+        </Button>
       </div>
 
       <Card className="flex flex-wrap items-end gap-3">

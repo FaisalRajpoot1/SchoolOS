@@ -20,6 +20,11 @@ export const payrollController = {
     res.status(200).json({ success: true, data: items, meta });
   }),
 
+  register: asyncHandler(async (req: Request, res: Response) => {
+    const data = await payrollService.register(requireSchoolId(req.user), req.query as never);
+    res.status(200).json({ success: true, data });
+  }),
+
   getById: asyncHandler(async (req: Request, res: Response) => {
     const payslip = await payrollService.getById(requireSchoolId(req.user), req.params.id as string);
     res.status(200).json({ success: true, data: { payslip } });

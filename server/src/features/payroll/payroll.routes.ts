@@ -8,6 +8,7 @@ import {
   generatePayslipsSchema,
   listPayslipsSchema,
   payslipIdParamSchema,
+  registerQuerySchema,
   updatePayslipSchema,
 } from './payroll.validation';
 
@@ -18,6 +19,7 @@ router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.HR));
 router.post('/payslips/generate', validate({ body: generatePayslipsSchema }), payrollController.generate);
 router.post('/payslips', validate({ body: createPayslipSchema }), payrollController.create);
 router.get('/payslips', validate({ query: listPayslipsSchema }), payrollController.list);
+router.get('/register', validate({ query: registerQuerySchema }), payrollController.register);
 router.get('/payslips/:id', validate({ params: payslipIdParamSchema }), payrollController.getById);
 router.get('/payslips/:id/pdf', validate({ params: payslipIdParamSchema }), payrollController.pdf);
 router.patch(

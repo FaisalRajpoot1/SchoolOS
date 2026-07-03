@@ -10,6 +10,7 @@ import type {
   CreatePayslipInput,
   GeneratePayslipsInput,
   ListPayslipsQuery,
+  RegisterQuery,
   UpdatePayslipInput,
 } from './payroll.validation';
 import { buildPayslipPdf } from './payslip.pdf';
@@ -137,6 +138,41 @@ export const payrollService = {
     ]);
 
     return { items, meta: buildPaginationMeta(query, total) };
+  },
+
+  /** Full payroll register for a period (no pagination) — feeds CSV export. */
+  async register(schoolId: string, query: RegisterQuery) {
+    const payslips = await prisma.payslip.findMany({
+      where: { schoolId, periodYear: query.periodYear, periodMonth: query.periodMonth },
+      orderBy: [{ employee: { lastName: 'asc' } }, { employee: { firstName: 'asc' } }],
+      include: employeeSelect,
+    });
+
+    const rows = payslips.map((p) => ({
+      employeeCode: p.employee.employeeCode,
+      name: `${p.employee.firstName} ${p.employee.lastName}`,
+      basicSalary: p.basicSalary,
+      allowances: p.allowances,
+      bonus: p.bonus,
+      deductions: p.deductions,
+      tax: p.tax,
+      netPay: p.netPay,
+      status: p.status,
+    }));
+
+    const totals = rows.reduce(
+      (acc, r) => ({
+        basicSalary: acc.basicSalary + r.basicSalary,
+        allowances: acc.allowances + r.allowances,
+        bonus: acc.bonus + r.bonus,
+        deductions: acc.deductions + r.deductions,
+        tax: acc.tax + r.tax,
+        netPay: acc.netPay + r.netPay,
+      }),
+      { basicSalary: 0, allowances: 0, bonus: 0, deductions: 0, tax: 0, netPay: 0 },
+    );
+
+    return { periodMonth: query.periodMonth, periodYear: query.periodYear, rows, totals };
   },
 
   async getById(schoolId: string, id: string) {

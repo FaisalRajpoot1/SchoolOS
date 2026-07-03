@@ -43,7 +43,11 @@ export const listPayslipsSchema = paginationSchema.extend({
 
 export const payslipIdParamSchema = z.object({ id: z.string().uuid() });
 
+/** Full-period register (no pagination) for CSV export. */
+export const registerQuerySchema = z.object({ periodMonth: month, periodYear: year });
+
 export type CreatePayslipInput = z.infer<typeof createPayslipSchema>;
 export type GeneratePayslipsInput = z.infer<typeof generatePayslipsSchema>;
 export type UpdatePayslipInput = z.infer<typeof updatePayslipSchema>;
 export type ListPayslipsQuery = z.infer<typeof listPayslipsSchema>;
+export type RegisterQuery = z.infer<typeof registerQuerySchema>;
