@@ -45,7 +45,12 @@ export const calendarQuerySchema = z.object({
 
 export const eventIdParamSchema = z.object({ id: z.string().uuid() });
 
+export const rsvpBodySchema = z
+  .object({ status: z.enum(['GOING', 'MAYBE', 'NOT_GOING']) })
+  .strict();
+
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type ListEventsQuery = z.infer<typeof listEventsSchema>;
 export type CalendarQuery = z.infer<typeof calendarQuerySchema>;
+export type RsvpInput = z.infer<typeof rsvpBodySchema>;

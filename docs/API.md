@@ -421,6 +421,10 @@ School calendar. The calendar feed is readable by any authenticated user (audien
 | ------ | ------------------- | ------------- | -------------------------------------------------------------- |
 | GET    | `/events/calendar`  | any           | Events overlapping `[from, to]` (defaults to the next 60 days) for the caller's role |
 | GET    | `/events/:id/ics`   | any           | Download one event as an iCalendar (`.ics`) file (audience-filtered by role) |
+| GET    | `/events/:id/rsvp`  | any           | The caller's own RSVP status + aggregate counts (`going`/`maybe`/`notGoing`/`total`) |
+| PUT    | `/events/:id/rsvp`  | any           | Set/replace the caller's RSVP (`status`: `GOING`/`MAYBE`/`NOT_GOING`) |
+| DELETE | `/events/:id/rsvp`  | any           | Withdraw the caller's RSVP |
+| GET    | `/events/:id/rsvps` | SCHOOL_ADMIN  | Full attendee list (name, role, status)                       |
 | POST   | `/events`           | SCHOOL_ADMIN  | Create an event (`type`, `audience`, dates, `location`, `allDay`) |
 | GET    | `/events`           | SCHOOL_ADMIN  | Manage list (paginated, `type` filter)                        |
 | GET    | `/events/:id`       | SCHOOL_ADMIN  | Get one                                                        |

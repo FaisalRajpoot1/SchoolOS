@@ -22,7 +22,7 @@ export function EventsCalendarPage() {
           <ul className="divide-y divide-slate-100 px-6">
             {calendar.data.map((e) => (
               <li key={e.id}>
-                <EventItem event={e} />
+                <EventItem event={e} showRsvp />
               </li>
             ))}
           </ul>

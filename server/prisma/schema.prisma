@@ -1189,8 +1189,33 @@ model Event {
   schoolId String
   school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
+  rsvps EventRsvp[]
+
   @@index([schoolId, startDate])
   @@map("events")
+}
+
+enum RsvpStatus {
+  GOING
+  MAYBE
+  NOT_GOING
+}
+
+/// A user's attendance response to an event (one per user per event).
+model EventRsvp {
+  id        String     @id @default(uuid())
+  status    RsvpStatus @default(GOING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@map("event_rsvps")
 }
 
 /// An issued certificate for a student, with a public verification code.
@@ -1331,6 +1356,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   auditLogs           AuditLog[]
   announcements       Announcement[]       @relation("AnnouncementAuthor")
+  eventRsvps          EventRsvp[]
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])

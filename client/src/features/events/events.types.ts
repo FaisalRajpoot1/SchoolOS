@@ -36,4 +36,18 @@ export interface ListEventsParams {
   type?: EventType;
 }
 
+export type RsvpStatus = 'GOING' | 'MAYBE' | 'NOT_GOING';
+
+export interface RsvpCounts {
+  going: number;
+  maybe: number;
+  notGoing: number;
+  total: number;
+}
+
+export interface RsvpSummary {
+  myStatus: RsvpStatus | null;
+  counts: RsvpCounts;
+}
+
 export type { PaginationMeta };

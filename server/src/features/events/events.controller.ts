@@ -42,6 +42,48 @@ export const eventsController = {
     res.status(200).send(content);
   }),
 
+  getRsvp: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const summary = await eventsService.getRsvp(
+      requireSchoolId(req.user),
+      req.user.role,
+      req.user.id,
+      req.params.id as string,
+    );
+    res.status(200).json({ success: true, data: summary });
+  }),
+
+  setRsvp: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const summary = await eventsService.setRsvp(
+      requireSchoolId(req.user),
+      req.user.role,
+      req.user.id,
+      req.params.id as string,
+      req.body,
+    );
+    res.status(200).json({ success: true, data: summary });
+  }),
+
+  removeRsvp: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized();
+    const summary = await eventsService.removeRsvp(
+      requireSchoolId(req.user),
+      req.user.role,
+      req.user.id,
+      req.params.id as string,
+    );
+    res.status(200).json({ success: true, data: summary });
+  }),
+
+  listRsvps: asyncHandler(async (req: Request, res: Response) => {
+    const attendees = await eventsService.listRsvps(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    res.status(200).json({ success: true, data: attendees });
+  }),
+
   /** Calendar feed for the current user (empty for accounts without a school). */
   calendar: asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) throw ApiError.unauthorized();

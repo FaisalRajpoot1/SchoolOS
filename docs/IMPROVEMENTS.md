@@ -128,7 +128,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P2 · L · Real email/SMS/push delivery + templates + delivery status (needs 1.12).
 
 ### Events (M20)
-- `[~]` P3 · S · RSVP + iCal export + reminders. — iCal (`.ics`) per-event export done (batch 11): pure `buildEventIcs` generator (RFC 5545 escaping, all-day exclusive DTEND, audience-scoped `GET /events/:id/ics`, "Add to calendar" button + unit tests). RSVP + reminders still open.
+- `[~]` P3 · S · RSVP + iCal export + reminders. — iCal (`.ics`) per-event export done (batch 11); RSVP done (batch 13): `EventRsvp` model + migration, audience-scoped `GET/PUT/DELETE /events/:id/rsvp` (own response + counts), admin `GET /events/:id/rsvps` attendee list, pure `summarizeRsvps` + unit tests, RSVP buttons with counts on the calendar page. Reminders still open.
 
 ### Certificates (M21)
 - `[ ]` P1 · M · PDF certificate with embedded QR to the verify URL (needs 1.11).
