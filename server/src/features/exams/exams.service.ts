@@ -6,7 +6,8 @@ import {
   toPrismaPagination,
   type PaginationMeta,
 } from '@/utils/pagination';
-import { gradeForPercentage } from './grade';
+import { gradeForBands } from './grade';
+import { gradingService } from './grading.service';
 import { buildReportCardPdf } from './reportCard.pdf';
 import type {
   BulkMarksInput,
@@ -233,6 +234,7 @@ export const examsService = {
   /** Ranked results for an exam: per-student totals, percentage, grade, pass/fail. */
   async results(schoolId: string, examId: string) {
     const exam = await assertExam(schoolId, examId);
+    const gradeBands = await gradingService.getBands(schoolId);
 
     const [examSubjects, students] = await Promise.all([
       prisma.examSubject.findMany({
@@ -268,7 +270,7 @@ export const examsService = {
         obtained,
         totalMax,
         percentage,
-        grade: gradeForPercentage(percentage),
+        grade: gradeForBands(gradeBands, percentage),
         passed: !failed && examSubjects.length > 0,
         rank: 0,
       };
@@ -350,6 +352,7 @@ export const examsService = {
       };
     });
     const percentage = totalMax > 0 ? Math.round((obtained / totalMax) * 10000) / 100 : 0;
+    const gradeBands = await gradingService.getBands(schoolId);
 
     const buffer = await buildReportCardPdf({
       schoolName: school?.name ?? 'School',
@@ -361,7 +364,7 @@ export const examsService = {
       obtained,
       totalMax,
       percentage,
-      grade: gradeForPercentage(percentage),
+      grade: gradeForBands(gradeBands, percentage),
       passed: !failed && subjects.length > 0,
     });
     return { buffer, filename: `report-card-${student.admissionNo}-${exam.name}.pdf` };

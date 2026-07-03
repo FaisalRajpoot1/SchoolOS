@@ -13,6 +13,7 @@ import {
   updateExamSchema,
   updateExamSubjectSchema,
 } from './exams.validation';
+import { setGradeSchemeSchema } from './grading.validation';
 
 const router = Router();
 
@@ -20,6 +21,11 @@ router.use(authenticate);
 
 const adminOnly = authorize(UserRole.SCHOOL_ADMIN);
 const adminOrTeacher = authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER);
+
+// Grade scheme (static paths registered before the `/:id` routes).
+router.get('/grade-scheme', adminOrTeacher, examsController.getGradeScheme);
+router.put('/grade-scheme', adminOnly, validate({ body: setGradeSchemeSchema }), examsController.setGradeScheme);
+router.delete('/grade-scheme', adminOnly, examsController.resetGradeScheme);
 
 // Exam management (school admin).
 router.post('/', adminOnly, validate({ body: createExamSchema }), examsController.create);

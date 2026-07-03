@@ -71,6 +71,7 @@ import { BehaviorPage } from '@/features/behavior/pages/BehaviorPage';
 import { MedicalPage } from '@/features/medical/pages/MedicalPage';
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
 import { DocumentsPage } from '@/features/documents/pages/DocumentsPage';
+import { GradeSchemePage } from '@/features/exams/pages/GradeSchemePage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SecurityPage } from '@/features/auth/pages/SecurityPage';
@@ -194,6 +195,7 @@ export const router = createBrowserRouter([
               { path: '/fees/invoices/:id', element: <InvoiceDetailPage /> },
               { path: '/fees/categories', element: <FeeCategoriesPage /> },
               { path: '/exams', element: <ExamsListPage /> },
+              { path: '/exams/grade-scheme', element: <GradeSchemePage /> },
               { path: '/exams/new', element: <CreateExamPage /> },
               { path: '/exams/:id', element: <ExamDetailPage /> },
               { path: '/exams/:id/results', element: <ExamResultsPage /> },

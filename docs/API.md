@@ -239,6 +239,9 @@ Exam management is `SCHOOL_ADMIN`; marks entry and results are `SCHOOL_ADMIN` + 
 
 | Method | Path                                       | Description                                                       |
 | ------ | ------------------------------------------ | ----------------------------------------------------------------- |
+| GET    | `/exams/grade-scheme`                      | The school's grade bands (`{ bands, isDefault }`; default A+…F when unset) — admin/teacher |
+| PUT    | `/exams/grade-scheme`                      | Replace the grade scheme (`{ bands:[{ label, minPercentage }] }`; unique labels, distinct mins, one band must start at 0%) — admin |
+| DELETE | `/exams/grade-scheme`                      | Reset to the built-in default scale — admin                       |
 | POST   | `/exams`                                   | Create an exam (auto-populates subjects from the class's offered subjects) |
 | GET    | `/exams`                                   | List exams (`page`, `limit`, `search`, `classId`, `status`)        |
 | GET    | `/exams/:id`                               | Exam detail (subjects with scheme + marks counts)                 |

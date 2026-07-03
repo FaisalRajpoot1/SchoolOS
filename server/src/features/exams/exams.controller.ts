@@ -3,8 +3,24 @@ import { asyncHandler } from '@/utils/asyncHandler';
 import { requireSchoolId } from '@/utils/tenant';
 import { sendPdf } from '@/utils/pdf';
 import { examsService } from './exams.service';
+import { gradingService } from './grading.service';
 
 export const examsController = {
+  getGradeScheme: asyncHandler(async (req: Request, res: Response) => {
+    const scheme = await gradingService.getScheme(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data: scheme });
+  }),
+
+  setGradeScheme: asyncHandler(async (req: Request, res: Response) => {
+    const bands = await gradingService.setScheme(requireSchoolId(req.user), req.body);
+    res.status(200).json({ success: true, data: { bands, isDefault: false } });
+  }),
+
+  resetGradeScheme: asyncHandler(async (req: Request, res: Response) => {
+    const bands = await gradingService.resetScheme(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data: { bands, isDefault: true } });
+  }),
+
   create: asyncHandler(async (req: Request, res: Response) => {
     const exam = await examsService.create(requireSchoolId(req.user), req.body);
     res.status(201).json({ success: true, data: { exam } });

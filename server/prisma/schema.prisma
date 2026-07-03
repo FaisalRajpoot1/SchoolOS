@@ -219,6 +219,7 @@ model School {
   infirmaryVisits       InfirmaryVisit[]
   notifications         Notification[]
   documents             Document[]
+  gradeBands            GradeBand[]
 
   @@map("schools")
 }
@@ -241,6 +242,21 @@ model AcademicYear {
   @@unique([schoolId, name])
   @@index([schoolId])
   @@map("academic_years")
+}
+
+/// A single band in a school's configurable grading scheme (e.g. "A+" ≥ 90%).
+model GradeBand {
+  id            String   @id @default(uuid())
+  label         String
+  minPercentage Int
+  createdAt     DateTime @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, label])
+  @@index([schoolId])
+  @@map("grade_bands")
 }
 
 /// A grade/class within a school (e.g. "Grade 1"). Holds sections and offered subjects.

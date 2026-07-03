@@ -95,7 +95,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Exams (M12)
 - `[x]` P1 · M · Report-card PDF (`GET /exams/:id/report-card/:studentId/pdf`, class-scoped) — batch 5.
-- `[ ]` P2 · M · Per-school configurable grade scheme (currently hard-coded A+…F).
+- `[x]` P2 · M · Per-school configurable grade scheme — batch 22: `GradeBand` model + `GET/PUT/DELETE /exams/grade-scheme` (falls back to the default A+…F scale when unset); pure `gradeForBands` (highest-floor-wins) drives exam results + report cards; admin Grade Scheme editor page + nav.
 - `[ ]` P3 · M · GPA/CGPA, weighted terms, co-scholastic areas.
 
 ### Homework (M10) / Assignments (M11)
