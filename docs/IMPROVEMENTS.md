@@ -19,7 +19,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 |---|------|-----|-----|------|
 | 0.1 | `[ ]` Attendance: scope TEACHER writes/reads to their assigned sections (currently any teacher, any section) | P1 | M | SEC |
 | 0.2 | `[ ]` Homework/Assignments: only the owning teacher (or admin) may grade/delete submissions | P1 | M | SEC |
-| 0.3 | `[~]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
+| 0.3 | `[x]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory — batches 26-27 | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
 **Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3 `2151ad6`. N1 Student Portal — batch 4 `e7d2369`. Invoice PDF + Report-card PDF — batch 5.
@@ -156,7 +156,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · M · Theme customization; backup/restore; API-key scopes + usage metrics; outbound webhooks.
 
 ### AI Assistant (M25)
-- `[ ]` P2 · M · SQL-side insights aggregation (0.3) + response streaming.
+- `[~]` P2 · M · SQL-side insights aggregation (0.3) + response streaming. — batch 27: at-risk fail-count + outstanding-balance now aggregated in SQL (`$queryRaw`) instead of loading all marks/invoices. Response streaming still open.
 - `[ ]` P3 · M · More generators (lesson plans, feedback drafts); parent/school chatbot; result caching; per-tenant model config.
 
 ---

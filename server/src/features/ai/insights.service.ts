@@ -1,4 +1,14 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/db/prisma';
+
+interface FailRow {
+  studentId: string;
+  fails: number;
+}
+interface BalanceRow {
+  studentId: string;
+  balance: number;
+}
 
 const ATTENDANCE_WINDOW_DAYS = 30;
 const ATTENDANCE_MIN_MARKED = 5;
@@ -28,7 +38,7 @@ export const insightsService = {
   async atRisk(schoolId: string) {
     const since = new Date(Date.now() - ATTENDANCE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
-    const [students, attendance, marks, invoices] = await Promise.all([
+    const [students, attendance, failRows, balanceRows] = await Promise.all([
       prisma.student.findMany({
         where: { schoolId, status: 'ACTIVE' },
         select: {
@@ -44,14 +54,31 @@ export const insightsService = {
         where: { schoolId, date: { gte: since } },
         _count: { _all: true },
       }),
-      prisma.mark.findMany({
-        where: { student: { schoolId }, marksObtained: { not: null } },
-        select: { studentId: true, marksObtained: true, examSubject: { select: { passMarks: true } } },
-      }),
-      prisma.invoice.findMany({
-        where: { schoolId, status: { not: 'CANCELLED' } },
-        select: { studentId: true, total: true, payments: { select: { amount: true } } },
-      }),
+      // Failed-subject count per student, aggregated in SQL (the pass threshold
+      // lives on the related exam_subject, so this needs a join groupBy).
+      prisma.$queryRaw<FailRow[]>(Prisma.sql`
+        SELECT m."studentId" AS "studentId", COUNT(*)::int AS fails
+        FROM "marks" m
+        JOIN "exam_subjects" es ON es.id = m."examSubjectId"
+        JOIN "students" s ON s.id = m."studentId"
+        WHERE s."schoolId" = ${schoolId}
+          AND m."marksObtained" IS NOT NULL
+          AND m."marksObtained" < es."passMarks"
+        GROUP BY m."studentId"
+      `),
+      // Outstanding balance per student (payments summed per invoice first to
+      // avoid a join fan-out), only students who actually owe.
+      prisma.$queryRaw<BalanceRow[]>(Prisma.sql`
+        SELECT i."studentId" AS "studentId",
+               (SUM(i.total) - COALESCE(SUM(p.paid), 0))::int AS balance
+        FROM "invoices" i
+        LEFT JOIN (
+          SELECT "invoiceId", SUM(amount) AS paid FROM "payments" GROUP BY "invoiceId"
+        ) p ON p."invoiceId" = i.id
+        WHERE i."schoolId" = ${schoolId} AND i.status <> 'CANCELLED'::"InvoiceStatus"
+        GROUP BY i."studentId"
+        HAVING (SUM(i.total) - COALESCE(SUM(p.paid), 0)) > 0
+      `),
     ]);
 
     // Attendance: present-rate per student over the window.
@@ -63,20 +90,11 @@ export const insightsService = {
       att.set(row.studentId, entry);
     }
 
-    // Performance: failed-subject count per student.
-    const fails = new Map<string, number>();
-    for (const m of marks) {
-      if (m.marksObtained !== null && m.marksObtained < m.examSubject.passMarks) {
-        fails.set(m.studentId, (fails.get(m.studentId) ?? 0) + 1);
-      }
-    }
+    // Performance: failed-subject count per student (from the SQL aggregate).
+    const fails = new Map<string, number>(failRows.map((r) => [r.studentId, r.fails]));
 
-    // Fees: outstanding balance per student.
-    const balance = new Map<string, number>();
-    for (const inv of invoices) {
-      const paid = inv.payments.reduce((acc, p) => acc + p.amount, 0);
-      balance.set(inv.studentId, (balance.get(inv.studentId) ?? 0) + (inv.total - paid));
-    }
+    // Fees: outstanding balance per student (from the SQL aggregate).
+    const balance = new Map<string, number>(balanceRows.map((r) => [r.studentId, r.balance]));
 
     const flagged: RiskStudent[] = [];
     for (const s of students) {
