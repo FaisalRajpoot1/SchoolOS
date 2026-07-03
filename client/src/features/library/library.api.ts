@@ -57,4 +57,10 @@ export const libraryApi = {
     const { data } = await api.get<{ data: BookIssue[]; meta: PaginationMeta }>('/library/issues', { params });
     return { items: data.data, meta: data.meta };
   },
+  async remindOverdue(): Promise<{ overdue: number; notified: number }> {
+    const { data } = await api.post<{ data: { overdue: number; notified: number } }>(
+      '/library/issues/remind-overdue',
+    );
+    return data.data;
+  },
 };

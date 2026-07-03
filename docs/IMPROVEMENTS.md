@@ -105,7 +105,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Library (M13)
 - `[ ]` P3 · M · Reservations/holds + barcode lookup.
-- `[ ]` P2 · S · Overdue notifications (needs 1.12).
+- `[x]` P2 · S · Overdue notifications — batch 28: admin/librarian-triggered `POST /library/issues/remind-overdue` sends a best-effort in-app reminder to each borrower (+ guardians) with currently-overdue books; "Remind overdue" button on the issues page. Email/SMS still needs 1.12.
 
 ### Transport (M14)
 - `[ ]` P3 · L · Live GPS tracking + parent ETA.

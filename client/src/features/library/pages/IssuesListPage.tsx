@@ -1,21 +1,35 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useIssues, useReturnBook } from '../useLibrary';
+import { useIssues, useRemindOverdue, useReturnBook } from '../useLibrary';
 import type { LibraryIssueStatus } from '../library.types';
 import { formatAmount } from '@/features/fees/format';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 export function IssuesListPage() {
   const [status, setStatus] = useState<LibraryIssueStatus | ''>('ISSUED');
   const [page, setPage] = useState(1);
   const query = useIssues({ page, limit: 15, status: status || undefined });
   const returnBook = useReturnBook();
+  const remindOverdue = useRemindOverdue();
   const meta = query.data?.meta;
 
   const today = new Date().toISOString().slice(0, 10);
+
+  const doRemind = (): void => {
+    remindOverdue.mutate(undefined, {
+      onSuccess: (r) =>
+        toast.success(
+          r.overdue === 0
+            ? 'No overdue books'
+            : `Reminded ${r.notified} borrower${r.notified === 1 ? '' : 's'} (${r.overdue} overdue)`,
+        ),
+      onError: (err) => toast.error(getApiErrorMessage(err)),
+    });
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -24,7 +38,12 @@ export function IssuesListPage() {
           <h1 className="text-2xl font-bold">Issued books</h1>
           <p className="text-slate-500">Loans, returns, and late fines.</p>
         </div>
-        <Link to="/library"><Button variant="secondary">Catalog</Button></Link>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={doRemind} isLoading={remindOverdue.isPending}>
+            Remind overdue
+          </Button>
+          <Link to="/library"><Button variant="secondary">Catalog</Button></Link>
+        </div>
       </div>
 
       <Card>

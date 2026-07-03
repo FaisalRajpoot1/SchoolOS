@@ -52,6 +52,7 @@ router.post(
   validate({ params: bookIdParamSchema, body: issueBookSchema }),
   libraryController.issueBook,
 );
+router.post('/issues/remind-overdue', libraryController.remindOverdue);
 router.post(
   '/issues/:issueId/return',
   validate({ params: issueIdParamSchema }),

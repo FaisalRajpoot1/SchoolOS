@@ -76,3 +76,6 @@ export const useReturnBook = () => {
 
 export const useIssues = (params: ListIssuesParams) =>
   useQuery({ queryKey: [...keys.issues, params], queryFn: () => libraryApi.listIssues(params) });
+
+export const useRemindOverdue = () =>
+  useMutation({ mutationFn: () => libraryApi.remindOverdue() });

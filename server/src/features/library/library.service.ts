@@ -2,6 +2,7 @@ import { type Book, type BookCategory, Prisma } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
 import { LIBRARY_FINE_PER_DAY } from '@/config/constants';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import {
   buildPaginationMeta,
   toPrismaPagination,
@@ -243,5 +244,37 @@ export const libraryService = {
     ]);
 
     return { items, meta: buildPaginationMeta(query, total) };
+  },
+
+  /**
+   * Sends a best-effort in-app reminder to each borrower (and their guardians)
+   * with currently-overdue books. Returns how many issues are overdue and how
+   * many distinct borrowers were reminded.
+   */
+  async remindOverdue(schoolId: string): Promise<{ overdue: number; notified: number }> {
+    const overdue = await prisma.bookIssue.findMany({
+      where: { schoolId, status: 'ISSUED', dueDate: { lt: new Date() } },
+      select: { studentId: true },
+    });
+
+    // One summary reminder per borrower (bounded by borrowers with overdue books).
+    const countByStudent = new Map<string, number>();
+    for (const o of overdue) {
+      countByStudent.set(o.studentId, (countByStudent.get(o.studentId) ?? 0) + 1);
+    }
+
+    await Promise.all(
+      [...countByStudent].map(([studentId, count]) =>
+        notificationsService.notifyGuardiansSafe(schoolId, [studentId], {
+          type: 'GENERAL',
+          title: 'Library book overdue',
+          body: `${count} library book${count === 1 ? '' : 's'} overdue — please return ${
+            count === 1 ? 'it' : 'them'
+          }.`,
+        }),
+      ),
+    );
+
+    return { overdue: overdue.length, notified: countByStudent.size };
   },
 };

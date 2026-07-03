@@ -72,4 +72,9 @@ export const libraryController = {
     const { items, meta } = await libraryService.listIssues(requireSchoolId(req.user), req.query as never);
     res.status(200).json({ success: true, data: items, meta });
   }),
+
+  remindOverdue: asyncHandler(async (req: Request, res: Response) => {
+    const result = await libraryService.remindOverdue(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data: result });
+  }),
 };

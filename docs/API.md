@@ -324,6 +324,7 @@ Conflict detection: two slots overlap when `existing.start < new.end AND existin
 | PATCH  | `/library/books/:id`              | Update (copy delta adjusts availability)                       |
 | DELETE | `/library/books/:id`              | Delete a book                                                  |
 | POST   | `/library/books/:id/issue`        | Issue a copy (`{ studentId, dueDate }`; decrements availability) |
+| POST   | `/library/issues/remind-overdue`  | Notify each borrower (+ guardians) with currently-overdue books; returns `{ overdue, notified }` |
 | POST   | `/library/issues/:issueId/return` | Return (computes late fine, restores a copy)                   |
 | GET    | `/library/issues`                 | List issues (`page`, `limit`, `status`, `studentId`, `bookId`) |
 
