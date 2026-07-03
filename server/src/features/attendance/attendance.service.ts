@@ -1,9 +1,44 @@
 import { type AttendanceStatus, Prisma, type UserRole } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import { ApiError } from '@/utils/ApiError';
+import { notificationsService } from '@/features/notifications/notifications.service';
+import { logger } from '@/utils/logger';
 import type { BulkMarkInput, StudentHistoryQuery, SummaryQuery } from './attendance.validation';
 
 type Actor = { id: string; role: UserRole };
+
+/**
+ * Notifies each absent student's guardians. Fully best-effort — the whole body
+ * is guarded so a notification failure can never affect the (already-committed)
+ * attendance save. Bounded by section size (records are enrollment-checked).
+ */
+const notifyAbsences = async (
+  schoolId: string,
+  day: Date,
+  records: BulkMarkInput['records'],
+): Promise<void> => {
+  try {
+    const absentIds = records.filter((r) => r.status === 'ABSENT').map((r) => r.studentId);
+    if (absentIds.length === 0) return;
+
+    const students = await prisma.student.findMany({
+      where: { id: { in: absentIds }, schoolId },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    const dateStr = day.toISOString().slice(0, 10);
+    await Promise.all(
+      students.map((s) =>
+        notificationsService.notifyGuardiansSafe(schoolId, [s.id], {
+          type: 'ATTENDANCE',
+          title: 'Absence recorded',
+          body: `${s.firstName} ${s.lastName} was marked absent on ${dateStr}.`,
+        }),
+      ),
+    );
+  } catch (err) {
+    logger.error({ err, schoolId }, 'Failed to notify absences');
+  }
+};
 
 /**
  * For a TEACHER, require they teach the section — either as its class teacher
@@ -117,6 +152,8 @@ export const attendanceService = {
         }),
       ),
     );
+
+    await notifyAbsences(schoolId, day, input.records);
 
     return this.roster(schoolId, actor, input.sectionId, day);
   },

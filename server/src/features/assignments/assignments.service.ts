@@ -7,6 +7,7 @@ import {
   type PaginationMeta,
 } from '@/utils/pagination';
 import { attachmentsService, type UploadedFile } from '@/features/attachments/attachments.service';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import type {
   CreateAssignmentInput,
   GradeSubmissionInput,
@@ -82,7 +83,7 @@ export const assignmentsService = {
     }
     const teacherId = await resolveTeacherId(schoolId, user.id, user.role);
 
-    return prisma.assignment.create({
+    const assignment = await prisma.assignment.create({
       data: {
         schoolId,
         classId: input.classId,
@@ -107,6 +108,14 @@ export const assignmentsService = {
       },
       include: detailInclude,
     });
+
+    await notificationsService.notifySectionGuardiansSafe(schoolId, assignment.sectionId, {
+      type: 'GENERAL',
+      title: `New assignment: ${assignment.title}`,
+      body: `Due ${assignment.dueDate.toISOString().slice(0, 10)}.`,
+    });
+
+    return assignment;
   },
 
   async list(

@@ -156,4 +156,61 @@ export const notificationsService = {
       logger.error({ err, schoolId, audience }, 'Failed to fan out notifications');
     }
   },
+
+  /**
+   * Resolves inbox recipients for a set of students: each student's own portal
+   * user plus their linked parents' users. Active accounts only, de-duplicated.
+   */
+  async recipientsForStudents(schoolId: string, studentIds: string[]): Promise<string[]> {
+    if (studentIds.length === 0) return [];
+    const [students, links] = await Promise.all([
+      prisma.student.findMany({
+        where: { id: { in: studentIds }, schoolId, user: { isActive: true } },
+        select: { userId: true },
+      }),
+      prisma.parentStudent.findMany({
+        where: { studentId: { in: studentIds }, parent: { schoolId, user: { isActive: true } } },
+        select: { parent: { select: { userId: true } } },
+      }),
+    ]);
+    const ids = new Set<string>();
+    for (const s of students) if (s.userId) ids.add(s.userId);
+    for (const l of links) ids.add(l.parent.userId);
+    return [...ids];
+  },
+
+  /** Best-effort notification to a set of students' own users + their guardians. */
+  async notifyGuardiansSafe(
+    schoolId: string,
+    studentIds: string[],
+    input: NotificationInput,
+  ): Promise<void> {
+    try {
+      const userIds = await this.recipientsForStudents(schoolId, studentIds);
+      await this.notifyUsers(schoolId, userIds, input);
+    } catch (err) {
+      logger.error({ err, schoolId }, 'Failed to notify guardians');
+    }
+  },
+
+  /** Best-effort notification to all active students of a section + their guardians. */
+  async notifySectionGuardiansSafe(
+    schoolId: string,
+    sectionId: string,
+    input: NotificationInput,
+  ): Promise<void> {
+    try {
+      const students = await prisma.student.findMany({
+        where: { schoolId, sectionId, status: 'ACTIVE' },
+        select: { id: true },
+      });
+      await this.notifyGuardiansSafe(
+        schoolId,
+        students.map((s) => s.id),
+        input,
+      );
+    } catch (err) {
+      logger.error({ err, schoolId, sectionId }, 'Failed to notify section guardians');
+    }
+  },
 };

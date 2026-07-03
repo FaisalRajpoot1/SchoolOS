@@ -7,6 +7,7 @@ import {
   type PaginationMeta,
 } from '@/utils/pagination';
 import { attachmentsService, type UploadedFile } from '@/features/attachments/attachments.service';
+import { notificationsService } from '@/features/notifications/notifications.service';
 import type {
   CreateHomeworkInput,
   GradeSubmissionInput,
@@ -95,6 +96,13 @@ export const homeworkService = {
       },
       include: detailInclude,
     });
+
+    await notificationsService.notifySectionGuardiansSafe(schoolId, homework.sectionId, {
+      type: 'GENERAL',
+      title: `New homework: ${homework.title}`,
+      body: `Due ${homework.dueDate.toISOString().slice(0, 10)}.`,
+    });
+
     return homework;
   },
 
