@@ -19,7 +19,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 |---|------|-----|-----|------|
 | 0.1 | `[ ]` Attendance: scope TEACHER writes/reads to their assigned sections (currently any teacher, any section) | P1 | M | SEC |
 | 0.2 | `[ ]` Homework/Assignments: only the owning teacher (or admin) may grade/delete submissions | P1 | M | SEC |
-| 0.3 | `[ ]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
+| 0.3 | `[~]` `/reports/finance` + `/ai/insights`: push per-student balance/aggregation to SQL instead of loading all rows in memory | P2 | M | PERF |
 | 0.4 | `[ ]` Portal `childHomework`/`childAssignments`/`childResults`: add `schoolId` to the student `findUnique` (defense-in-depth; already ownership-checked + tenant-scoped downstream) | P3 | S | SEC |
 
 **Done:** 0.1 (attendance teacher section-scoping), 0.2 (owner-only homework/assignment management), 1.5 (per-user AI rate limiting) — commit `d4257e6`. 1.11 (PDF service), Payslip PDF (M18), Certificate PDF + QR (M21) — batch 2 `b0d95d3`. 1.3 (toasts), 1.4 (Spinner/EmptyState primitives, partial rollout) — batch 3 `2151ad6`. N1 Student Portal — batch 4 `e7d2369`. Invoice PDF + Report-card PDF — batch 5.
@@ -144,7 +144,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · M · Admin template editor.
 
 ### Reports (M22)
-- `[ ]` P2 · M · SQL-side aggregation (0.3) + more report types.
+- `[~]` P2 · M · SQL-side aggregation (0.3) + more report types. — batch 26: `/reports/finance` top-10 defaulters now aggregated in SQL (`$queryRaw`, payments summed per invoice to avoid join fan-out) instead of loading every invoice+payment into memory; `/ai/insights` still to do.
 - `[ ]` P3 · M · Scheduled report emails; PDF/Excel export.
 
 ### Dashboard (M23)

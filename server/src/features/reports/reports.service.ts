@@ -1,6 +1,14 @@
-import type { AttendanceStatus, Gender, InvoiceStatus, StudentStatus } from '@prisma/client';
+import { type AttendanceStatus, type Gender, type InvoiceStatus, Prisma, type StudentStatus } from '@prisma/client';
 import { prisma } from '@/db/prisma';
 import type { AttendanceRange } from './reports.validation';
+
+interface DefaulterRow {
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  admissionNo: string;
+  balance: number;
+}
 
 const toDateOnly = (d: Date): Date =>
   new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
@@ -67,7 +75,7 @@ export const reportsService = {
 
   /** Finance totals, invoices by status, and the top outstanding balances. */
   async finance(schoolId: string) {
-    const [invoiceAgg, paymentAgg, byStatusRaw, invoices] = await Promise.all([
+    const [invoiceAgg, paymentAgg, byStatusRaw, defaulters] = await Promise.all([
       prisma.invoice.aggregate({
         _sum: { total: true },
         where: { schoolId, status: { not: 'CANCELLED' } },
@@ -77,39 +85,36 @@ export const reportsService = {
         where: { schoolId, invoice: { status: { not: 'CANCELLED' } } },
       }),
       prisma.invoice.groupBy({ by: ['status'], where: { schoolId }, _count: { _all: true } }),
-      prisma.invoice.findMany({
-        where: { schoolId, status: { not: 'CANCELLED' } },
-        select: {
-          total: true,
-          studentId: true,
-          student: { select: { firstName: true, lastName: true, admissionNo: true } },
-          payments: { select: { amount: true } },
-        },
-      }),
+      // Per-student outstanding balance is aggregated in SQL (top 10 only), so
+      // the report never loads every invoice/payment row into memory. Payments
+      // are summed per invoice first to avoid a join fan-out inflating totals.
+      prisma.$queryRaw<DefaulterRow[]>(Prisma.sql`
+        SELECT i."studentId"       AS "studentId",
+               s."firstName"       AS "firstName",
+               s."lastName"        AS "lastName",
+               s."admissionNo"     AS "admissionNo",
+               (SUM(i.total) - COALESCE(SUM(p.paid), 0))::int AS balance
+        FROM "invoices" i
+        JOIN "students" s ON s.id = i."studentId"
+        LEFT JOIN (
+          SELECT "invoiceId", SUM(amount) AS paid FROM "payments" GROUP BY "invoiceId"
+        ) p ON p."invoiceId" = i.id
+        WHERE i."schoolId" = ${schoolId} AND i.status <> 'CANCELLED'::"InvoiceStatus"
+        GROUP BY i."studentId", s."firstName", s."lastName", s."admissionNo"
+        HAVING (SUM(i.total) - COALESCE(SUM(p.paid), 0)) > 0
+        ORDER BY balance DESC
+        LIMIT 10
+      `),
     ]);
 
     const byStatus = {} as Record<InvoiceStatus, number>;
     for (const r of byStatusRaw) byStatus[r.status] = r._count._all;
 
-    // Aggregate per-student outstanding balances in memory (admin-run report).
-    const perStudent = new Map<string, { name: string; admissionNo: string; balance: number }>();
-    for (const inv of invoices) {
-      const paid = inv.payments.reduce((acc, p) => acc + p.amount, 0);
-      const balance = inv.total - paid;
-      const existing = perStudent.get(inv.studentId);
-      if (existing) existing.balance += balance;
-      else
-        perStudent.set(inv.studentId, {
-          name: `${inv.student.firstName} ${inv.student.lastName}`,
-          admissionNo: inv.student.admissionNo,
-          balance,
-        });
-    }
-
-    const topDefaulters = [...perStudent.values()]
-      .filter((s) => s.balance > 0)
-      .sort((a, b) => b.balance - a.balance)
-      .slice(0, 10);
+    const topDefaulters = defaulters.map((d) => ({
+      name: `${d.firstName} ${d.lastName}`,
+      admissionNo: d.admissionNo,
+      balance: d.balance,
+    }));
 
     const invoiced = invoiceAgg._sum.total ?? 0;
     const collected = paymentAgg._sum.amount ?? 0;
