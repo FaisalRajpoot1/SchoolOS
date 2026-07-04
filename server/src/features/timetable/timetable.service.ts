@@ -166,6 +166,65 @@ export const timetableService = {
     await prisma.timetableSlot.delete({ where: { id } });
   },
 
+  /**
+   * Per-teacher weekly workload across all sections: how many periods each
+   * teacher runs, total teaching minutes, and how many distinct subjects and
+   * sections they cover. Includes every active teacher (0-load teachers show
+   * up too, so admins can spot both over- and under-loaded staff).
+   */
+  async workload(schoolId: string) {
+    const [teachers, slots] = await Promise.all([
+      prisma.teacher.findMany({
+        where: { schoolId, status: 'ACTIVE' },
+        select: { id: true, firstName: true, lastName: true, employeeNo: true },
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+      }),
+      prisma.timetableSlot.findMany({
+        where: { schoolId, teacherId: { not: null } },
+        select: {
+          teacherId: true,
+          startMinute: true,
+          endMinute: true,
+          subjectId: true,
+          sectionId: true,
+        },
+      }),
+    ]);
+
+    interface Acc {
+      periods: number;
+      minutes: number;
+      subjects: Set<string>;
+      sections: Set<string>;
+    }
+    const byTeacher = new Map<string, Acc>();
+    for (const s of slots) {
+      if (!s.teacherId) continue;
+      let acc = byTeacher.get(s.teacherId);
+      if (!acc) {
+        acc = { periods: 0, minutes: 0, subjects: new Set(), sections: new Set() };
+        byTeacher.set(s.teacherId, acc);
+      }
+      acc.periods += 1;
+      acc.minutes += Math.max(0, s.endMinute - s.startMinute);
+      if (s.subjectId) acc.subjects.add(s.subjectId);
+      acc.sections.add(s.sectionId);
+    }
+
+    return teachers.map((t) => {
+      const acc = byTeacher.get(t.id);
+      return {
+        teacherId: t.id,
+        name: `${t.firstName} ${t.lastName}`,
+        employeeNo: t.employeeNo,
+        periods: acc?.periods ?? 0,
+        minutes: acc?.minutes ?? 0,
+        subjects: acc?.subjects.size ?? 0,
+        sections: acc?.sections.size ?? 0,
+      };
+    });
+  },
+
   /** Renders a section or teacher weekly timetable as a downloadable PDF. */
   async renderPdf(
     schoolId: string,

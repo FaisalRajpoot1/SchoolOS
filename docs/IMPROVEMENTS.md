@@ -72,7 +72,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Teachers (M4)
 - `[x]` P2 · S · Photo + qualification/document attachments — batch 21: teacher photo (upload/serve/delete, avatars, `PhotoPanel`); batch 31: teacher-owned documents — `Document.teacherId` owner added (at most one of student/employee/teacher), assert + tenant scoping, Documents page owner-type toggle (School/Student/Teacher).
-- `[ ]` P3 · S · Per-teacher workload view (periods, subjects, sections).
+- `[x]` P3 · S · Per-teacher workload view (periods, subjects, sections) — batch 37: `GET /timetable/workload` aggregates every active teacher's weekly load (periods, teaching minutes, distinct subjects & sections; 0-load teachers included so admins can spot imbalance) + a "Teacher workload" view mode on the Timetable page. Read-only, no schema change.
 
 ### Attendance (M6)
 - `[ ]` P1 · M · Teacher section-scoping (0.1).

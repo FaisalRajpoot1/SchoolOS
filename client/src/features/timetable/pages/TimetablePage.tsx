@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useClass, useClasses } from '@/features/academics/useAcademics';
 import { useTeacherOptions } from '@/features/teachers/useTeachers';
-import { useCreateSlot, useDeleteSlot, useTimetable } from '../useTimetable';
+import { useCreateSlot, useDeleteSlot, useTimetable, useWorkload } from '../useTimetable';
 import { timetableApi } from '../timetable.api';
 import { DAYS, type DayOfWeek, type TimetableSlot } from '../timetable.types';
 import { minutesToTime, timeToMinutes } from '../time';
@@ -37,6 +37,16 @@ const addSchema = z
   .refine((d) => d.start < d.end, { message: 'Start must be before end', path: ['end'] });
 
 type AddValues = z.infer<typeof addSchema>;
+
+type ViewMode = 'section' | 'teacher' | 'workload';
+
+/** Formats a minutes total as "6h 30m" (or "45m" under an hour). */
+const formatDuration = (minutes: number): string => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+};
 
 function DayColumn({
   day,
@@ -87,7 +97,7 @@ function DayColumn({
 }
 
 export function TimetablePage() {
-  const [mode, setMode] = useState<'section' | 'teacher'>('section');
+  const [mode, setMode] = useState<ViewMode>('section');
   const [classId, setClassId] = useState('');
   const [sectionId, setSectionId] = useState('');
   const [teacherId, setTeacherId] = useState('');
@@ -100,11 +110,13 @@ export function TimetablePage() {
   const teachers = useTeacherOptions();
 
   const isSection = mode === 'section';
+  const isWorkload = mode === 'workload';
   const activeId = isSection ? sectionId : teacherId;
   const timetable = useTimetable(
     isSection ? { sectionId } : { teacherId },
-    !!activeId,
+    !isWorkload && !!activeId,
   );
+  const workload = useWorkload(isWorkload);
 
   const createSlot = useCreateSlot();
   const deleteSlot = useDeleteSlot();
@@ -155,13 +167,14 @@ export function TimetablePage() {
           <Select
             label="View"
             value={mode}
-            onChange={(e) => setMode(e.target.value as 'section' | 'teacher')}
+            onChange={(e) => setMode(e.target.value as ViewMode)}
           >
             <option value="section">By section</option>
             <option value="teacher">By teacher</option>
+            <option value="workload">Teacher workload</option>
           </Select>
         </div>
-        {isSection ? (
+        {isWorkload ? null : isSection ? (
           <>
             <div className="w-40">
               <Select label="Class" value={classId} onChange={(e) => { setClassId(e.target.value); setSectionId(''); }}>
@@ -227,7 +240,46 @@ export function TimetablePage() {
         </Card>
       )}
 
-      {!activeId ? (
+      {isWorkload ? (
+        workload.isLoading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : (
+          <Card className="p-0">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="px-6 py-3">Teacher</th>
+                  <th className="px-6 py-3 text-right">Periods/wk</th>
+                  <th className="px-6 py-3 text-right">Teaching time</th>
+                  <th className="px-6 py-3 text-right">Subjects</th>
+                  <th className="px-6 py-3 text-right">Sections</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(workload.data ?? []).length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-slate-400">
+                      No active teachers.
+                    </td>
+                  </tr>
+                )}
+                {(workload.data ?? []).map((w) => (
+                  <tr key={w.teacherId} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                    <td className="px-6 py-3 font-medium">
+                      {w.name}
+                      <span className="ml-2 font-mono text-xs text-slate-400">{w.employeeNo}</span>
+                    </td>
+                    <td className="px-6 py-3 text-right tabular-nums">{w.periods}</td>
+                    <td className="px-6 py-3 text-right tabular-nums">{formatDuration(w.minutes)}</td>
+                    <td className="px-6 py-3 text-right tabular-nums">{w.subjects}</td>
+                    <td className="px-6 py-3 text-right tabular-nums">{w.sections}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )
+      ) : !activeId ? (
         <p className="text-sm text-slate-500">
           {isSection ? 'Select a class and section.' : 'Select a teacher.'}
         </p>

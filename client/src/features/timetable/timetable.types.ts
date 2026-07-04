@@ -18,6 +18,16 @@ export interface TimetableSlot {
   section: { id: string; name: string; class: NamedRef };
 }
 
+export interface TeacherWorkload {
+  teacherId: string;
+  name: string;
+  employeeNo: string;
+  periods: number;
+  minutes: number;
+  subjects: number;
+  sections: number;
+}
+
 export interface CreateSlotPayload {
   sectionId: string;
   dayOfWeek: DayOfWeek;

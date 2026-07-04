@@ -9,6 +9,13 @@ export const useTimetable = (params: TimetableQuery, enabled: boolean) =>
     enabled,
   });
 
+export const useWorkload = (enabled: boolean) =>
+  useQuery({
+    queryKey: ['timetable', 'workload'],
+    queryFn: () => timetableApi.workload(),
+    enabled,
+  });
+
 export const useCreateSlot = () => {
   const qc = useQueryClient();
   return useMutation({

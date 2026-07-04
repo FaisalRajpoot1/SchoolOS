@@ -29,6 +29,11 @@ export const timetableController = {
     res.status(204).send();
   }),
 
+  workload: asyncHandler(async (req: Request, res: Response) => {
+    const rows = await timetableService.workload(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data: rows });
+  }),
+
   exportPdf: asyncHandler(async (req: Request, res: Response) => {
     const { buffer, filename } = await timetableService.renderPdf(
       requireSchoolId(req.user),

@@ -303,6 +303,7 @@ Weekly recurring slots per section. Viewing is `SCHOOL_ADMIN` + `TEACHER`; editi
 | Method | Path                    | Description                                                          |
 | ------ | ----------------------- | ------------------------------------------------------------------- |
 | GET    | `/timetable/slots`      | Weekly slots for a `sectionId` **or** `teacherId`                    |
+| GET    | `/timetable/workload`   | Per-teacher weekly load: periods, teaching minutes, distinct subjects & sections (every active teacher, 0-load included) |
 | GET    | `/timetable/slots/export` | Download the section/teacher weekly timetable as a PDF (`SCHOOL_ADMIN` + `TEACHER`) |
 | POST   | `/timetable/slots`      | Add a slot (rejects section/teacher/room clashes on the same day)   |
 | PATCH  | `/timetable/slots/:id`  | Update a slot (re-checks clashes)                                    |

@@ -1,6 +1,6 @@
 import { api } from '@/lib/axios';
 import { downloadFile } from '@/lib/download';
-import type { CreateSlotPayload, TimetableSlot } from './timetable.types';
+import type { CreateSlotPayload, TeacherWorkload, TimetableSlot } from './timetable.types';
 
 export interface TimetableQuery {
   sectionId?: string;
@@ -18,6 +18,10 @@ export const timetableApi = {
   },
   async remove(id: string): Promise<void> {
     await api.delete(`/timetable/slots/${id}`);
+  },
+  async workload(): Promise<TeacherWorkload[]> {
+    const { data } = await api.get<{ data: TeacherWorkload[] }>('/timetable/workload');
+    return data.data;
   },
   async exportPdf(params: TimetableQuery): Promise<void> {
     const key = params.sectionId ? `section-${params.sectionId}` : `teacher-${params.teacherId}`;

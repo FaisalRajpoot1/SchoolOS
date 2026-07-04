@@ -22,6 +22,11 @@ router.get(
   timetableController.list,
 );
 router.get(
+  '/workload',
+  authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER),
+  timetableController.workload,
+);
+router.get(
   '/slots/export',
   authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER),
   validate({ query: listSlotsSchema }),
