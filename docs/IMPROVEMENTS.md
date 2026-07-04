@@ -95,7 +95,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[x]` P2 · S · Scholarships / structured discounts — batch 32: `Invoice.discount` field; net owed = subtotal − discount (floored at 0); status/balance/payment-guard derive from net; PDF + create form + detail show the breakdown; finance aggregations (reports, dashboard, AI-insights) net out the discount. discount=0 path is fully backward-compatible.
 
 ### Exams (M12)
-- `[x]` P1 · M · Report-card PDF (`GET /exams/:id/report-card/:studentId/pdf`, class-scoped) — batch 5.
+- `[x]` P1 · M · Report-card PDF (`GET /exams/:id/report-card/:studentId/pdf`, class-scoped) — batch 5. Batch 36: added "Class position: N of M" — dense rank of the student's obtained total among all active classmates (reuses the `results()` ranking; PDF-only, no schema/client change).
 - `[x]` P2 · M · Per-school configurable grade scheme — batch 22: `GradeBand` model + `GET/PUT/DELETE /exams/grade-scheme` (falls back to the default A+…F scale when unset); pure `gradeForBands` (highest-floor-wins) drives exam results + report cards; admin Grade Scheme editor page + nav.
 - `[ ]` P3 · M · GPA/CGPA, weighted terms, co-scholastic areas.
 

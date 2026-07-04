@@ -18,6 +18,8 @@ export interface ReportCardPdfData {
   percentage: number;
   grade: string;
   passed: boolean;
+  /** Class position (dense rank) among the exam's class, when available. */
+  position: { rank: number; classSize: number } | null;
 }
 
 /** Renders a per-student exam report card PDF. */
@@ -81,6 +83,12 @@ export const buildReportCardPdf = (data: ReportCardPdfData): Promise<Buffer> =>
     doc.fillColor(data.passed ? '#16a34a' : '#dc2626')
       .text(`Result: ${data.passed ? 'PASS' : 'FAIL'}`);
     doc.fillColor('#000');
+    if (data.position) {
+      doc.moveDown(0.3);
+      doc.font('Helvetica').fontSize(11).text(
+        `Class position: ${data.position.rank} of ${data.position.classSize}`,
+      );
+    }
 
     doc.moveDown(4);
     doc.fontSize(9).font('Helvetica').text('_______________________', { align: 'right' });

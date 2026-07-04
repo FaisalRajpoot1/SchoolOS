@@ -352,7 +352,30 @@ export const examsService = {
       };
     });
     const percentage = totalMax > 0 ? Math.round((obtained / totalMax) * 10000) / 100 : 0;
-    const gradeBands = await gradingService.getBands(schoolId);
+
+    // Class position: dense rank of this student's obtained total among all
+    // active students of the exam's class (matches the results() ranking).
+    const [gradeBands, classStudents, obtainedRows] = await Promise.all([
+      gradingService.getBands(schoolId),
+      prisma.student.findMany({
+        where: { schoolId, classId: exam.classId, status: 'ACTIVE' },
+        select: { id: true },
+      }),
+      prisma.mark.groupBy({
+        by: ['studentId'],
+        where: { examSubject: { examId }, isAbsent: false },
+        _sum: { marksObtained: true },
+      }),
+    ]);
+    const obtainedById = new Map(obtainedRows.map((r) => [r.studentId, r._sum.marksObtained ?? 0]));
+    const classTotals = classStudents.map((s) => obtainedById.get(s.id) ?? 0);
+    const position =
+      subjects.length > 0 && classStudents.length > 0
+        ? {
+            rank: new Set(classTotals.filter((t) => t > obtained)).size + 1,
+            classSize: classStudents.length,
+          }
+        : null;
 
     const buffer = await buildReportCardPdf({
       schoolName: school?.name ?? 'School',
@@ -366,6 +389,7 @@ export const examsService = {
       percentage,
       grade: gradeForBands(gradeBands, percentage),
       passed: !failed && subjects.length > 0,
+      position,
     });
     return { buffer, filename: `report-card-${student.admissionNo}-${exam.name}.pdf` };
   },
