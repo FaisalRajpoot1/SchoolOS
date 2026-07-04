@@ -20,6 +20,10 @@ const schema = z.object({
   department: z.string().optional(),
   employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT']),
   salary: z.string().optional().refine((v) => !v || /^\d+$/.test(v), 'Must be a number'),
+  bankName: z.string().optional(),
+  bankAccountName: z.string().optional(),
+  bankAccountNo: z.string().optional(),
+  bankRoutingNo: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -47,6 +51,10 @@ export function AddEmployeePage() {
       department: trimmed(values.department),
       employmentType: values.employmentType as EmploymentType,
       salary: values.salary ? Number(values.salary) : undefined,
+      bankName: trimmed(values.bankName),
+      bankAccountName: trimmed(values.bankAccountName),
+      bankAccountNo: trimmed(values.bankAccountNo),
+      bankRoutingNo: trimmed(values.bankRoutingNo),
     });
     navigate(`/hr/employees/${employee.id}`, { replace: true });
   });
@@ -79,6 +87,18 @@ export function AddEmployeePage() {
           </div>
           <div className="w-40">
             <TextField label="Salary (monthly)" inputMode="numeric" {...register('salary')} error={errors.salary?.message} />
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <h2 className="font-semibold">Bank details (for salary transfer)</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField label="Bank name" {...register('bankName')} />
+            <TextField label="Account holder name" {...register('bankAccountName')} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField label="Account number" {...register('bankAccountNo')} />
+            <TextField label="Routing / IFSC" {...register('bankRoutingNo')} />
           </div>
         </Card>
 

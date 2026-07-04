@@ -185,6 +185,50 @@ export const payrollService = {
     return { periodMonth: query.periodMonth, periodYear: query.periodYear, rows, totals };
   },
 
+  /**
+   * Bank-transfer file rows for a period: one line per payslip whose employee
+   * has a bank account number. Employees without an account are skipped and
+   * counted so the caller can surface them.
+   */
+  async bankFile(schoolId: string, query: RegisterQuery) {
+    const payslips = await prisma.payslip.findMany({
+      where: { schoolId, periodYear: query.periodYear, periodMonth: query.periodMonth },
+      orderBy: [{ employee: { lastName: 'asc' } }, { employee: { firstName: 'asc' } }],
+      select: {
+        netPay: true,
+        employee: {
+          select: {
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            bankName: true,
+            bankAccountName: true,
+            bankAccountNo: true,
+            bankRoutingNo: true,
+          },
+        },
+      },
+    });
+
+    const payable = payslips.filter((p) => p.employee.bankAccountNo && p.netPay > 0);
+    const rows = payable.map((p) => ({
+      employeeCode: p.employee.employeeCode,
+      accountName: p.employee.bankAccountName ?? `${p.employee.firstName} ${p.employee.lastName}`,
+      accountNo: p.employee.bankAccountNo ?? '',
+      bankName: p.employee.bankName ?? '',
+      routingNo: p.employee.bankRoutingNo ?? '',
+      amount: p.netPay,
+    }));
+
+    return {
+      periodMonth: query.periodMonth,
+      periodYear: query.periodYear,
+      rows,
+      skipped: payslips.length - payable.length,
+      total: rows.reduce((acc, r) => acc + r.amount, 0),
+    };
+  },
+
   /** Year-to-date per-employee payroll totals across all of a year's periods. */
   async ytd(schoolId: string, query: YtdQuery) {
     const grouped = await prisma.payslip.groupBy({

@@ -424,6 +424,7 @@ Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bo
 | GET    | `/payroll/payslips`               | List (`employeeId`, `periodMonth`, `periodYear`, `status`)     |
 | GET    | `/payroll/register`               | Full-period register (`periodMonth`, `periodYear`) — all payslips + totals, for CSV export |
 | GET    | `/payroll/ytd`                    | Year-to-date per-employee totals (`periodYear`) — sums each salary component across the year |
+| GET    | `/payroll/bank-file`              | Bank-transfer rows for a period (`periodMonth`, `periodYear`) — account/bank/routing + net amount; skips employees with no account |
 | GET    | `/payroll/tax-slabs`              | The school's progressive tax slabs (`{ slabs: [{ minMonthly, rate }] }`) |
 | PUT    | `/payroll/tax-slabs`              | Replace the tax slabs (distinct floors; auto-applied on payslip generate) |
 | GET    | `/payroll/payslips/:id`           | Payslip detail                                               |

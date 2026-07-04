@@ -18,6 +18,10 @@ export const createEmployeeSchema = z
     employmentType: employmentType.default('FULL_TIME'),
     joiningDate: z.coerce.date().optional(),
     salary: z.coerce.number().int().min(0).max(100_000_000).nullish(),
+    bankName: z.string().trim().max(120).nullish(),
+    bankAccountName: z.string().trim().max(120).nullish(),
+    bankAccountNo: z.string().trim().max(40).nullish(),
+    bankRoutingNo: z.string().trim().max(40).nullish(),
   })
   .strict();
 
@@ -32,6 +36,10 @@ export const updateEmployeeSchema = z
     employmentType: employmentType.optional(),
     joiningDate: z.coerce.date().optional(),
     salary: z.coerce.number().int().min(0).max(100_000_000).nullish(),
+    bankName: z.string().trim().max(120).nullish(),
+    bankAccountName: z.string().trim().max(120).nullish(),
+    bankAccountNo: z.string().trim().max(40).nullish(),
+    bankRoutingNo: z.string().trim().max(40).nullish(),
   })
   .strict();
 

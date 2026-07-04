@@ -51,6 +51,12 @@ export const payrollApi = {
     });
     return data.data;
   },
+  async bankFile(periodMonth: number, periodYear: number): Promise<PayrollBankFile> {
+    const { data } = await api.get<{ data: PayrollBankFile }>('/payroll/bank-file', {
+      params: { periodMonth, periodYear },
+    });
+    return data.data;
+  },
   async ytd(periodYear: number): Promise<PayrollYtd> {
     const { data } = await api.get<{ data: PayrollYtd }>('/payroll/ytd', { params: { periodYear } });
     return data.data;
@@ -68,6 +74,23 @@ export const payrollApi = {
 export interface TaxSlab {
   minMonthly: number;
   rate: number;
+}
+
+export interface BankFileRow {
+  employeeCode: string;
+  accountName: string;
+  accountNo: string;
+  bankName: string;
+  routingNo: string;
+  amount: number;
+}
+
+export interface PayrollBankFile {
+  periodMonth: number;
+  periodYear: number;
+  rows: BankFileRow[];
+  skipped: number;
+  total: number;
 }
 
 export interface YtdRow {

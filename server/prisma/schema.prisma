@@ -1186,6 +1186,11 @@ model Employee {
   joiningDate    DateTime       @default(now())
   salary         Int?
   status         StaffStatus    @default(ACTIVE)
+  // Bank details for salary transfer (optional).
+  bankName          String?
+  bankAccountName   String?
+  bankAccountNo     String?
+  bankRoutingNo     String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 

@@ -47,6 +47,10 @@ export const hrService = {
           employmentType: input.employmentType,
           joiningDate: input.joiningDate,
           salary: input.salary ?? null,
+          bankName: input.bankName ?? null,
+          bankAccountName: input.bankAccountName ?? null,
+          bankAccountNo: input.bankAccountNo ?? null,
+          bankRoutingNo: input.bankRoutingNo ?? null,
         },
       });
     } catch (err) {

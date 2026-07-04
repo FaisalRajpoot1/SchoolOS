@@ -76,6 +76,15 @@ export function EmployeeDetailPage() {
         <Detail label="Joined" value={e.joiningDate.slice(0, 10)} />
       </Card>
 
+      {(e.bankAccountNo || e.bankName) && (
+        <Card className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <Detail label="Bank" value={e.bankName} />
+          <Detail label="Account name" value={e.bankAccountName} />
+          <Detail label="Account number" value={e.bankAccountNo} />
+          <Detail label="Routing / IFSC" value={e.bankRoutingNo} />
+        </Card>
+      )}
+
       <Card className="space-y-3">
         <h2 className="font-semibold">Status</h2>
         <div className="w-48">

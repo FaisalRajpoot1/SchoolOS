@@ -31,6 +31,33 @@ export function PayslipsListPage() {
   const generate = useGeneratePayslips();
   const create = useCreatePayslip();
 
+  const [exportingBank, setExportingBank] = useState(false);
+  const exportBankFile = async (): Promise<void> => {
+    setExportingBank(true);
+    try {
+      const bank = await payrollApi.bankFile(month, year);
+      if (bank.rows.length === 0) {
+        toast.info('No payslips with bank details for this period');
+        return;
+      }
+      downloadCsv(
+        `payroll-bank-${bank.periodYear}-${String(bank.periodMonth).padStart(2, '0')}.csv`,
+        ['Employee code', 'Account name', 'Account number', 'Bank', 'Routing/IFSC', 'Amount'],
+        [
+          ...bank.rows.map((r) => [r.employeeCode, r.accountName, r.accountNo, r.bankName, r.routingNo, r.amount]),
+          ['', 'TOTAL', '', '', '', bank.total],
+        ],
+      );
+      if (bank.skipped > 0) {
+        toast.info(`${bank.skipped} payslip(s) skipped — no bank account or nothing payable`);
+      }
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Could not export the bank file'));
+    } finally {
+      setExportingBank(false);
+    }
+  };
+
   const [exportingYtd, setExportingYtd] = useState(false);
   const exportYtd = async (): Promise<void> => {
     setExportingYtd(true);
@@ -111,6 +138,9 @@ export function PayslipsListPage() {
           <p className="text-slate-500">Monthly payslips for staff.</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="secondary" onClick={exportBankFile} isLoading={exportingBank}>
+            Bank file
+          </Button>
           <Button variant="secondary" onClick={exportYtd} isLoading={exportingYtd}>
             Export YTD
           </Button>

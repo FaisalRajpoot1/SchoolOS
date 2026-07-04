@@ -33,13 +33,24 @@ export interface Employee {
   joiningDate: string;
   salary: number | null;
   status: StaffStatus;
+  bankName: string | null;
+  bankAccountName: string | null;
+  bankAccountNo: string | null;
+  bankRoutingNo: string | null;
 }
 
 export interface EmployeeDetail extends Employee {
   leaveRequests: LeaveRequest[];
 }
 
-export interface CreateEmployeePayload {
+export interface BankDetailsPayload {
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNo?: string;
+  bankRoutingNo?: string;
+}
+
+export interface CreateEmployeePayload extends BankDetailsPayload {
   employeeCode?: string;
   firstName: string;
   lastName: string;

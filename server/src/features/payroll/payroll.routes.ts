@@ -23,6 +23,7 @@ router.post('/payslips', validate({ body: createPayslipSchema }), payrollControl
 router.get('/payslips', validate({ query: listPayslipsSchema }), payrollController.list);
 router.get('/register', validate({ query: registerQuerySchema }), payrollController.register);
 router.get('/ytd', validate({ query: ytdQuerySchema }), payrollController.ytd);
+router.get('/bank-file', validate({ query: registerQuerySchema }), payrollController.bankFile);
 router.get('/tax-slabs', payrollController.getTaxSlabs);
 router.put('/tax-slabs', validate({ body: setTaxSlabsSchema }), payrollController.setTaxSlabs);
 router.get('/payslips/:id', validate({ params: payslipIdParamSchema }), payrollController.getById);
