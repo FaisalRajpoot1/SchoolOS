@@ -11,9 +11,11 @@ import type {
   GeneratePayslipsInput,
   ListPayslipsQuery,
   RegisterQuery,
+  SetTaxSlabsInput,
   UpdatePayslipInput,
 } from './payroll.validation';
 import { buildPayslipPdf } from './payslip.pdf';
+import { computeTax, type TaxSlab } from './tax';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -84,7 +86,7 @@ export const payrollService = {
 
   /** Creates DRAFT payslips for all active, salaried employees missing one for the period. */
   async generate(schoolId: string, input: GeneratePayslipsInput): Promise<{ created: number }> {
-    const [employees, existing] = await Promise.all([
+    const [employees, existing, slabs] = await Promise.all([
       prisma.employee.findMany({
         where: { schoolId, status: 'ACTIVE', salary: { not: null } },
         select: { id: true, salary: true },
@@ -93,20 +95,27 @@ export const payrollService = {
         where: { schoolId, periodYear: input.periodYear, periodMonth: input.periodMonth },
         select: { employeeId: true },
       }),
+      this.getTaxSlabs(schoolId),
     ]);
 
     const alreadyPaid = new Set(existing.map((p) => p.employeeId));
     const toCreate = employees.filter((e) => !alreadyPaid.has(e.id));
 
     const result = await prisma.payslip.createMany({
-      data: toCreate.map((e) => ({
-        schoolId,
-        employeeId: e.id,
-        periodMonth: input.periodMonth,
-        periodYear: input.periodYear,
-        basicSalary: e.salary ?? 0,
-        netPay: e.salary ?? 0,
-      })),
+      data: toCreate.map((e) => {
+        const basicSalary = e.salary ?? 0;
+        // Tax is auto-computed from the school's slabs (0 when none configured).
+        const tax = computeTax(basicSalary, slabs);
+        return {
+          schoolId,
+          employeeId: e.id,
+          periodMonth: input.periodMonth,
+          periodYear: input.periodYear,
+          basicSalary,
+          tax,
+          netPay: basicSalary - tax,
+        };
+      }),
       skipDuplicates: true,
     });
 
@@ -173,6 +182,27 @@ export const payrollService = {
     );
 
     return { periodMonth: query.periodMonth, periodYear: query.periodYear, rows, totals };
+  },
+
+  /** The school's tax slabs (ascending), or an empty list when unconfigured. */
+  async getTaxSlabs(schoolId: string): Promise<TaxSlab[]> {
+    const rows = await prisma.taxSlab.findMany({
+      where: { schoolId },
+      orderBy: { minMonthly: 'asc' },
+      select: { minMonthly: true, rate: true },
+    });
+    return rows;
+  },
+
+  /** Replaces the school's tax slabs. */
+  async setTaxSlabs(schoolId: string, input: SetTaxSlabsInput): Promise<TaxSlab[]> {
+    await prisma.$transaction([
+      prisma.taxSlab.deleteMany({ where: { schoolId } }),
+      prisma.taxSlab.createMany({
+        data: input.slabs.map((s) => ({ schoolId, minMonthly: s.minMonthly, rate: s.rate })),
+      }),
+    ]);
+    return this.getTaxSlabs(schoolId);
   },
 
   async getById(schoolId: string, id: string) {

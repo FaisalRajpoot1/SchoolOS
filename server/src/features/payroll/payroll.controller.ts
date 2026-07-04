@@ -25,6 +25,16 @@ export const payrollController = {
     res.status(200).json({ success: true, data });
   }),
 
+  getTaxSlabs: asyncHandler(async (req: Request, res: Response) => {
+    const slabs = await payrollService.getTaxSlabs(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data: { slabs } });
+  }),
+
+  setTaxSlabs: asyncHandler(async (req: Request, res: Response) => {
+    const slabs = await payrollService.setTaxSlabs(requireSchoolId(req.user), req.body);
+    res.status(200).json({ success: true, data: { slabs } });
+  }),
+
   getById: asyncHandler(async (req: Request, res: Response) => {
     const payslip = await payrollService.getById(requireSchoolId(req.user), req.params.id as string);
     res.status(200).json({ success: true, data: { payslip } });

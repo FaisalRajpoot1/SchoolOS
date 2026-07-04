@@ -51,7 +51,20 @@ export const payrollApi = {
     });
     return data.data;
   },
+  async getTaxSlabs(): Promise<TaxSlab[]> {
+    const { data } = await api.get<{ data: { slabs: TaxSlab[] } }>('/payroll/tax-slabs');
+    return data.data.slabs;
+  },
+  async setTaxSlabs(slabs: TaxSlab[]): Promise<TaxSlab[]> {
+    const { data } = await api.put<{ data: { slabs: TaxSlab[] } }>('/payroll/tax-slabs', { slabs });
+    return data.data.slabs;
+  },
 };
+
+export interface TaxSlab {
+  minMonthly: number;
+  rate: number;
+}
 
 export interface RegisterRow {
   employeeCode: string;

@@ -57,6 +57,7 @@ import { EmployeeDetailPage } from '@/features/hr/pages/EmployeeDetailPage';
 import { LeaveRequestsPage } from '@/features/hr/pages/LeaveRequestsPage';
 import { PayslipsListPage } from '@/features/payroll/pages/PayslipsListPage';
 import { PayslipDetailPage } from '@/features/payroll/pages/PayslipDetailPage';
+import { TaxSlabsPage } from '@/features/payroll/pages/TaxSlabsPage';
 import { EventsCalendarPage } from '@/features/events/pages/EventsCalendarPage';
 import { ManageEventsPage } from '@/features/events/pages/ManageEventsPage';
 import { AssignmentsListPage } from '@/features/assignments/pages/AssignmentsListPage';
@@ -143,6 +144,7 @@ export const router = createBrowserRouter([
               { path: '/hr/employees/:id', element: <EmployeeDetailPage /> },
               { path: '/hr/leave', element: <LeaveRequestsPage /> },
               { path: '/payroll/payslips', element: <PayslipsListPage /> },
+              { path: '/payroll/tax-slabs', element: <TaxSlabsPage /> },
               { path: '/payroll/payslips/:id', element: <PayslipDetailPage /> },
             ],
           },

@@ -221,6 +221,7 @@ model School {
   documents             Document[]
   gradeBands            GradeBand[]
   attachments           Attachment[]
+  taxSlabs              TaxSlab[]
 
   @@map("schools")
 }
@@ -518,6 +519,22 @@ model FeeCategory {
   @@unique([schoolId, name])
   @@index([schoolId])
   @@map("fee_categories")
+}
+
+/// A progressive monthly tax bracket for a school's payroll (marginal rate
+/// applied to income above `minMonthly`, up to the next slab's floor).
+model TaxSlab {
+  id         String   @id @default(uuid())
+  minMonthly Int
+  rate       Int
+  createdAt  DateTime @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, minMonthly])
+  @@index([schoolId])
+  @@map("tax_slabs")
 }
 
 /// A bill issued to a student. Amounts are whole units of the school's currency.

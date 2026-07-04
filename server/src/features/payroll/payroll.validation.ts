@@ -46,6 +46,28 @@ export const payslipIdParamSchema = z.object({ id: z.string().uuid() });
 /** Full-period register (no pagination) for CSV export. */
 export const registerQuerySchema = z.object({ periodMonth: month, periodYear: year });
 
+const taxSlab = z.object({
+  minMonthly: z.coerce.number().int().min(0).max(100_000_000),
+  rate: z.coerce.number().int().min(0).max(100),
+});
+
+/** Replaces a school's progressive tax slabs (distinct floors). */
+export const setTaxSlabsSchema = z
+  .object({ slabs: z.array(taxSlab).max(20) })
+  .strict()
+  .superRefine((data, ctx) => {
+    const floors = data.slabs.map((s) => s.minMonthly);
+    if (new Set(floors).size !== floors.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Each slab needs a distinct minimum monthly income',
+        path: ['slabs'],
+      });
+    }
+  });
+
+export type SetTaxSlabsInput = z.infer<typeof setTaxSlabsSchema>;
+
 export type CreatePayslipInput = z.infer<typeof createPayslipSchema>;
 export type GeneratePayslipsInput = z.infer<typeof generatePayslipsSchema>;
 export type UpdatePayslipInput = z.infer<typeof updatePayslipSchema>;

@@ -423,6 +423,8 @@ Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bo
 | POST   | `/payroll/payslips`               | Create one payslip (basic defaults to the employee's salary)  |
 | GET    | `/payroll/payslips`               | List (`employeeId`, `periodMonth`, `periodYear`, `status`)     |
 | GET    | `/payroll/register`               | Full-period register (`periodMonth`, `periodYear`) — all payslips + totals, for CSV export |
+| GET    | `/payroll/tax-slabs`              | The school's progressive tax slabs (`{ slabs: [{ minMonthly, rate }] }`) |
+| PUT    | `/payroll/tax-slabs`              | Replace the tax slabs (distinct floors; auto-applied on payslip generate) |
 | GET    | `/payroll/payslips/:id`           | Payslip detail                                               |
 | GET    | `/payroll/payslips/:id/pdf`       | Download the payslip as a PDF                                |
 | PATCH  | `/payroll/payslips/:id`           | Edit amounts (DRAFT only; recomputes net)                    |
