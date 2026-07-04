@@ -18,16 +18,21 @@ export const createDocumentSchema = z
     category: category.default('GENERAL'),
     studentId: z.string().uuid().optional(),
     employeeId: z.string().uuid().optional(),
+    teacherId: z.string().uuid().optional(),
   })
   .strict()
-  .refine((d) => !(d.studentId && d.employeeId), {
-    message: 'A document can belong to a student or an employee, not both',
-    path: ['employeeId'],
-  });
+  .refine(
+    (d) => [d.studentId, d.employeeId, d.teacherId].filter(Boolean).length <= 1,
+    {
+      message: 'A document can belong to at most one of a student, employee, or teacher',
+      path: ['teacherId'],
+    },
+  );
 
 export const listDocumentsSchema = paginationSchema.extend({
   studentId: z.string().uuid().optional(),
   employeeId: z.string().uuid().optional(),
+  teacherId: z.string().uuid().optional(),
   category: category.optional(),
 });
 

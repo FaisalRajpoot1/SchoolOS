@@ -1433,12 +1433,16 @@ model Document {
   employeeId String?
   employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
   uploadedById String?
   uploadedBy   User?   @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   @@index([schoolId])
   @@index([studentId])
   @@index([employeeId])
+  @@index([teacherId])
   @@map("documents")
 }
 
@@ -1549,6 +1553,7 @@ model Teacher {
   classSections      Section[]       @relation("ClassTeacher")
   subjectAssignments ClassSubject[]  @relation("SubjectTeacher")
   homeworks          Homework[]      @relation("HomeworkTeacher")
+  documents          Document[]
   assignments        Assignment[]    @relation("AssignmentTeacher")
   timetableSlots     TimetableSlot[] @relation("TimetableTeacher")
 

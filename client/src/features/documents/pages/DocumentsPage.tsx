@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useStudents } from '@/features/students/useStudents';
+import { useTeacherOptions } from '@/features/teachers/useTeachers';
 import { useDeleteDocument, useDocuments, useUploadDocument } from '../useDocuments';
 import {
   DOCUMENT_CATEGORIES,
@@ -36,14 +37,17 @@ export function DocumentsPage() {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<DocumentCategory>('GENERAL');
   const [file, setFile] = useState<File | null>(null);
+  const [ownerType, setOwnerType] = useState<'none' | 'student' | 'teacher'>('none');
   const [studentSearch, setStudentSearch] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [teacherId, setTeacherId] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<DocumentCategory | ''>('');
   const [page, setPage] = useState(1);
   const fileInput = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState('');
 
   const students = useStudents({ limit: 20, search: studentSearch || undefined });
+  const teachers = useTeacherOptions();
   const list = useDocuments({ page, limit: 10, category: categoryFilter || undefined });
   const upload = useUploadDocument();
   const remove = useDeleteDocument();
@@ -60,15 +64,23 @@ export function DocumentsPage() {
       return;
     }
     upload.mutate(
-      { file, title: title.trim(), category, studentId: studentId || undefined },
+      {
+        file,
+        title: title.trim(),
+        category,
+        studentId: ownerType === 'student' ? studentId || undefined : undefined,
+        teacherId: ownerType === 'teacher' ? teacherId || undefined : undefined,
+      },
       {
         onSuccess: () => {
           toast.success('Document uploaded');
           setTitle('');
           setCategory('GENERAL');
           setFile(null);
+          setOwnerType('none');
           setStudentId('');
           setStudentSearch('');
+          setTeacherId('');
           if (fileInput.current) fileInput.current.value = '';
         },
         onError: (err) => toast.error(getApiErrorMessage(err)),
@@ -96,7 +108,7 @@ export function DocumentsPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Documents</h1>
-        <p className="text-slate-500">Secure per-student and school document store.</p>
+        <p className="text-slate-500">Secure document store for students, teachers, and the school.</p>
       </div>
 
       <Card className="space-y-3">
@@ -113,22 +125,51 @@ export function DocumentsPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-start gap-3">
-            <div className="w-64">
-              <TextField
-                label="Attach to student (optional)"
-                placeholder="Search by name or admission no."
-                value={studentSearch}
-                onChange={(e) => { setStudentSearch(e.target.value); setStudentId(''); }}
-              />
-            </div>
-            <div className="w-72">
-              <Select label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
-                <option value="">School-level (no student)</option>
-                {students.data?.items.map((s) => (
-                  <option key={s.id} value={s.id}>{s.firstName} {s.lastName} ({s.admissionNo})</option>
-                ))}
+            <div className="w-44">
+              <Select
+                label="Attach to"
+                value={ownerType}
+                onChange={(e) => {
+                  setOwnerType(e.target.value as 'none' | 'student' | 'teacher');
+                  setStudentId('');
+                  setTeacherId('');
+                }}
+              >
+                <option value="none">School-level</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
               </Select>
             </div>
+            {ownerType === 'student' && (
+              <>
+                <div className="w-64">
+                  <TextField
+                    label="Find student"
+                    placeholder="Search by name or admission no."
+                    value={studentSearch}
+                    onChange={(e) => { setStudentSearch(e.target.value); setStudentId(''); }}
+                  />
+                </div>
+                <div className="w-72">
+                  <Select label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+                    <option value="">Select</option>
+                    {students.data?.items.map((s) => (
+                      <option key={s.id} value={s.id}>{s.firstName} {s.lastName} ({s.admissionNo})</option>
+                    ))}
+                  </Select>
+                </div>
+              </>
+            )}
+            {ownerType === 'teacher' && (
+              <div className="w-72">
+                <Select label="Teacher" value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
+                  <option value="">Select</option>
+                  {teachers.data?.map((t) => (
+                    <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">File</label>
@@ -191,9 +232,11 @@ export function DocumentsPage() {
                   <td className="px-4 py-3 text-slate-600">
                     {d.student
                       ? `${d.student.firstName} ${d.student.lastName}`
-                      : d.employee
-                        ? `${d.employee.firstName} ${d.employee.lastName}`
-                        : '—'}
+                      : d.teacher
+                        ? `${d.teacher.firstName} ${d.teacher.lastName} (teacher)`
+                        : d.employee
+                          ? `${d.employee.firstName} ${d.employee.lastName}`
+                          : '—'}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-slate-500">{formatBytes(d.sizeBytes)}</td>
                   <td className="px-4 py-3 text-slate-500">{d.createdAt.slice(0, 10)}</td>

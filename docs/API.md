@@ -553,8 +553,8 @@ A secure document store: files are held by a pluggable storage backend (local fi
 
 | Method | Path                       | Description                                                              |
 | ------ | -------------------------- | ------------------------------------------------------------------------ |
-| POST   | `/documents`               | Upload (`file` + `title`, `category`, optional `studentId`/`employeeId`) |
-| GET    | `/documents`               | List (paginated; `studentId`, `employeeId`, `category` filters)          |
+| POST   | `/documents`               | Upload (`file` + `title`, `category`, optional owner: one of `studentId`/`employeeId`/`teacherId`) |
+| GET    | `/documents`               | List (paginated; `studentId`, `employeeId`, `teacherId`, `category` filters) |
 | GET    | `/documents/:id`           | Get one document's metadata                                              |
 | GET    | `/documents/:id/download`  | Download the file (authenticated, tenant-scoped)                         |
 | DELETE | `/documents/:id`           | Delete the metadata row and its stored file                             |
