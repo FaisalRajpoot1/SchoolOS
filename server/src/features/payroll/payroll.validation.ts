@@ -46,6 +46,9 @@ export const payslipIdParamSchema = z.object({ id: z.string().uuid() });
 /** Full-period register (no pagination) for CSV export. */
 export const registerQuerySchema = z.object({ periodMonth: month, periodYear: year });
 
+/** Year-to-date summary (all months of a year). */
+export const ytdQuerySchema = z.object({ periodYear: year });
+
 const taxSlab = z.object({
   minMonthly: z.coerce.number().int().min(0).max(100_000_000),
   rate: z.coerce.number().int().min(0).max(100),
@@ -73,3 +76,4 @@ export type GeneratePayslipsInput = z.infer<typeof generatePayslipsSchema>;
 export type UpdatePayslipInput = z.infer<typeof updatePayslipSchema>;
 export type ListPayslipsQuery = z.infer<typeof listPayslipsSchema>;
 export type RegisterQuery = z.infer<typeof registerQuerySchema>;
+export type YtdQuery = z.infer<typeof ytdQuerySchema>;

@@ -11,6 +11,7 @@ import {
   registerQuerySchema,
   setTaxSlabsSchema,
   updatePayslipSchema,
+  ytdQuerySchema,
 } from './payroll.validation';
 
 const router = Router();
@@ -21,6 +22,7 @@ router.post('/payslips/generate', validate({ body: generatePayslipsSchema }), pa
 router.post('/payslips', validate({ body: createPayslipSchema }), payrollController.create);
 router.get('/payslips', validate({ query: listPayslipsSchema }), payrollController.list);
 router.get('/register', validate({ query: registerQuerySchema }), payrollController.register);
+router.get('/ytd', validate({ query: ytdQuerySchema }), payrollController.ytd);
 router.get('/tax-slabs', payrollController.getTaxSlabs);
 router.put('/tax-slabs', validate({ body: setTaxSlabsSchema }), payrollController.setTaxSlabs);
 router.get('/payslips/:id', validate({ params: payslipIdParamSchema }), payrollController.getById);

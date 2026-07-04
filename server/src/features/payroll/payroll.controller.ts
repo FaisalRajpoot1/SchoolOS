@@ -25,6 +25,11 @@ export const payrollController = {
     res.status(200).json({ success: true, data });
   }),
 
+  ytd: asyncHandler(async (req: Request, res: Response) => {
+    const data = await payrollService.ytd(requireSchoolId(req.user), req.query as never);
+    res.status(200).json({ success: true, data });
+  }),
+
   getTaxSlabs: asyncHandler(async (req: Request, res: Response) => {
     const slabs = await payrollService.getTaxSlabs(requireSchoolId(req.user));
     res.status(200).json({ success: true, data: { slabs } });

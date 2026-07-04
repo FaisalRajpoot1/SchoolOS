@@ -51,6 +51,10 @@ export const payrollApi = {
     });
     return data.data;
   },
+  async ytd(periodYear: number): Promise<PayrollYtd> {
+    const { data } = await api.get<{ data: PayrollYtd }>('/payroll/ytd', { params: { periodYear } });
+    return data.data;
+  },
   async getTaxSlabs(): Promise<TaxSlab[]> {
     const { data } = await api.get<{ data: { slabs: TaxSlab[] } }>('/payroll/tax-slabs');
     return data.data.slabs;
@@ -64,6 +68,24 @@ export const payrollApi = {
 export interface TaxSlab {
   minMonthly: number;
   rate: number;
+}
+
+export interface YtdRow {
+  employeeCode: string;
+  name: string;
+  payslips: number;
+  basicSalary: number;
+  allowances: number;
+  bonus: number;
+  deductions: number;
+  tax: number;
+  netPay: number;
+}
+
+export interface PayrollYtd {
+  periodYear: number;
+  rows: YtdRow[];
+  totals: Omit<YtdRow, 'employeeCode' | 'name' | 'payslips'>;
 }
 
 export interface RegisterRow {

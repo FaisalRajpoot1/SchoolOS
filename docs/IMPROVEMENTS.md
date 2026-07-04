@@ -123,7 +123,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Payroll (M18)
 - `[ ]` P1 · S · PDF payslip (needs 1.11).
-- `[~]` P2 · M · Bank-transfer export file (CSV/NACHA); configurable tax slabs; YTD summary. — batch 29: per-period payroll register CSV export. Batch 33: configurable progressive tax slabs (`TaxSlab` model + `GET/PUT /payroll/tax-slabs` + editor page; `computeTax` marginal helper auto-applied on payslip generate). True bank/NACHA file (needs employee bank fields) and YTD still open.
+- `[~]` P2 · M · Bank-transfer export file (CSV/NACHA); configurable tax slabs; YTD summary. — batch 29: per-period payroll register CSV export. Batch 33: configurable progressive tax slabs. Batch 34: YTD summary (`GET /payroll/ytd` per-employee year totals via groupBy + "Export YTD" CSV button). True bank/NACHA file (needs employee bank fields) still open.
 
 ### Parent Portal (M5)
 - `[ ]` P1 · M · Online fee payment from portal (needs Fees gateway).

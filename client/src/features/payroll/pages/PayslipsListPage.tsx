@@ -31,6 +31,32 @@ export function PayslipsListPage() {
   const generate = useGeneratePayslips();
   const create = useCreatePayslip();
 
+  const [exportingYtd, setExportingYtd] = useState(false);
+  const exportYtd = async (): Promise<void> => {
+    setExportingYtd(true);
+    try {
+      const ytd = await payrollApi.ytd(year);
+      if (ytd.rows.length === 0) {
+        toast.info('No payslips for this year');
+        return;
+      }
+      downloadCsv(
+        `payroll-ytd-${ytd.periodYear}.csv`,
+        ['Employee code', 'Name', 'Payslips', 'Basic', 'Allowances', 'Bonus', 'Deductions', 'Tax', 'Net pay'],
+        [
+          ...ytd.rows.map((r) => [
+            r.employeeCode, r.name, r.payslips, r.basicSalary, r.allowances, r.bonus, r.deductions, r.tax, r.netPay,
+          ]),
+          ['', 'TOTAL', '', ytd.totals.basicSalary, ytd.totals.allowances, ytd.totals.bonus, ytd.totals.deductions, ytd.totals.tax, ytd.totals.netPay],
+        ],
+      );
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Could not export YTD summary'));
+    } finally {
+      setExportingYtd(false);
+    }
+  };
+
   const [exporting, setExporting] = useState(false);
   const exportRegister = async (): Promise<void> => {
     setExporting(true);
@@ -84,9 +110,14 @@ export function PayslipsListPage() {
           <h1 className="text-2xl font-bold">Payroll</h1>
           <p className="text-slate-500">Monthly payslips for staff.</p>
         </div>
-        <Button variant="secondary" onClick={exportRegister} isLoading={exporting}>
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={exportYtd} isLoading={exportingYtd}>
+            Export YTD
+          </Button>
+          <Button variant="secondary" onClick={exportRegister} isLoading={exporting}>
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       <Card className="flex flex-wrap items-end gap-3">

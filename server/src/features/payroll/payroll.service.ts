@@ -13,6 +13,7 @@ import type {
   RegisterQuery,
   SetTaxSlabsInput,
   UpdatePayslipInput,
+  YtdQuery,
 } from './payroll.validation';
 import { buildPayslipPdf } from './payslip.pdf';
 import { computeTax, type TaxSlab } from './tax';
@@ -182,6 +183,60 @@ export const payrollService = {
     );
 
     return { periodMonth: query.periodMonth, periodYear: query.periodYear, rows, totals };
+  },
+
+  /** Year-to-date per-employee payroll totals across all of a year's periods. */
+  async ytd(schoolId: string, query: YtdQuery) {
+    const grouped = await prisma.payslip.groupBy({
+      by: ['employeeId'],
+      where: { schoolId, periodYear: query.periodYear },
+      _sum: {
+        basicSalary: true,
+        allowances: true,
+        bonus: true,
+        deductions: true,
+        tax: true,
+        netPay: true,
+      },
+      _count: { _all: true },
+    });
+
+    const employees = await prisma.employee.findMany({
+      where: { schoolId, id: { in: grouped.map((g) => g.employeeId) } },
+      select: { id: true, firstName: true, lastName: true, employeeCode: true },
+    });
+    const byId = new Map(employees.map((e) => [e.id, e]));
+
+    const rows = grouped
+      .map((g) => {
+        const e = byId.get(g.employeeId);
+        return {
+          employeeCode: e?.employeeCode ?? '',
+          name: e ? `${e.firstName} ${e.lastName}` : 'Unknown',
+          payslips: g._count._all,
+          basicSalary: g._sum.basicSalary ?? 0,
+          allowances: g._sum.allowances ?? 0,
+          bonus: g._sum.bonus ?? 0,
+          deductions: g._sum.deductions ?? 0,
+          tax: g._sum.tax ?? 0,
+          netPay: g._sum.netPay ?? 0,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const totals = rows.reduce(
+      (acc, r) => ({
+        basicSalary: acc.basicSalary + r.basicSalary,
+        allowances: acc.allowances + r.allowances,
+        bonus: acc.bonus + r.bonus,
+        deductions: acc.deductions + r.deductions,
+        tax: acc.tax + r.tax,
+        netPay: acc.netPay + r.netPay,
+      }),
+      { basicSalary: 0, allowances: 0, bonus: 0, deductions: 0, tax: 0, netPay: 0 },
+    );
+
+    return { periodYear: query.periodYear, rows, totals };
   },
 
   /** The school's tax slabs (ascending), or an empty list when unconfigured. */
