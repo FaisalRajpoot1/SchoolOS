@@ -422,6 +422,7 @@ Payslips are one-per-employee-per-month. `netPay = basicSalary + allowances + bo
 | POST   | `/payroll/payslips/generate`      | Bulk-create DRAFT payslips for active salaried employees missing one for `{ periodMonth, periodYear }` |
 | POST   | `/payroll/payslips`               | Create one payslip (basic defaults to the employee's salary)  |
 | GET    | `/payroll/payslips`               | List (`employeeId`, `periodMonth`, `periodYear`, `status`)     |
+| GET    | `/payroll/register`               | Full-period register (`periodMonth`, `periodYear`) — all payslips + totals, for CSV export |
 | GET    | `/payroll/payslips/:id`           | Payslip detail                                               |
 | GET    | `/payroll/payslips/:id/pdf`       | Download the payslip as a PDF                                |
 | PATCH  | `/payroll/payslips/:id`           | Edit amounts (DRAFT only; recomputes net)                    |

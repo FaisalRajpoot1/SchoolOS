@@ -217,7 +217,14 @@ export const invoicesService = {
       });
       await recomputeStatus(tx, invoiceId);
     });
-    return this.getById(schoolId, invoiceId);
+
+    const updated = await this.getById(schoolId, invoiceId);
+    await notificationsService.notifyGuardiansSafe(schoolId, [updated.studentId], {
+      type: 'FEE',
+      title: 'Payment received',
+      body: `Payment of ${input.amount} recorded for invoice ${updated.invoiceNo}. Balance ${updated.totals.balance}.`,
+    });
+    return updated;
   },
 
   async removePayment(schoolId: string, invoiceId: string, paymentId: string) {
