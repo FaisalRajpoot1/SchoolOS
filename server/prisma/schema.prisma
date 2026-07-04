@@ -188,6 +188,7 @@ model School {
   attendanceRecords     AttendanceRecord[]
   feeCategories         FeeCategory[]
   invoices              Invoice[]
+  invoiceInstallments   InvoiceInstallment[]
   payments              Payment[]
   exams                 Exam[]
   homeworks             Homework[]
@@ -558,13 +559,37 @@ model Invoice {
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  items    InvoiceItem[]
-  payments Payment[]
+  items        InvoiceItem[]
+  payments     Payment[]
+  installments InvoiceInstallment[]
 
   @@unique([schoolId, invoiceNo])
   @@index([schoolId])
   @@index([studentId])
   @@map("invoices")
+}
+
+/// One scheduled installment of an invoice's net payable. A full plan's
+/// amounts must sum to the invoice net total; payments are allocated to
+/// installments in `seq` order (waterfall) to derive each one's status.
+model InvoiceInstallment {
+  id        String   @id @default(uuid())
+  seq       Int
+  label     String?
+  dueDate   DateTime
+  amount    Int
+  createdAt DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, seq])
+  @@index([invoiceId])
+  @@index([schoolId])
+  @@map("invoice_installments")
 }
 
 /// A line item on an invoice. Amount may be negative for discounts/scholarships.

@@ -11,9 +11,11 @@ import type {
   AddPaymentInput,
   CreateInvoiceInput,
   ListInvoicesQuery,
+  SetInstallmentsInput,
   UpdateInvoiceInput,
 } from './invoices.validation';
 import { buildInvoicePdf } from './invoice.pdf';
+import { allocateInstallments, scheduledTotal } from './installments';
 
 interface Totals {
   subtotal: number;
@@ -251,6 +253,68 @@ export const invoicesService = {
       await recomputeStatus(tx, invoiceId);
     });
     return this.getById(schoolId, invoiceId);
+  },
+
+  /** Returns the invoice's installment plan with each installment's derived status. */
+  async getInstallments(schoolId: string, invoiceId: string) {
+    const invoice = await this.getById(schoolId, invoiceId);
+    const installments = await prisma.invoiceInstallment.findMany({
+      where: { invoiceId, schoolId },
+      orderBy: { seq: 'asc' },
+    });
+    const allocated = allocateInstallments(
+      installments.map((i) => ({ seq: i.seq, label: i.label, dueDate: i.dueDate, amount: i.amount })),
+      invoice.totals.paid,
+      new Date(),
+    );
+    const scheduled = scheduledTotal(installments);
+    return {
+      installments: allocated,
+      summary: {
+        total: invoice.totals.total,
+        paid: invoice.totals.paid,
+        scheduled,
+        matchesTotal: scheduled === invoice.totals.total,
+      },
+    };
+  },
+
+  /**
+   * Replaces the invoice's installment plan. The installment amounts must sum
+   * to the invoice's net total; `seq` is assigned from the submitted order.
+   */
+  async setInstallments(schoolId: string, invoiceId: string, input: SetInstallmentsInput) {
+    const invoice = await this.getById(schoolId, invoiceId);
+    if (invoice.status === 'CANCELLED') {
+      throw ApiError.badRequest('Cannot set an installment plan on a cancelled invoice');
+    }
+    const scheduled = input.installments.reduce((acc, i) => acc + i.amount, 0);
+    if (scheduled !== invoice.totals.total) {
+      throw ApiError.badRequest(
+        `Installments must sum to the net total (${invoice.totals.total}); got ${scheduled}`,
+      );
+    }
+    await prisma.$transaction(async (tx) => {
+      await tx.invoiceInstallment.deleteMany({ where: { invoiceId, schoolId } });
+      await tx.invoiceInstallment.createMany({
+        data: input.installments.map((inst, idx) => ({
+          schoolId,
+          invoiceId,
+          seq: idx + 1,
+          label: inst.label ?? null,
+          dueDate: inst.dueDate,
+          amount: inst.amount,
+        })),
+      });
+    });
+    return this.getInstallments(schoolId, invoiceId);
+  },
+
+  /** Removes the invoice's installment plan entirely. */
+  async clearInstallments(schoolId: string, invoiceId: string) {
+    await this.getById(schoolId, invoiceId);
+    await prisma.invoiceInstallment.deleteMany({ where: { invoiceId, schoolId } });
+    return this.getInstallments(schoolId, invoiceId);
   },
 
   /** Renders an invoice as a PDF buffer with a suggested filename. */

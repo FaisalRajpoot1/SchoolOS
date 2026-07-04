@@ -5,6 +5,7 @@ import type {
   CreateInvoicePayload,
   InvoiceDetail,
   ListInvoicesParams,
+  SetInstallmentsPayload,
 } from './fees.types';
 
 const categoryKeys = { all: ['fee-categories'] as const };
@@ -12,6 +13,7 @@ const invoiceKeys = {
   all: ['invoices'] as const,
   list: (params: ListInvoicesParams) => ['invoices', 'list', params] as const,
   detail: (id: string) => ['invoices', 'detail', id] as const,
+  installments: (id: string) => ['invoices', 'installments', id] as const,
 };
 
 // ---- Fee categories ----
@@ -81,5 +83,32 @@ export const useRemovePayment = (id: string) => {
   return useMutation({
     mutationFn: (paymentId: string) => invoicesApi.removePayment(id, paymentId),
     onSuccess: syncDetail(qc),
+  });
+};
+
+// ---- Installment plan ----
+export const useInstallments = (id: string) =>
+  useQuery({
+    queryKey: invoiceKeys.installments(id),
+    queryFn: () => invoicesApi.getInstallments(id),
+    enabled: !!id,
+  });
+
+export const useSetInstallments = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: SetInstallmentsPayload) => invoicesApi.setInstallments(id, payload),
+    onSuccess: (plan) => {
+      qc.setQueryData(invoiceKeys.installments(id), plan);
+      void qc.invalidateQueries({ queryKey: invoiceKeys.all });
+    },
+  });
+};
+
+export const useClearInstallments = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => invoicesApi.clearInstallments(id),
+    onSuccess: (plan) => qc.setQueryData(invoiceKeys.installments(id), plan),
   });
 };

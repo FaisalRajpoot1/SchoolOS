@@ -13,6 +13,7 @@ import {
 } from '../useFees';
 import { PAYMENT_METHODS, type InvoiceStatus } from '../fees.types';
 import { formatAmount } from '../format';
+import { InstallmentsCard } from './InstallmentsCard';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
@@ -174,6 +175,8 @@ export function InvoiceDetailPage() {
           </div>
         </dl>
       </Card>
+
+      <InstallmentsCard invoiceId={inv.id} isCancelled={isCancelled} />
 
       <Card className="space-y-4">
         <h2 className="font-semibold">Payments</h2>

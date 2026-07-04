@@ -84,6 +84,31 @@ export interface CreateInvoicePayload {
   discount?: number;
 }
 
+export type InstallmentStatus = 'PAID' | 'PARTIAL' | 'OVERDUE' | 'UPCOMING';
+
+export interface InstallmentRow {
+  seq: number;
+  label: string | null;
+  dueDate: string;
+  amount: number;
+  allocated: number;
+  status: InstallmentStatus;
+}
+
+export interface InstallmentPlan {
+  installments: InstallmentRow[];
+  summary: {
+    total: number;
+    paid: number;
+    scheduled: number;
+    matchesTotal: boolean;
+  };
+}
+
+export interface SetInstallmentsPayload {
+  installments: { label?: string; dueDate: string; amount: number }[];
+}
+
 export interface AddPaymentPayload {
   amount: number;
   method: PaymentMethod;

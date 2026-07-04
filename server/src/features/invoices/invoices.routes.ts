@@ -9,6 +9,7 @@ import {
   invoiceIdParamSchema,
   listInvoicesSchema,
   paymentIdParamSchema,
+  setInstallmentsSchema,
   updateInvoiceSchema,
 } from './invoices.validation';
 
@@ -26,6 +27,24 @@ router.patch(
   invoicesController.update,
 );
 router.post('/:id/cancel', validate({ params: invoiceIdParamSchema }), invoicesController.cancel);
+
+// Installment plan (nested under an invoice).
+router.get(
+  '/:id/installments',
+  validate({ params: invoiceIdParamSchema }),
+  invoicesController.getInstallments,
+);
+router.put(
+  '/:id/installments',
+  validate({ params: invoiceIdParamSchema, body: setInstallmentsSchema }),
+  invoicesController.setInstallments,
+);
+router.delete(
+  '/:id/installments',
+  validate({ params: invoiceIdParamSchema }),
+  invoicesController.clearInstallments,
+);
+
 router.delete('/:id', validate({ params: invoiceIdParamSchema }), invoicesController.remove);
 
 // Payments (nested under an invoice).

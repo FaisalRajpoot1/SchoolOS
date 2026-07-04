@@ -53,6 +53,23 @@ export const addPaymentSchema = z
   })
   .strict();
 
+export const setInstallmentsSchema = z
+  .object({
+    installments: z
+      .array(
+        z
+          .object({
+            label: z.string().trim().max(60).nullish(),
+            dueDate: z.coerce.date(),
+            amount: positiveMoney,
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(60),
+  })
+  .strict();
+
 export const invoiceIdParamSchema = z.object({ id: z.string().uuid() });
 export const paymentIdParamSchema = z.object({
   id: z.string().uuid(),
@@ -63,3 +80,4 @@ export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
 export type ListInvoicesQuery = z.infer<typeof listInvoicesSchema>;
 export type AddPaymentInput = z.infer<typeof addPaymentSchema>;
+export type SetInstallmentsInput = z.infer<typeof setInstallmentsSchema>;

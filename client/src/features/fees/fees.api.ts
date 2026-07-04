@@ -4,10 +4,12 @@ import type {
   AddPaymentPayload,
   CreateInvoicePayload,
   FeeCategory,
+  InstallmentPlan,
   InvoiceDetail,
   InvoiceListItem,
   ListInvoicesParams,
   PaginationMeta,
+  SetInstallmentsPayload,
 } from './fees.types';
 
 export const feeCategoriesApi = {
@@ -63,5 +65,17 @@ export const invoicesApi = {
   },
   downloadInvoicePdf(id: string, invoiceNo: string): Promise<void> {
     return downloadFile(`/invoices/${id}/pdf`, `invoice-${invoiceNo}.pdf`);
+  },
+  async getInstallments(id: string): Promise<InstallmentPlan> {
+    const { data } = await api.get<{ data: InstallmentPlan }>(`/invoices/${id}/installments`);
+    return data.data;
+  },
+  async setInstallments(id: string, payload: SetInstallmentsPayload): Promise<InstallmentPlan> {
+    const { data } = await api.put<{ data: InstallmentPlan }>(`/invoices/${id}/installments`, payload);
+    return data.data;
+  },
+  async clearInstallments(id: string): Promise<InstallmentPlan> {
+    const { data } = await api.delete<{ data: InstallmentPlan }>(`/invoices/${id}/installments`);
+    return data.data;
   },
 };

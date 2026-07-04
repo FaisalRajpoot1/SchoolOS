@@ -67,4 +67,29 @@ export const invoicesController = {
     );
     res.status(200).json({ success: true, data: { invoice } });
   }),
+
+  getInstallments: asyncHandler(async (req: Request, res: Response) => {
+    const plan = await invoicesService.getInstallments(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    res.status(200).json({ success: true, data: plan });
+  }),
+
+  setInstallments: asyncHandler(async (req: Request, res: Response) => {
+    const plan = await invoicesService.setInstallments(
+      requireSchoolId(req.user),
+      req.params.id as string,
+      req.body,
+    );
+    res.status(200).json({ success: true, data: plan });
+  }),
+
+  clearInstallments: asyncHandler(async (req: Request, res: Response) => {
+    const plan = await invoicesService.clearInstallments(
+      requireSchoolId(req.user),
+      req.params.id as string,
+    );
+    res.status(200).json({ success: true, data: plan });
+  }),
 };

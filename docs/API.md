@@ -224,6 +224,9 @@ Invoices & payments (amounts are whole units of the school's currency; line-item
 | DELETE | `/invoices/:id`                     | Delete an invoice                                            |
 | POST   | `/invoices/:id/payments`            | Record a payment (recomputes status PENDING/PARTIAL/PAID)    |
 | DELETE | `/invoices/:id/payments/:paymentId` | Remove a payment (recomputes status)                        |
+| GET    | `/invoices/:id/installments`        | Installment plan + each installment's derived status (payments allocated in `seq` order) |
+| PUT    | `/invoices/:id/installments`        | Replace the plan (amounts must sum to the net total; `seq` from submitted order) |
+| DELETE | `/invoices/:id/installments`        | Remove the installment plan                                 |
 
 Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `CASH`, `CARD`, `BANK_TRANSFER`, `ONLINE`, `OTHER`.
 
