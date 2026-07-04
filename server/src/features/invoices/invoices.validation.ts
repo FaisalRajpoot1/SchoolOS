@@ -22,8 +22,13 @@ export const createInvoiceSchema = z
     dueDate: z.coerce.date().nullish(),
     notes: z.string().trim().max(500).nullish(),
     items: z.array(invoiceItemSchema).min(1).max(100),
+    discount: z.coerce.number().int().min(0).max(100_000_000).default(0),
   })
-  .strict();
+  .strict()
+  .refine((d) => d.discount <= d.items.reduce((acc, i) => acc + i.amount * i.quantity, 0), {
+    message: 'Discount cannot exceed the invoice subtotal',
+    path: ['discount'],
+  });
 
 export const updateInvoiceSchema = z
   .object({

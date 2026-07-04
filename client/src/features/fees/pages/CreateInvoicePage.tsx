@@ -26,6 +26,7 @@ const schema = z.object({
       }),
     )
     .min(1),
+  discount: z.coerce.number().int().min(0).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -51,10 +52,12 @@ export function CreateInvoicePage() {
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
   const watchedItems = watch('items');
-  const total = (watchedItems ?? []).reduce(
+  const subtotal = (watchedItems ?? []).reduce(
     (acc, i) => acc + (Number(i.amount) || 0) * (Number(i.quantity) || 0),
     0,
   );
+  const discount = Math.max(0, Number(watch('discount')) || 0);
+  const total = Math.max(0, subtotal - discount);
 
   const onSubmit = handleSubmit(async (values) => {
     const invoice = await createInvoice.mutateAsync({
@@ -68,6 +71,7 @@ export function CreateInvoicePage() {
         amount: i.amount,
         quantity: i.quantity,
       })),
+      discount: values.discount || undefined,
     });
     navigate(`/fees/invoices/${invoice.id}`, { replace: true });
   });
@@ -146,8 +150,25 @@ export function CreateInvoicePage() {
             ))}
           </div>
 
-          <div className="border-t border-slate-100 pt-3 text-right text-sm">
-            Total: <span className="font-semibold tabular-nums">{formatAmount(total)}</span>
+          <div className="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+            <div className="w-40">
+              <TextField
+                label="Discount / scholarship"
+                type="number"
+                min={0}
+                {...register('discount')}
+                error={errors.discount?.message}
+              />
+            </div>
+            <div className="text-right text-sm">
+              {discount > 0 && (
+                <>
+                  <div className="text-slate-500">Subtotal: <span className="tabular-nums">{formatAmount(subtotal)}</span></div>
+                  <div className="text-slate-500">Discount: <span className="tabular-nums">− {formatAmount(discount)}</span></div>
+                </>
+              )}
+              <div>Total: <span className="font-semibold tabular-nums">{formatAmount(total)}</span></div>
+            </div>
           </div>
         </Card>
 

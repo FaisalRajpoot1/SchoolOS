@@ -34,7 +34,7 @@ export const dashboardService = {
         _count: { status: true },
       }),
       prisma.invoice.aggregate({
-        _sum: { total: true },
+        _sum: { total: true, discount: true },
         where: { schoolId, status: { not: 'CANCELLED' } },
       }),
       prisma.payment.aggregate({
@@ -65,7 +65,8 @@ export const dashboardService = {
     const byStatus: Record<InvoiceStatus, number> = { PENDING: 0, PARTIAL: 0, PAID: 0, CANCELLED: 0 };
     for (const g of invoiceStatusGroups) byStatus[g.status] = g._count.status;
 
-    const invoiced = invoiceAgg._sum.total ?? 0;
+    // Net of scholarships/discounts.
+    const invoiced = (invoiceAgg._sum.total ?? 0) - (invoiceAgg._sum.discount ?? 0);
     const collected = paymentAgg._sum.amount ?? 0;
 
     return {

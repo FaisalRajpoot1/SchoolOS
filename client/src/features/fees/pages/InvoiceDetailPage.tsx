@@ -148,6 +148,18 @@ export function InvoiceDetailPage() {
 
       <Card className="flex justify-end">
         <dl className="w-56 space-y-1 text-sm">
+          {inv.totals.discount > 0 && (
+            <>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Subtotal</dt>
+                <dd className="tabular-nums">{formatAmount(inv.totals.subtotal)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Discount</dt>
+                <dd className="tabular-nums">− {formatAmount(inv.totals.discount)}</dd>
+              </div>
+            </>
+          )}
           <div className="flex justify-between">
             <dt className="text-slate-500">Total</dt>
             <dd className="tabular-nums">{formatAmount(inv.totals.total)}</dd>

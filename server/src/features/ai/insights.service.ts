@@ -70,14 +70,14 @@ export const insightsService = {
       // avoid a join fan-out), only students who actually owe.
       prisma.$queryRaw<BalanceRow[]>(Prisma.sql`
         SELECT i."studentId" AS "studentId",
-               (SUM(i.total) - COALESCE(SUM(p.paid), 0))::int AS balance
+               (SUM(i.total) - SUM(i.discount) - COALESCE(SUM(p.paid), 0))::int AS balance
         FROM "invoices" i
         LEFT JOIN (
           SELECT "invoiceId", SUM(amount) AS paid FROM "payments" GROUP BY "invoiceId"
         ) p ON p."invoiceId" = i.id
         WHERE i."schoolId" = ${schoolId} AND i.status <> 'CANCELLED'::"InvoiceStatus"
         GROUP BY i."studentId"
-        HAVING (SUM(i.total) - COALESCE(SUM(p.paid), 0)) > 0
+        HAVING (SUM(i.total) - SUM(i.discount) - COALESCE(SUM(p.paid), 0)) > 0
       `),
     ]);
 

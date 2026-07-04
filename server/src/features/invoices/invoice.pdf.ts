@@ -10,7 +10,7 @@ export interface InvoicePdfData {
   admissionNo: string;
   items: { description: string; quantity: number; amount: number }[];
   payments: { paidAt: string; method: string; amount: number; reference: string | null }[];
-  totals: { total: number; paid: number; balance: number };
+  totals: { subtotal: number; discount: number; total: number; paid: number; balance: number };
 }
 
 const money = (n: number): string => n.toLocaleString('en-US');
@@ -59,6 +59,10 @@ export const buildInvoicePdf = (data: InvoicePdfData): Promise<Buffer> =>
       doc.text(value, right - 120, y, { width: 120, align: 'right' });
       doc.moveDown(0.4);
     };
+    if (data.totals.discount > 0) {
+      totalRow('Subtotal', money(data.totals.subtotal));
+      totalRow('Discount', `- ${money(data.totals.discount)}`);
+    }
     totalRow('Total', money(data.totals.total), true);
     totalRow('Paid', money(data.totals.paid));
     totalRow('Balance', money(data.totals.balance), true);

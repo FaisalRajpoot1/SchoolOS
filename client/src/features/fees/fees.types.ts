@@ -20,6 +20,8 @@ interface StudentRef {
 }
 
 export interface InvoiceTotals {
+  subtotal: number;
+  discount: number;
   total: number;
   paid: number;
   balance: number;
@@ -79,6 +81,7 @@ export interface CreateInvoicePayload {
   dueDate?: string;
   notes?: string;
   items: CreateInvoiceItemPayload[];
+  discount?: number;
 }
 
 export interface AddPaymentPayload {

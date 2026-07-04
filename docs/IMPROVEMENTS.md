@@ -92,7 +92,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P1 · L · Online payment gateway (Stripe/Razorpay) + webhook reconciliation.
 - `[x]` P1 · S · Invoice / fee-statement PDF (`GET /invoices/:id/pdf`) — batch 5.
 - `[ ]` P2 · M · Fee plans / installment schedules + auto late-fee.
-- `[ ]` P2 · S · Scholarships / structured discounts.
+- `[x]` P2 · S · Scholarships / structured discounts — batch 32: `Invoice.discount` field; net owed = subtotal − discount (floored at 0); status/balance/payment-guard derive from net; PDF + create form + detail show the breakdown; finance aggregations (reports, dashboard, AI-insights) net out the discount. discount=0 path is fully backward-compatible.
 
 ### Exams (M12)
 - `[x]` P1 · M · Report-card PDF (`GET /exams/:id/report-card/:studentId/pdf`, class-scoped) — batch 5.

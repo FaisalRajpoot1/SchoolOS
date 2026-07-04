@@ -77,7 +77,7 @@ export const reportsService = {
   async finance(schoolId: string) {
     const [invoiceAgg, paymentAgg, byStatusRaw, defaulters] = await Promise.all([
       prisma.invoice.aggregate({
-        _sum: { total: true },
+        _sum: { total: true, discount: true },
         where: { schoolId, status: { not: 'CANCELLED' } },
       }),
       prisma.payment.aggregate({
@@ -93,7 +93,7 @@ export const reportsService = {
                s."firstName"       AS "firstName",
                s."lastName"        AS "lastName",
                s."admissionNo"     AS "admissionNo",
-               (SUM(i.total) - COALESCE(SUM(p.paid), 0))::int AS balance
+               (SUM(i.total) - SUM(i.discount) - COALESCE(SUM(p.paid), 0))::int AS balance
         FROM "invoices" i
         JOIN "students" s ON s.id = i."studentId"
         LEFT JOIN (
@@ -101,7 +101,7 @@ export const reportsService = {
         ) p ON p."invoiceId" = i.id
         WHERE i."schoolId" = ${schoolId} AND i.status <> 'CANCELLED'::"InvoiceStatus"
         GROUP BY i."studentId", s."firstName", s."lastName", s."admissionNo"
-        HAVING (SUM(i.total) - COALESCE(SUM(p.paid), 0)) > 0
+        HAVING (SUM(i.total) - SUM(i.discount) - COALESCE(SUM(p.paid), 0)) > 0
         ORDER BY balance DESC
         LIMIT 10
       `),
@@ -116,7 +116,8 @@ export const reportsService = {
       balance: d.balance,
     }));
 
-    const invoiced = invoiceAgg._sum.total ?? 0;
+    // Net invoiced = gross line-item totals minus scholarships/discounts.
+    const invoiced = (invoiceAgg._sum.total ?? 0) - (invoiceAgg._sum.discount ?? 0);
     const collected = paymentAgg._sum.amount ?? 0;
 
     return {

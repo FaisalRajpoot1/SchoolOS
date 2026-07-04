@@ -16,6 +16,8 @@ import type {
 import { buildInvoicePdf } from './invoice.pdf';
 
 interface Totals {
+  subtotal: number;
+  discount: number;
   total: number;
   paid: number;
   balance: number;
@@ -26,6 +28,9 @@ const sumItems = (items: { amount: number; quantity: number }[]): number =>
 
 const sumPayments = (payments: { amount: number }[]): number =>
   payments.reduce((acc, p) => acc + p.amount, 0);
+
+/** Net amount owed after the discount, never negative. */
+const netTotal = (subtotal: number, discount: number): number => Math.max(0, subtotal - discount);
 
 /** Derives invoice status from totals (CANCELLED is sticky). */
 const deriveStatus = (
@@ -53,12 +58,13 @@ const recomputeStatus = async (tx: Prisma.TransactionClient, invoiceId: string):
     where: { id: invoiceId },
     select: {
       status: true,
+      discount: true,
       items: { select: { amount: true, quantity: true } },
       payments: { select: { amount: true } },
     },
   });
   if (!invoice) return;
-  const total = sumItems(invoice.items);
+  const total = netTotal(sumItems(invoice.items), invoice.discount);
   const paid = sumPayments(invoice.payments);
   const status = deriveStatus(invoice.status, total, paid);
   if (status !== invoice.status) {
@@ -71,12 +77,19 @@ const nextInvoiceNo = async (schoolId: string): Promise<string> => {
   return `INV-${String(count + 1).padStart(5, '0')}`;
 };
 
-const withTotals = <T extends { items: { amount: number; quantity: number }[]; payments: { amount: number }[] }>(
+const withTotals = <
+  T extends {
+    discount: number;
+    items: { amount: number; quantity: number }[];
+    payments: { amount: number }[];
+  },
+>(
   invoice: T,
 ): T & { totals: Totals } => {
-  const total = sumItems(invoice.items);
+  const subtotal = sumItems(invoice.items);
+  const total = netTotal(subtotal, invoice.discount);
   const paid = sumPayments(invoice.payments);
-  return { ...invoice, totals: { total, paid, balance: total - paid } };
+  return { ...invoice, totals: { subtotal, discount: invoice.discount, total, paid, balance: total - paid } };
 };
 
 export const invoicesService = {
@@ -107,6 +120,7 @@ export const invoicesService = {
           dueDate: input.dueDate ?? null,
           notes: input.notes ?? null,
           total: input.items.reduce((acc, i) => acc + i.amount * i.quantity, 0),
+          discount: input.discount,
           items: {
             create: input.items.map((i) => ({
               categoryId: i.categoryId ?? null,
@@ -119,13 +133,14 @@ export const invoicesService = {
         include: detailInclude,
       });
 
+      const withNet = withTotals(invoice);
       await notificationsService.notifyGuardiansSafe(schoolId, [input.studentId], {
         type: 'FEE',
         title: `New invoice ${invoice.invoiceNo}`,
-        body: `${invoice.title} — total ${invoice.total}.`,
+        body: `${invoice.title} — total ${withNet.totals.total}.`,
       });
 
-      return withTotals(invoice);
+      return withNet;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
         throw ApiError.conflict('Invoice number collision, please retry');
