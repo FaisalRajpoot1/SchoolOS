@@ -7,6 +7,7 @@ import {
   addPaymentSchema,
   createInvoiceSchema,
   invoiceIdParamSchema,
+  applyLateFeesSchema,
   listInvoicesSchema,
   paymentIdParamSchema,
   setInstallmentsSchema,
@@ -18,6 +19,12 @@ const router = Router();
 router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.ACCOUNTANT));
 
 router.post('/', validate({ body: createInvoiceSchema }), invoicesController.create);
+// Bulk action — must precede the `/:id` routes so it isn't captured as an id.
+router.post(
+  '/apply-late-fees',
+  validate({ body: applyLateFeesSchema }),
+  invoicesController.applyLateFees,
+);
 router.get('/', validate({ query: listInvoicesSchema }), invoicesController.list);
 router.get('/:id', validate({ params: invoiceIdParamSchema }), invoicesController.getById);
 router.get('/:id/pdf', validate({ params: invoiceIdParamSchema }), invoicesController.pdf);

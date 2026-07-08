@@ -22,6 +22,7 @@ interface StudentRef {
 export interface InvoiceTotals {
   subtotal: number;
   discount: number;
+  lateFee: number;
   total: number;
   paid: number;
   balance: number;
@@ -115,6 +116,17 @@ export interface AddPaymentPayload {
   reference?: string;
   note?: string;
   paidAt?: string;
+}
+
+export interface ApplyLateFeesPayload {
+  amount: number;
+  graceDays?: number;
+  asOf?: string;
+}
+
+export interface ApplyLateFeesResult {
+  applied: number;
+  amount: number;
 }
 
 export interface ListInvoicesParams {

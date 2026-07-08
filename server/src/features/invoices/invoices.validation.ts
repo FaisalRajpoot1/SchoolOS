@@ -53,6 +53,14 @@ export const addPaymentSchema = z
   })
   .strict();
 
+export const applyLateFeesSchema = z
+  .object({
+    amount: positiveMoney,
+    graceDays: z.coerce.number().int().min(0).max(365).default(0),
+    asOf: z.coerce.date().optional(),
+  })
+  .strict();
+
 export const setInstallmentsSchema = z
   .object({
     installments: z
@@ -81,3 +89,4 @@ export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
 export type ListInvoicesQuery = z.infer<typeof listInvoicesSchema>;
 export type AddPaymentInput = z.infer<typeof addPaymentSchema>;
 export type SetInstallmentsInput = z.infer<typeof setInstallmentsSchema>;
+export type ApplyLateFeesInput = z.infer<typeof applyLateFeesSchema>;

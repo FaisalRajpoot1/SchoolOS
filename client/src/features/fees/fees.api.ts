@@ -2,6 +2,8 @@ import { api } from '@/lib/axios';
 import { downloadFile } from '@/lib/download';
 import type {
   AddPaymentPayload,
+  ApplyLateFeesPayload,
+  ApplyLateFeesResult,
   CreateInvoicePayload,
   FeeCategory,
   InstallmentPlan,
@@ -76,6 +78,10 @@ export const invoicesApi = {
   },
   async clearInstallments(id: string): Promise<InstallmentPlan> {
     const { data } = await api.delete<{ data: InstallmentPlan }>(`/invoices/${id}/installments`);
+    return data.data;
+  },
+  async applyLateFees(payload: ApplyLateFeesPayload): Promise<ApplyLateFeesResult> {
+    const { data } = await api.post<{ data: ApplyLateFeesResult }>('/invoices/apply-late-fees', payload);
     return data.data;
   },
 };

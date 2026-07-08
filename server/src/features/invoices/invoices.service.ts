@@ -9,6 +9,7 @@ import {
 import { notificationsService } from '@/features/notifications/notifications.service';
 import type {
   AddPaymentInput,
+  ApplyLateFeesInput,
   CreateInvoiceInput,
   ListInvoicesQuery,
   SetInstallmentsInput,
@@ -20,6 +21,7 @@ import { allocateInstallments, scheduledTotal } from './installments';
 interface Totals {
   subtotal: number;
   discount: number;
+  lateFee: number;
   total: number;
   paid: number;
   balance: number;
@@ -31,8 +33,9 @@ const sumItems = (items: { amount: number; quantity: number }[]): number =>
 const sumPayments = (payments: { amount: number }[]): number =>
   payments.reduce((acc, p) => acc + p.amount, 0);
 
-/** Net amount owed after the discount, never negative. */
-const netTotal = (subtotal: number, discount: number): number => Math.max(0, subtotal - discount);
+/** Net amount owed: subtotal less discount (floored at 0), plus any late fee. */
+const netTotal = (subtotal: number, discount: number, lateFee: number): number =>
+  Math.max(0, subtotal - discount) + lateFee;
 
 /** Derives invoice status from totals (CANCELLED is sticky). */
 const deriveStatus = (
@@ -61,12 +64,13 @@ const recomputeStatus = async (tx: Prisma.TransactionClient, invoiceId: string):
     select: {
       status: true,
       discount: true,
+      lateFee: true,
       items: { select: { amount: true, quantity: true } },
       payments: { select: { amount: true } },
     },
   });
   if (!invoice) return;
-  const total = netTotal(sumItems(invoice.items), invoice.discount);
+  const total = netTotal(sumItems(invoice.items), invoice.discount, invoice.lateFee);
   const paid = sumPayments(invoice.payments);
   const status = deriveStatus(invoice.status, total, paid);
   if (status !== invoice.status) {
@@ -82,6 +86,7 @@ const nextInvoiceNo = async (schoolId: string): Promise<string> => {
 const withTotals = <
   T extends {
     discount: number;
+    lateFee: number;
     items: { amount: number; quantity: number }[];
     payments: { amount: number }[];
   },
@@ -89,9 +94,19 @@ const withTotals = <
   invoice: T,
 ): T & { totals: Totals } => {
   const subtotal = sumItems(invoice.items);
-  const total = netTotal(subtotal, invoice.discount);
+  const total = netTotal(subtotal, invoice.discount, invoice.lateFee);
   const paid = sumPayments(invoice.payments);
-  return { ...invoice, totals: { subtotal, discount: invoice.discount, total, paid, balance: total - paid } };
+  return {
+    ...invoice,
+    totals: {
+      subtotal,
+      discount: invoice.discount,
+      lateFee: invoice.lateFee,
+      total,
+      paid,
+      balance: total - paid,
+    },
+  };
 };
 
 export const invoicesService = {
@@ -242,6 +257,44 @@ export const invoicesService = {
       body: `Payment of ${input.amount} recorded for invoice ${updated.invoiceNo}. Balance ${updated.totals.balance}.`,
     });
     return updated;
+  },
+
+  /**
+   * Bulk-applies a flat late fee to every overdue, still-owing invoice that
+   * doesn't already carry one. "Overdue" means the due date is on or before
+   * `asOf` minus `graceDays`. Idempotent: invoices with a late fee are skipped.
+   */
+  async applyLateFees(schoolId: string, input: ApplyLateFeesInput) {
+    const asOf = input.asOf ?? new Date();
+    const cutoff = new Date(asOf.getTime() - input.graceDays * 24 * 60 * 60 * 1000);
+
+    // Select and charge inside one transaction so a concurrent payment can't slip
+    // between the candidate read and the update.
+    const applied = await prisma.$transaction(async (tx) => {
+      const candidates = await tx.invoice.findMany({
+        where: {
+          schoolId,
+          status: { in: ['PENDING', 'PARTIAL'] },
+          lateFee: 0,
+          dueDate: { lte: cutoff },
+        },
+        select: { id: true },
+      });
+      if (candidates.length === 0) return 0;
+
+      const ids = candidates.map((c) => c.id);
+      await tx.invoice.updateMany({
+        where: { id: { in: ids }, schoolId },
+        data: { lateFee: input.amount },
+      });
+      // A late fee only raises the balance, so status stays PENDING/PARTIAL;
+      // recompute anyway so the derived status is always consistent.
+      for (const id of ids) {
+        await recomputeStatus(tx, id);
+      }
+      return ids.length;
+    });
+    return { applied, amount: input.amount };
   },
 
   async removePayment(schoolId: string, invoiceId: string, paymentId: string) {

@@ -216,6 +216,7 @@ Invoices & payments (amounts are whole units of the school's currency; line-item
 | Method | Path                                | Description                                                  |
 | ------ | ----------------------------------- | ------------------------------------------------------------ |
 | POST   | `/invoices`                         | Create an invoice with line items (auto invoice #)           |
+| POST   | `/invoices/apply-late-fees`         | Bulk-charge a flat late fee (`amount`, `graceDays?`, `asOf?`) to overdue, still-owing invoices without one; returns `{ applied, amount }` |
 | GET    | `/invoices`                         | List invoices (`page`, `limit`, `search`, `status`, `studentId`); each row carries `totals` |
 | GET    | `/invoices/:id`                     | Invoice detail (items, payments, `totals: {total,paid,balance}`) |
 | GET    | `/invoices/:id/pdf`                 | Download the invoice / fee statement as a PDF                |

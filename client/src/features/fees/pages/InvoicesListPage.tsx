@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useInvoices } from '../useFees';
+import { useApplyLateFees, useInvoices } from '../useFees';
 import { INVOICE_STATUSES, type InvoiceStatus } from '../fees.types';
 import { formatAmount } from '../format';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { toast } from '@/lib/toast';
 
 const statusBadge: Record<InvoiceStatus, string> = {
   PENDING: 'bg-amber-50 text-amber-700',
@@ -28,6 +29,34 @@ export function InvoicesListPage() {
   });
   const meta = query.data?.meta;
 
+  const [showLateFee, setShowLateFee] = useState(false);
+  const [lateFeeAmount, setLateFeeAmount] = useState('');
+  const [graceDays, setGraceDays] = useState('0');
+  const applyLateFees = useApplyLateFees();
+
+  const onApplyLateFees = (): void => {
+    const amount = Number(lateFeeAmount);
+    if (!Number.isInteger(amount) || amount < 1) {
+      toast.error('Enter a late-fee amount of at least 1');
+      return;
+    }
+    applyLateFees.mutate(
+      { amount, graceDays: Math.max(0, Number(graceDays) || 0) },
+      {
+        onSuccess: (res) => {
+          toast.success(
+            res.applied === 0
+              ? 'No overdue invoices to charge'
+              : `Late fee applied to ${res.applied} invoice(s)`,
+          );
+          setShowLateFee(false);
+          setLateFeeAmount('');
+        },
+        onError: (err) => toast.error(getApiErrorMessage(err, 'Could not apply late fees')),
+      },
+    );
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
@@ -35,10 +64,49 @@ export function InvoicesListPage() {
           <h1 className="text-2xl font-bold">Invoices</h1>
           <p className="text-slate-500">Student fee invoices and payments.</p>
         </div>
-        <Link to="/fees/invoices/new">
-          <Button>+ New invoice</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setShowLateFee((v) => !v)}>
+            Apply late fees
+          </Button>
+          <Link to="/fees/invoices/new">
+            <Button>+ New invoice</Button>
+          </Link>
+        </div>
       </div>
+
+      {showLateFee && (
+        <Card className="flex flex-wrap items-end gap-3 border-amber-200 bg-amber-50/40">
+          <div>
+            <p className="text-sm font-medium text-slate-700">Apply a flat late fee</p>
+            <p className="text-xs text-slate-500">
+              Charges every overdue, still-owing invoice that doesn&apos;t already have one.
+            </p>
+          </div>
+          <div className="w-32">
+            <label className="text-xs font-medium text-slate-600">Amount</label>
+            <input
+              type="number"
+              min={1}
+              value={lateFeeAmount}
+              onChange={(e) => setLateFeeAmount(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+            />
+          </div>
+          <div className="w-28">
+            <label className="text-xs font-medium text-slate-600">Grace days</label>
+            <input
+              type="number"
+              min={0}
+              value={graceDays}
+              onChange={(e) => setGraceDays(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+            />
+          </div>
+          <Button onClick={onApplyLateFees} isLoading={applyLateFees.isPending}>
+            Apply
+          </Button>
+        </Card>
+      )}
 
       <Card className="flex flex-wrap items-end gap-3">
         <input

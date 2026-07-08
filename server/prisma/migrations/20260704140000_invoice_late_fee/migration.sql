@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "invoices" ADD COLUMN "lateFee" INTEGER NOT NULL DEFAULT 0;

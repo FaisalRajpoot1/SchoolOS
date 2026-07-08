@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { feeCategoriesApi, invoicesApi } from './fees.api';
 import type {
   AddPaymentPayload,
+  ApplyLateFeesPayload,
   CreateInvoicePayload,
   InvoiceDetail,
   ListInvoicesParams,
@@ -110,5 +111,13 @@ export const useClearInstallments = (id: string) => {
   return useMutation({
     mutationFn: () => invoicesApi.clearInstallments(id),
     onSuccess: (plan) => qc.setQueryData(invoiceKeys.installments(id), plan),
+  });
+};
+
+export const useApplyLateFees = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ApplyLateFeesPayload) => invoicesApi.applyLateFees(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: invoiceKeys.all }),
   });
 };

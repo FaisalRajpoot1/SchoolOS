@@ -550,6 +550,8 @@ model Invoice {
   total     Int           @default(0)
   /// Scholarship / discount applied to the subtotal; net owed = total − discount (floored at 0).
   discount  Int           @default(0)
+  /// Late fee added once an invoice is overdue; net owed = max(0, total − discount) + lateFee.
+  lateFee   Int           @default(0)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 

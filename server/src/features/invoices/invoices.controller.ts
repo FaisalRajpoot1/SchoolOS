@@ -68,6 +68,11 @@ export const invoicesController = {
     res.status(200).json({ success: true, data: { invoice } });
   }),
 
+  applyLateFees: asyncHandler(async (req: Request, res: Response) => {
+    const result = await invoicesService.applyLateFees(requireSchoolId(req.user), req.body);
+    res.status(200).json({ success: true, data: result });
+  }),
+
   getInstallments: asyncHandler(async (req: Request, res: Response) => {
     const plan = await invoicesService.getInstallments(
       requireSchoolId(req.user),
