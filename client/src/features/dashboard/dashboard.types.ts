@@ -49,3 +49,21 @@ export interface TeacherOverview {
     periods: TeacherPeriod[];
   };
 }
+
+export interface AccountantOverview {
+  finance: {
+    invoiced: number;
+    collected: number;
+    outstanding: number;
+    collectedThisMonth: number;
+  };
+  counts: { overdue: number; pending: number; partial: number };
+  recentPayments: {
+    id: string;
+    amount: number;
+    method: string;
+    paidAt: string;
+    invoiceNo: string;
+    studentName: string;
+  }[];
+}

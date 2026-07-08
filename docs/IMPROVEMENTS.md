@@ -148,7 +148,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 - `[ ]` P3 · M · Scheduled report emails; PDF/Excel export.
 
 ### Dashboard (M23)
-- `[~]` P2 · M · Role-specific dashboards (teacher, parent, accountant) — batch 40: teacher dashboard — `GET /dashboard/teacher` (sections as class teacher, submissions awaiting grading across homework + assignments, upcoming homework, today's period schedule) + a `TeacherDashboard` on the home page (TEACHER previously fell to a generic role card). Parent + student home views already existed; accountant dashboard still open.
+- `[x]` P2 · M · Role-specific dashboards (teacher, parent, accountant) — batch 40: teacher dashboard — `GET /dashboard/teacher` (sections as class teacher, submissions awaiting grading across homework + assignments, upcoming homework, today's period schedule) + a `TeacherDashboard` on the home page (TEACHER previously fell to a generic role card). Batch 41: accountant dashboard — `GET /dashboard/accountant` (invoiced/collected/outstanding + collected-this-month, overdue & unpaid counts, recent payments) + `AccountantDashboard`. Parent + student home views already existed.
 - `[ ]` P3 · S · Date-range filter + drill-down.
 
 ### Settings (M24)

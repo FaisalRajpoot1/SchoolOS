@@ -237,6 +237,7 @@ Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `C
 | ------ | -------------------- | --------------------------------------------------------------------- |
 | GET    | `/dashboard`         | `SCHOOL_ADMIN` — aggregated KPIs: student/teacher/class/section counts, today's attendance breakdown + rate, finance (invoiced/collected/outstanding + invoices by status), and recent invoices |
 | GET    | `/dashboard/teacher` | `TEACHER` — the signed-in teacher's overview: sections (as class teacher), submissions awaiting grading, upcoming homework, and today's period schedule |
+| GET    | `/dashboard/accountant` | `ACCOUNTANT` — finance overview: invoiced/collected/outstanding, collected-this-month, overdue & unpaid counts, and recent payments |
 
 ## Examination — Module 12 (tenant-scoped)
 

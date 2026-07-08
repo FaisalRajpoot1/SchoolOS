@@ -153,4 +153,76 @@ export const dashboardService = {
       },
     };
   },
+
+  /** Finance-focused overview for the signed-in accountant. */
+  async getAccountantOverview(schoolId: string) {
+    const now = new Date();
+    const today = toDateOnly(now);
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const notCancelled = { not: 'CANCELLED' } as const;
+
+    const [invoiceAgg, paymentAgg, monthAgg, overdueCount, statusGroups, recentPayments] =
+      await Promise.all([
+        prisma.invoice.aggregate({
+          _sum: { total: true, discount: true, lateFee: true },
+          where: { schoolId, status: notCancelled },
+        }),
+        prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { schoolId, invoice: { status: notCancelled } },
+        }),
+        prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { schoolId, paidAt: { gte: monthStart }, invoice: { status: notCancelled } },
+        }),
+        prisma.invoice.count({
+          where: { schoolId, status: { in: ['PENDING', 'PARTIAL'] }, dueDate: { lt: today } },
+        }),
+        prisma.invoice.groupBy({ by: ['status'], where: { schoolId }, _count: { status: true } }),
+        prisma.payment.findMany({
+          where: { schoolId, invoice: { status: notCancelled } },
+          orderBy: { paidAt: 'desc' },
+          take: 5,
+          select: {
+            id: true,
+            amount: true,
+            method: true,
+            paidAt: true,
+            invoice: {
+              select: {
+                invoiceNo: true,
+                student: { select: { firstName: true, lastName: true } },
+              },
+            },
+          },
+        }),
+      ]);
+
+    const byStatus: Record<InvoiceStatus, number> = { PENDING: 0, PARTIAL: 0, PAID: 0, CANCELLED: 0 };
+    for (const g of statusGroups) byStatus[g.status] = g._count.status;
+
+    const invoiced =
+      (invoiceAgg._sum.total ?? 0) -
+      (invoiceAgg._sum.discount ?? 0) +
+      (invoiceAgg._sum.lateFee ?? 0);
+    const collected = paymentAgg._sum.amount ?? 0;
+
+    return {
+      finance: {
+        invoiced,
+        collected,
+        outstanding: Math.max(0, invoiced - collected),
+        collectedThisMonth: monthAgg._sum.amount ?? 0,
+      },
+      counts: { overdue: overdueCount, pending: byStatus.PENDING, partial: byStatus.PARTIAL },
+      recentPayments: recentPayments.map((p) => ({
+        id: p.id,
+        amount: p.amount,
+        method: p.method,
+        paidAt: p.paidAt.toISOString().slice(0, 10),
+        invoiceNo: p.invoice.invoiceNo,
+        studentName: `${p.invoice.student.firstName} ${p.invoice.student.lastName}`,
+      })),
+    };
+  },
 };

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
-import type { DashboardOverview, TeacherOverview } from './dashboard.types';
+import type { AccountantOverview, DashboardOverview, TeacherOverview } from './dashboard.types';
 
 const fetchOverview = async (): Promise<DashboardOverview> => {
   const { data } = await api.get<{ data: DashboardOverview }>('/dashboard');
@@ -17,3 +17,11 @@ const fetchTeacherOverview = async (): Promise<TeacherOverview> => {
 
 export const useTeacherDashboard = (enabled: boolean) =>
   useQuery({ queryKey: ['dashboard', 'teacher'], queryFn: fetchTeacherOverview, enabled });
+
+const fetchAccountantOverview = async (): Promise<AccountantOverview> => {
+  const { data } = await api.get<{ data: AccountantOverview }>('/dashboard/accountant');
+  return data.data;
+};
+
+export const useAccountantDashboard = (enabled: boolean) =>
+  useQuery({ queryKey: ['dashboard', 'accountant'], queryFn: fetchAccountantOverview, enabled });

@@ -2,7 +2,11 @@ import { Link } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { useAuth } from '@/features/auth/useAuth';
-import { useDashboard, useTeacherDashboard } from '@/features/dashboard/useDashboard';
+import {
+  useAccountantDashboard,
+  useDashboard,
+  useTeacherDashboard,
+} from '@/features/dashboard/useDashboard';
 import { usePortalMe } from '@/features/portal/usePortal';
 import { minutesToTime } from '@/features/timetable/time';
 import { NoticeBoard } from '@/features/announcements/components/NoticeBoard';
@@ -197,6 +201,61 @@ function TeacherDashboard() {
   );
 }
 
+function AccountantDashboard() {
+  const { data, isLoading, isError, error } = useAccountantDashboard(true);
+
+  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isError || !data) return <p className="text-sm text-red-600">{getApiErrorMessage(error)}</p>;
+
+  const { finance, counts } = data;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi
+          label="Outstanding"
+          value={formatAmount(finance.outstanding)}
+          sub={`${formatAmount(finance.invoiced)} invoiced`}
+        />
+        <Kpi
+          label="Collected this month"
+          value={formatAmount(finance.collectedThisMonth)}
+          sub={`${formatAmount(finance.collected)} all time`}
+        />
+        <Kpi label="Overdue invoices" value={counts.overdue} sub="past due date, unpaid" />
+        <Kpi label="Unpaid" value={counts.pending + counts.partial} sub={`${counts.partial} partial`} />
+      </div>
+
+      <Card className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Recent payments</h2>
+          <Link to="/fees/invoices" className="text-sm text-brand-600">
+            All invoices
+          </Link>
+        </div>
+        {data.recentPayments.length > 0 ? (
+          <ul className="divide-y divide-slate-100">
+            {data.recentPayments.map((p) => (
+              <li key={p.id} className="flex items-center justify-between py-2 text-sm">
+                <div>
+                  <span className="font-medium text-slate-700">{p.studentName}</span>
+                  <span className="ml-2 font-mono text-xs text-slate-400">{p.invoiceNo}</span>
+                  <span className="ml-2 text-xs text-slate-400">
+                    {p.paidAt} · {p.method}
+                  </span>
+                </div>
+                <span className="tabular-nums font-medium text-green-700">{formatAmount(p.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">No payments recorded yet.</p>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 function ParentDashboard() {
   const me = usePortalMe();
 
@@ -273,6 +332,8 @@ export function DashboardPage() {
         <SchoolAdminDashboard />
       ) : user?.role === 'TEACHER' ? (
         <TeacherDashboard />
+      ) : user?.role === 'ACCOUNTANT' ? (
+        <AccountantDashboard />
       ) : user?.role === 'PARENT' ? (
         <ParentDashboard />
       ) : user?.role === 'STUDENT' ? (

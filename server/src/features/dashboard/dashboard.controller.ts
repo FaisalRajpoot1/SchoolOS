@@ -15,4 +15,9 @@ export const dashboardController = {
     const data = await dashboardService.getTeacherOverview(requireSchoolId(req.user), req.user.id);
     res.status(200).json({ success: true, data });
   }),
+
+  accountant: asyncHandler(async (req: Request, res: Response) => {
+    const data = await dashboardService.getAccountantOverview(requireSchoolId(req.user));
+    res.status(200).json({ success: true, data });
+  }),
 };
