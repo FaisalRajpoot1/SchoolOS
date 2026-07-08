@@ -1,8 +1,12 @@
-import type { AttendanceStatus, InvoiceStatus } from '@prisma/client';
+import type { AttendanceStatus, DayOfWeek, InvoiceStatus } from '@prisma/client';
 import { prisma } from '@/db/prisma';
+import { ApiError } from '@/utils/ApiError';
 
 const toDateOnly = (d: Date): Date =>
   new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+
+/** Maps a JS getUTCDay() index (0=Sun) to the schema's DayOfWeek enum. */
+const DOW: DayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 export const dashboardService = {
   /** Aggregated KPIs for a school admin's overview. */
@@ -94,6 +98,59 @@ export const dashboardService = {
         byStatus,
       },
       recentInvoices,
+    };
+  },
+
+  /** At-a-glance overview for the signed-in teacher. */
+  async getTeacherOverview(schoolId: string, userId: string) {
+    const teacher = await prisma.teacher.findFirst({
+      where: { schoolId, userId },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    if (!teacher) throw ApiError.badRequest('No teacher profile is linked to your account');
+
+    const now = new Date();
+    const today = toDateOnly(now);
+    const dayOfWeek = DOW[now.getUTCDay()] ?? 'MON';
+
+    const [sectionsCount, periods, pendingHomework, pendingAssignments, upcomingHomework] =
+      await Promise.all([
+        prisma.section.count({ where: { classTeacherId: teacher.id, class: { schoolId } } }),
+        prisma.timetableSlot.findMany({
+          where: { schoolId, teacherId: teacher.id, dayOfWeek },
+          orderBy: { startMinute: 'asc' },
+          select: {
+            startMinute: true,
+            endMinute: true,
+            room: true,
+            subject: { select: { name: true } },
+            section: { select: { name: true, class: { select: { name: true } } } },
+          },
+        }),
+        prisma.homeworkSubmission.count({
+          where: { gradedAt: null, homework: { schoolId, teacherId: teacher.id } },
+        }),
+        prisma.assignmentSubmission.count({
+          where: { gradedAt: null, assignment: { schoolId, teacherId: teacher.id } },
+        }),
+        prisma.homework.count({ where: { schoolId, teacherId: teacher.id, dueDate: { gte: today } } }),
+      ]);
+
+    return {
+      teacher: { name: `${teacher.firstName} ${teacher.lastName}` },
+      sections: sectionsCount,
+      pendingGrading: pendingHomework + pendingAssignments,
+      upcomingHomework,
+      today: {
+        dayOfWeek,
+        periods: periods.map((p) => ({
+          startMinute: p.startMinute,
+          endMinute: p.endMinute,
+          subject: p.subject?.name ?? null,
+          section: p.section ? `${p.section.class.name} ${p.section.name}` : null,
+          room: p.room,
+        })),
+      },
     };
   },
 };

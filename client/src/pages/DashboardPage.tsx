@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { useAuth } from '@/features/auth/useAuth';
-import { useDashboard } from '@/features/dashboard/useDashboard';
+import { useDashboard, useTeacherDashboard } from '@/features/dashboard/useDashboard';
 import { usePortalMe } from '@/features/portal/usePortal';
+import { minutesToTime } from '@/features/timetable/time';
 import { NoticeBoard } from '@/features/announcements/components/NoticeBoard';
 import { UpcomingEvents } from '@/features/events/components/UpcomingEvents';
 import { Card } from '@/components/ui/Card';
@@ -150,6 +151,52 @@ function SchoolAdminDashboard() {
   );
 }
 
+function TeacherDashboard() {
+  const { data, isLoading, isError, error } = useTeacherDashboard(true);
+
+  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isError || !data) return <p className="text-sm text-red-600">{getApiErrorMessage(error)}</p>;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Kpi label="My sections" value={data.sections} sub="as class teacher" />
+        <Kpi label="Awaiting grading" value={data.pendingGrading} sub="homework & assignments" />
+        <Kpi label="Upcoming homework" value={data.upcomingHomework} sub="due today or later" />
+      </div>
+
+      <Card className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Today's schedule</h2>
+          <Link to="/timetable" className="text-sm text-brand-600">
+            Full timetable
+          </Link>
+        </div>
+        {data.today.periods.length === 0 ? (
+          <p className="text-sm text-slate-500">No periods scheduled for today.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {data.today.periods.map((p, i) => (
+              <li key={i} className="flex items-center justify-between py-2 text-sm">
+                <div>
+                  <span className="font-medium tabular-nums">
+                    {minutesToTime(p.startMinute)}–{minutesToTime(p.endMinute)}
+                  </span>
+                  <span className="ml-3 text-slate-700">{p.subject ?? 'Subject TBD'}</span>
+                </div>
+                <span className="text-slate-500">
+                  {p.section ?? '—'}
+                  {p.room ? ` · Room ${p.room}` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 function ParentDashboard() {
   const me = usePortalMe();
 
@@ -224,6 +271,8 @@ export function DashboardPage() {
         <SuperAdminDashboard />
       ) : user?.role === 'SCHOOL_ADMIN' ? (
         <SchoolAdminDashboard />
+      ) : user?.role === 'TEACHER' ? (
+        <TeacherDashboard />
       ) : user?.role === 'PARENT' ? (
         <ParentDashboard />
       ) : user?.role === 'STUDENT' ? (

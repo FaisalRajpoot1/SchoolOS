@@ -231,11 +231,12 @@ Invoices & payments (amounts are whole units of the school's currency; line-item
 
 Invoice statuses: `PENDING`, `PARTIAL`, `PAID`, `CANCELLED`. Payment methods: `CASH`, `CARD`, `BANK_TRANSFER`, `ONLINE`, `OTHER`.
 
-## Dashboard — Module 23 (role `SCHOOL_ADMIN`, tenant-scoped)
+## Dashboard — Module 23 (tenant-scoped)
 
-| Method | Path         | Description                                                            |
-| ------ | ------------ | --------------------------------------------------------------------- |
-| GET    | `/dashboard` | Aggregated KPIs: student/teacher/class/section counts, today's attendance breakdown + rate, finance (invoiced/collected/outstanding + invoices by status), and recent invoices |
+| Method | Path                 | Description                                                            |
+| ------ | -------------------- | --------------------------------------------------------------------- |
+| GET    | `/dashboard`         | `SCHOOL_ADMIN` — aggregated KPIs: student/teacher/class/section counts, today's attendance breakdown + rate, finance (invoiced/collected/outstanding + invoices by status), and recent invoices |
+| GET    | `/dashboard/teacher` | `TEACHER` — the signed-in teacher's overview: sections (as class teacher), submissions awaiting grading, upcoming homework, and today's period schedule |
 
 ## Examination — Module 12 (tenant-scoped)
 

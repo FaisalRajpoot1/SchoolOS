@@ -5,8 +5,9 @@ import { dashboardController } from './dashboard.controller';
 
 const router = Router();
 
-router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN));
+router.use(authenticate);
 
-router.get('/', dashboardController.overview);
+router.get('/', authorize(UserRole.SCHOOL_ADMIN), dashboardController.overview);
+router.get('/teacher', authorize(UserRole.TEACHER), dashboardController.teacher);
 
 export const dashboardRoutes = router;

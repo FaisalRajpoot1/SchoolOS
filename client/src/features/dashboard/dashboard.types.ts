@@ -30,3 +30,22 @@ export interface DashboardOverview {
     student: { firstName: string; lastName: string };
   }[];
 }
+
+export interface TeacherPeriod {
+  startMinute: number;
+  endMinute: number;
+  subject: string | null;
+  section: string | null;
+  room: string | null;
+}
+
+export interface TeacherOverview {
+  teacher: { name: string };
+  sections: number;
+  pendingGrading: number;
+  upcomingHomework: number;
+  today: {
+    dayOfWeek: string;
+    periods: TeacherPeriod[];
+  };
+}
