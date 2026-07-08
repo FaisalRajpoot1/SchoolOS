@@ -7,5 +7,5 @@ export const useStudentsReport = () =>
 export const useAttendanceReport = (from?: string, to?: string) =>
   useQuery({ queryKey: ['reports', 'attendance', from, to], queryFn: () => reportsApi.attendance(from, to) });
 
-export const useFinanceReport = () =>
-  useQuery({ queryKey: ['reports', 'finance'], queryFn: reportsApi.finance });
+export const useFinanceReport = (from?: string, to?: string) =>
+  useQuery({ queryKey: ['reports', 'finance', from, to], queryFn: () => reportsApi.finance(from, to) });

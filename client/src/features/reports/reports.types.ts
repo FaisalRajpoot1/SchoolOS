@@ -18,6 +18,8 @@ export interface AttendanceReport {
 }
 
 export interface FinanceReport {
+  from: string | null;
+  to: string | null;
   invoiced: number;
   collected: number;
   outstanding: number;

@@ -485,7 +485,7 @@ Read-only aggregates over existing data (no new tables).
 | ------ | --------------------- | ------------------------------------------------------------------- |
 | GET    | `/reports/students`   | Headcounts: total/active, by status, by gender, by class            |
 | GET    | `/reports/attendance` | Present/absent/late/leave totals + present-rate over `[from, to]` (defaults to last 30 days) |
-| GET    | `/reports/finance`    | Invoiced/collected/outstanding, invoices by status, top-10 outstanding balances |
+| GET    | `/reports/finance`    | Invoiced/collected + invoices-by-status over optional `[from, to]` (invoices by `createdAt`, payments by `paidAt`; all-time when unset); outstanding + top-10 balances are always current (point-in-time) |
 
 The client renders these as Chart.js charts with CSV export (students-by-class, fee defaulters).
 

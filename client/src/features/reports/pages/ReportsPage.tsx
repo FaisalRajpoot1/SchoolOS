@@ -31,10 +31,13 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export function ReportsPage() {
   const students = useStudentsReport();
-  const finance = useFinanceReport();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const attendance = useAttendanceReport(from || undefined, to || undefined);
+  const [finFrom, setFinFrom] = useState('');
+  const [finTo, setFinTo] = useState('');
+  const finance = useFinanceReport(finFrom || undefined, finTo || undefined);
+  const finHasRange = Boolean(finFrom || finTo);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -139,22 +142,32 @@ export function ReportsPage() {
 
       {/* Finance */}
       <Card className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-semibold">Finance</h2>
-          {finance.data && finance.data.topDefaulters.length > 0 && (
-            <Button
-              variant="secondary"
-              onClick={() =>
-                downloadCsv(
-                  'fee-defaulters.csv',
-                  ['Student', 'Admission No', 'Balance'],
-                  finance.data.topDefaulters.map((d) => [d.name, d.admissionNo, d.balance]),
-                )
-              }
-            >
-              Export defaulters
-            </Button>
-          )}
+          <div className="flex items-end gap-2">
+            <div>
+              <label className="text-xs text-slate-500">From</label>
+              <input type="date" value={finFrom} onChange={(e) => setFinFrom(e.target.value)} className="block rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand-500" />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">To</label>
+              <input type="date" value={finTo} onChange={(e) => setFinTo(e.target.value)} className="block rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand-500" />
+            </div>
+            {finance.data && finance.data.topDefaulters.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  downloadCsv(
+                    'fee-defaulters.csv',
+                    ['Student', 'Admission No', 'Balance'],
+                    finance.data.topDefaulters.map((d) => [d.name, d.admissionNo, d.balance]),
+                  )
+                }
+              >
+                Export defaulters
+              </Button>
+            )}
+          </div>
         </div>
         {finance.isLoading ? (
           <p className="text-sm text-slate-500">Loading…</p>
@@ -163,10 +176,22 @@ export function ReportsPage() {
         ) : (
           <>
             <div className="flex flex-wrap gap-8">
-              <Stat label="Invoiced" value={formatAmount(finance.data.invoiced)} />
-              <Stat label="Collected" value={formatAmount(finance.data.collected)} />
-              <Stat label="Outstanding" value={formatAmount(finance.data.outstanding)} />
+              <Stat
+                label={finHasRange ? 'Invoiced (period)' : 'Invoiced'}
+                value={formatAmount(finance.data.invoiced)}
+              />
+              <Stat
+                label={finHasRange ? 'Collected (period)' : 'Collected'}
+                value={formatAmount(finance.data.collected)}
+              />
+              <Stat label="Outstanding (current)" value={formatAmount(finance.data.outstanding)} />
             </div>
+            {finHasRange && (
+              <p className="text-xs text-slate-400">
+                Invoiced &amp; collected cover {finance.data.from ?? '…'} → {finance.data.to ?? '…'};
+                outstanding &amp; top-outstanding are current across all invoices.
+              </p>
+            )}
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="h-48">
                 <Doughnut

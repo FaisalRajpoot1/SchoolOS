@@ -1,6 +1,11 @@
 import { type AttendanceStatus, type Gender, type InvoiceStatus, Prisma, type StudentStatus } from '@prisma/client';
 import { prisma } from '@/db/prisma';
-import type { AttendanceRange } from './reports.validation';
+import type { AttendanceRange, FinanceRange } from './reports.validation';
+
+/** Net owed for an invoice aggregate: total − discount + late fee. */
+const netInvoiced = (agg: {
+  _sum: { total: number | null; discount: number | null; lateFee: number | null };
+}): number => (agg._sum.total ?? 0) - (agg._sum.discount ?? 0) + (agg._sum.lateFee ?? 0);
 
 interface DefaulterRow {
   studentId: string;
@@ -73,18 +78,58 @@ export const reportsService = {
     };
   },
 
-  /** Finance totals, invoices by status, and the top outstanding balances. */
-  async finance(schoolId: string) {
-    const [invoiceAgg, paymentAgg, byStatusRaw, defaulters] = await Promise.all([
+  /**
+   * Finance totals, invoices by status, and the top outstanding balances.
+   *
+   * `invoiced`, `collected`, and `byStatus` reflect the selected window
+   * (invoices by `createdAt`, payments by `paidAt`); when no range is given
+   * they cover all time. `outstanding` and `topDefaulters` are always
+   * point-in-time (current total owed across all non-cancelled invoices),
+   * since "who owes money now" is inherently a current figure.
+   */
+  async finance(schoolId: string, range: FinanceRange) {
+    const notCancelled = { not: 'CANCELLED' } as const;
+    const hasRange = Boolean(range.from || range.to);
+    // `to` arrives as midnight of that day; compare with an exclusive next-day
+    // bound so the whole "to" day is included against the timestamp columns.
+    const dateWindow = {
+      ...(range.from ? { gte: range.from } : {}),
+      ...(range.to ? { lt: new Date(range.to.getTime() + 24 * 60 * 60 * 1000) } : {}),
+    };
+
+    const [invoiceAgg, paymentAgg, byStatusRaw, currentOutstanding, defaulters] = await Promise.all([
       prisma.invoice.aggregate({
         _sum: { total: true, discount: true, lateFee: true },
-        where: { schoolId, status: { not: 'CANCELLED' } },
+        where: { schoolId, status: notCancelled, ...(hasRange ? { createdAt: dateWindow } : {}) },
       }),
       prisma.payment.aggregate({
         _sum: { amount: true },
-        where: { schoolId, invoice: { status: { not: 'CANCELLED' } } },
+        where: {
+          schoolId,
+          invoice: { status: notCancelled },
+          ...(hasRange ? { paidAt: dateWindow } : {}),
+        },
       }),
-      prisma.invoice.groupBy({ by: ['status'], where: { schoolId }, _count: { _all: true } }),
+      prisma.invoice.groupBy({
+        by: ['status'],
+        where: { schoolId, ...(hasRange ? { createdAt: dateWindow } : {}) },
+        _count: { _all: true },
+      }),
+      // Current total outstanding across ALL non-cancelled invoices, independent
+      // of the window. Only needs a second pair of aggregates when a range is set;
+      // otherwise the windowed figures already cover all time.
+      hasRange
+        ? Promise.all([
+            prisma.invoice.aggregate({
+              _sum: { total: true, discount: true, lateFee: true },
+              where: { schoolId, status: notCancelled },
+            }),
+            prisma.payment.aggregate({
+              _sum: { amount: true },
+              where: { schoolId, invoice: { status: notCancelled } },
+            }),
+          ])
+        : null,
       // Per-student outstanding balance is aggregated in SQL (top 10 only), so
       // the report never loads every invoice/payment row into memory. Payments
       // are summed per invoice first to avoid a join fan-out inflating totals.
@@ -116,17 +161,22 @@ export const reportsService = {
       balance: d.balance,
     }));
 
-    // Net invoiced = gross line-item totals minus scholarships/discounts plus late fees.
-    const invoiced =
-      (invoiceAgg._sum.total ?? 0) -
-      (invoiceAgg._sum.discount ?? 0) +
-      (invoiceAgg._sum.lateFee ?? 0);
+    // Windowed figures (all-time when no range was supplied).
+    const invoiced = netInvoiced(invoiceAgg);
     const collected = paymentAgg._sum.amount ?? 0;
 
+    // Current outstanding: reuse the windowed figures when there is no range
+    // (they already cover all time), else the dedicated all-time aggregates.
+    const outstanding = currentOutstanding
+      ? Math.max(0, netInvoiced(currentOutstanding[0]) - (currentOutstanding[1]._sum.amount ?? 0))
+      : Math.max(0, invoiced - collected);
+
     return {
+      from: range.from ? range.from.toISOString().slice(0, 10) : null,
+      to: range.to ? range.to.toISOString().slice(0, 10) : null,
       invoiced,
       collected,
-      outstanding: Math.max(0, invoiced - collected),
+      outstanding,
       byStatus,
       topDefaulters,
     };

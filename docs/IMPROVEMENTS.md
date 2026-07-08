@@ -149,7 +149,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Dashboard (M23)
 - `[x]` P2 · M · Role-specific dashboards (teacher, parent, accountant) — batch 40: teacher dashboard — `GET /dashboard/teacher` (sections as class teacher, submissions awaiting grading across homework + assignments, upcoming homework, today's period schedule) + a `TeacherDashboard` on the home page (TEACHER previously fell to a generic role card). Batch 41: accountant dashboard — `GET /dashboard/accountant` (invoiced/collected/outstanding + collected-this-month, overdue & unpaid counts, recent payments) + `AccountantDashboard`. Parent + student home views already existed.
-- `[ ]` P3 · S · Date-range filter + drill-down.
+- `[~]` P3 · S · Date-range filter + drill-down — batch 42: finance report now accepts `from`/`to` (invoices by `createdAt`, payments by `paidAt`) for invoiced/collected/byStatus; outstanding & top-defaulters stay point-in-time (current). Attendance report already had a range. Drill-down still open.
 
 ### Settings (M24)
 - `[ ]` P2 · L · Granular roles/permissions editor (fine-grained RBAC beyond fixed roles).

@@ -12,8 +12,10 @@ export const reportsApi = {
     });
     return data.data;
   },
-  async finance(): Promise<FinanceReport> {
-    const { data } = await api.get<{ data: FinanceReport }>('/reports/finance');
+  async finance(from?: string, to?: string): Promise<FinanceReport> {
+    const { data } = await api.get<{ data: FinanceReport }>('/reports/finance', {
+      params: { from, to },
+    });
     return data.data;
   },
 };

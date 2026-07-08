@@ -6,3 +6,10 @@ export const attendanceRangeSchema = z.object({
 });
 
 export type AttendanceRange = z.infer<typeof attendanceRangeSchema>;
+
+export const financeRangeSchema = z.object({
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+});
+
+export type FinanceRange = z.infer<typeof financeRangeSchema>;

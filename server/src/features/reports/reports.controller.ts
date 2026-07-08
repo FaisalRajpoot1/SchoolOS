@@ -15,7 +15,7 @@ export const reportsController = {
   }),
 
   finance: asyncHandler(async (req: Request, res: Response) => {
-    const data = await reportsService.finance(requireSchoolId(req.user));
+    const data = await reportsService.finance(requireSchoolId(req.user), req.query as never);
     res.status(200).json({ success: true, data });
   }),
 };
