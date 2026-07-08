@@ -57,6 +57,8 @@ export const listAssignmentsSchema = paginationSchema.extend({
 });
 
 export const assignmentIdParamSchema = z.object({ id: z.string().uuid() });
+/** `:id` is a submission id (used by submission-attachment routes). */
+export const submissionIdParamSchema = z.object({ id: z.string().uuid() });
 export const submissionStudentParamSchema = z.object({
   id: z.string().uuid(),
   studentId: z.string().uuid(),

@@ -758,6 +758,8 @@ model HomeworkSubmission {
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
+  attachments Attachment[]
+
   @@unique([homeworkId, studentId])
   @@index([homeworkId])
   @@index([studentId])
@@ -800,8 +802,8 @@ model Assignment {
   @@map("assignments")
 }
 
-/// A file attached to a homework or assignment task (teacher-uploaded brief or
-/// worksheet). Exactly one of homeworkId/assignmentId is set.
+/// A file attached to a homework/assignment task (teacher brief/worksheet) or to
+/// a student's submission. Exactly one owner id is set.
 model Attachment {
   id           String   @id @default(uuid())
   originalName String
@@ -819,12 +821,20 @@ model Attachment {
   assignmentId String?
   assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
+  homeworkSubmissionId String?
+  homeworkSubmission   HomeworkSubmission? @relation(fields: [homeworkSubmissionId], references: [id], onDelete: Cascade)
+
+  assignmentSubmissionId String?
+  assignmentSubmission   AssignmentSubmission? @relation(fields: [assignmentSubmissionId], references: [id], onDelete: Cascade)
+
   uploadedById String?
   uploadedBy   User?   @relation("AttachmentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   @@index([schoolId])
   @@index([homeworkId])
   @@index([assignmentId])
+  @@index([homeworkSubmissionId])
+  @@index([assignmentSubmissionId])
   @@map("attachments")
 }
 
@@ -861,6 +871,8 @@ model AssignmentSubmission {
 
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  attachments Attachment[]
 
   @@unique([assignmentId, studentId])
   @@index([assignmentId])

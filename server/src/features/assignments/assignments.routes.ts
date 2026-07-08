@@ -3,7 +3,10 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { assignmentsController } from './assignments.controller';
-import { assignmentsService } from './assignments.service';
+import {
+  assignmentsService,
+  assignmentSubmissionAttachmentsService,
+} from './assignments.service';
 import { makeAttachmentsController } from '@/features/attachments/attachments.controller';
 import { attachmentParamSchema } from '@/features/attachments/attachments.validation';
 import { uploadSingle } from '@/utils/fileUpload';
@@ -13,12 +16,14 @@ import {
   gradeSubmissionSchema,
   listAssignmentsSchema,
   recordSubmissionSchema,
+  submissionIdParamSchema,
   submissionStudentParamSchema,
   updateAssignmentSchema,
 } from './assignments.validation';
 
 const router = Router();
 const attachments = makeAttachmentsController(assignmentsService);
+const submissionAttachments = makeAttachmentsController(assignmentSubmissionAttachmentsService);
 
 router.use(authenticate, authorize(UserRole.SCHOOL_ADMIN, UserRole.TEACHER));
 
@@ -49,6 +54,29 @@ router.delete(
   '/:id/attachments/:attachmentId',
   validate({ params: attachmentParamSchema }),
   attachments.remove,
+);
+
+// Submission attachments (files turned in for a submission; `:id` = submission id).
+router.get(
+  '/submissions/:id/attachments',
+  validate({ params: submissionIdParamSchema }),
+  submissionAttachments.list,
+);
+router.post(
+  '/submissions/:id/attachments',
+  validate({ params: submissionIdParamSchema }),
+  uploadSingle('file'),
+  submissionAttachments.upload,
+);
+router.get(
+  '/submissions/:id/attachments/:attachmentId',
+  validate({ params: attachmentParamSchema }),
+  submissionAttachments.download,
+);
+router.delete(
+  '/submissions/:id/attachments/:attachmentId',
+  validate({ params: attachmentParamSchema }),
+  submissionAttachments.remove,
 );
 
 router.get(

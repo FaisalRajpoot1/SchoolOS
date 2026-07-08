@@ -70,6 +70,34 @@ const assertSectionInClass = async (
   if (!section) throw ApiError.badRequest('Section does not belong to the selected class');
 };
 
+/** Tenant-scoped existence check for an assignment submission. */
+const assertSubmission = async (schoolId: string, submissionId: string): Promise<void> => {
+  const submission = await prisma.assignmentSubmission.findFirst({
+    where: { id: submissionId, assignment: { schoolId } },
+    select: { id: true },
+  });
+  if (!submission) throw ApiError.notFound('Submission not found');
+};
+
+/** Loads a submission and, for a TEACHER, requires they authored the assignment. */
+const assertSubmissionOwned = async (
+  schoolId: string,
+  actor: Actor,
+  submissionId: string,
+): Promise<void> => {
+  const submission = await prisma.assignmentSubmission.findFirst({
+    where: { id: submissionId, assignment: { schoolId } },
+    select: { assignment: { select: { teacherId: true } } },
+  });
+  if (!submission) throw ApiError.notFound('Submission not found');
+  if (actor.role === 'TEACHER') {
+    const teacherId = await resolveTeacherId(schoolId, actor.id, actor.role);
+    if (!teacherId || submission.assignment.teacherId !== teacherId) {
+      throw ApiError.forbidden('You can only manage submissions for your own assignments');
+    }
+  }
+};
+
 export const assignmentsService = {
   async create(
     schoolId: string,
@@ -284,5 +312,42 @@ export const assignmentsService = {
     await assertAssignmentOwned(schoolId, actor, assignmentId);
     await prisma.assignmentSubmission.deleteMany({ where: { assignmentId, studentId } });
     return this.submissionsRoster(schoolId, assignmentId);
+  },
+};
+
+/**
+ * Attachment surface for assignment SUBMISSIONS (files a student turned in).
+ * `ownerId` is the submission id; reads are tenant-scoped, writes require the
+ * owning teacher (or an admin). Shape matches `AttachmentsCapable`.
+ */
+export const assignmentSubmissionAttachmentsService = {
+  async listAttachments(schoolId: string, submissionId: string) {
+    await assertSubmission(schoolId, submissionId);
+    return attachmentsService.list(schoolId, { assignmentSubmissionId: submissionId });
+  },
+
+  async addAttachment(schoolId: string, actor: Actor, submissionId: string, file: UploadedFile) {
+    await assertSubmissionOwned(schoolId, actor, submissionId);
+    return attachmentsService.create(
+      schoolId,
+      actor.id,
+      { assignmentSubmissionId: submissionId },
+      file,
+    );
+  },
+
+  async downloadAttachment(schoolId: string, submissionId: string, attachmentId: string) {
+    await assertSubmission(schoolId, submissionId);
+    return attachmentsService.download(schoolId, { assignmentSubmissionId: submissionId }, attachmentId);
+  },
+
+  async removeAttachment(
+    schoolId: string,
+    actor: Actor,
+    submissionId: string,
+    attachmentId: string,
+  ): Promise<void> {
+    await assertSubmissionOwned(schoolId, actor, submissionId);
+    await attachmentsService.remove(schoolId, { assignmentSubmissionId: submissionId }, attachmentId);
   },
 };

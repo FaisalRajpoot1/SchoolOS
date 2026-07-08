@@ -5,8 +5,12 @@ import { ApiError } from '@/utils/ApiError';
 import { fileStorage } from '@/utils/fileStorage';
 import { buildStorageKey, mimeForExtension, safeExtension } from '@/utils/fileKey';
 
-/** Identifies the task an attachment hangs off (exactly one owner). */
-export type AttachmentOwner = { homeworkId: string } | { assignmentId: string };
+/** Identifies what an attachment hangs off (exactly one owner id is set). */
+export type AttachmentOwner =
+  | { homeworkId: string }
+  | { assignmentId: string }
+  | { homeworkSubmissionId: string }
+  | { assignmentSubmissionId: string };
 
 export interface UploadedFile {
   originalname: string;
@@ -23,8 +27,9 @@ const attachmentSelect = {
   uploadedBy: { select: { id: true, firstName: true, lastName: true } },
 } satisfies Prisma.AttachmentSelect;
 
-const ownerWhere = (owner: AttachmentOwner): Prisma.AttachmentWhereInput =>
-  'homeworkId' in owner ? { homeworkId: owner.homeworkId } : { assignmentId: owner.assignmentId };
+// Each owner variant is a single foreign-key field, so it is already a valid
+// where/create fragment — spread it directly rather than branch per variant.
+const ownerWhere = (owner: AttachmentOwner): Prisma.AttachmentWhereInput => owner;
 
 /**
  * Storage + metadata for task attachments. Callers are responsible for
@@ -52,9 +57,7 @@ export const attachmentsService = {
           mimeType: mimeForExtension(ext),
           sizeBytes: file.size,
           storageKey,
-          ...('homeworkId' in owner
-            ? { homeworkId: owner.homeworkId }
-            : { assignmentId: owner.assignmentId }),
+          ...owner,
         },
         select: attachmentSelect,
       });

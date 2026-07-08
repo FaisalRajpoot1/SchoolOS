@@ -72,6 +72,34 @@ const assertSubject = async (schoolId: string, subjectId: string): Promise<void>
   if (!subject) throw ApiError.badRequest('Invalid subject for this school');
 };
 
+/** Tenant-scoped existence check for a homework submission. */
+const assertSubmission = async (schoolId: string, submissionId: string): Promise<void> => {
+  const submission = await prisma.homeworkSubmission.findFirst({
+    where: { id: submissionId, homework: { schoolId } },
+    select: { id: true },
+  });
+  if (!submission) throw ApiError.notFound('Submission not found');
+};
+
+/** Loads a submission and, for a TEACHER, requires they authored the homework. */
+const assertSubmissionOwned = async (
+  schoolId: string,
+  actor: Actor,
+  submissionId: string,
+): Promise<void> => {
+  const submission = await prisma.homeworkSubmission.findFirst({
+    where: { id: submissionId, homework: { schoolId } },
+    select: { homework: { select: { teacherId: true } } },
+  });
+  if (!submission) throw ApiError.notFound('Submission not found');
+  if (actor.role === 'TEACHER') {
+    const teacherId = await resolveTeacherId(schoolId, actor.id, actor.role);
+    if (!teacherId || submission.homework.teacherId !== teacherId) {
+      throw ApiError.forbidden('You can only manage submissions for your own homework');
+    }
+  }
+};
+
 export const homeworkService = {
   async create(
     schoolId: string,
@@ -268,5 +296,37 @@ export const homeworkService = {
     await assertHomeworkOwned(schoolId, actor, homeworkId);
     await prisma.homeworkSubmission.deleteMany({ where: { homeworkId, studentId } });
     return this.submissionsRoster(schoolId, homeworkId);
+  },
+};
+
+/**
+ * Attachment surface for homework SUBMISSIONS (files a student turned in).
+ * `ownerId` is the submission id; reads are tenant-scoped, writes require the
+ * owning teacher (or an admin). Shape matches `AttachmentsCapable`.
+ */
+export const homeworkSubmissionAttachmentsService = {
+  async listAttachments(schoolId: string, submissionId: string) {
+    await assertSubmission(schoolId, submissionId);
+    return attachmentsService.list(schoolId, { homeworkSubmissionId: submissionId });
+  },
+
+  async addAttachment(schoolId: string, actor: Actor, submissionId: string, file: UploadedFile) {
+    await assertSubmissionOwned(schoolId, actor, submissionId);
+    return attachmentsService.create(schoolId, actor.id, { homeworkSubmissionId: submissionId }, file);
+  },
+
+  async downloadAttachment(schoolId: string, submissionId: string, attachmentId: string) {
+    await assertSubmission(schoolId, submissionId);
+    return attachmentsService.download(schoolId, { homeworkSubmissionId: submissionId }, attachmentId);
+  },
+
+  async removeAttachment(
+    schoolId: string,
+    actor: Actor,
+    submissionId: string,
+    attachmentId: string,
+  ): Promise<void> {
+    await assertSubmissionOwned(schoolId, actor, submissionId);
+    await attachmentsService.remove(schoolId, { homeworkSubmissionId: submissionId }, attachmentId);
   },
 };

@@ -28,8 +28,10 @@ function SubmissionRow({ homeworkId, studentId, name, admissionNo, submission }:
   const remove = useRemoveSubmission(homeworkId);
   const [marks, setMarks] = useState(submission?.marks != null ? String(submission.marks) : '');
   const [feedback, setFeedback] = useState(submission?.feedback ?? '');
+  const [showFiles, setShowFiles] = useState(false);
 
   return (
+    <>
     <tr className="border-b border-slate-100 last:border-0 align-top">
       <td className="px-4 py-3">
         <p className="font-medium">{name}</p>
@@ -85,6 +87,9 @@ function SubmissionRow({ homeworkId, studentId, name, admissionNo, submission }:
             <Button variant="ghost" isLoading={remove.isPending} onClick={() => remove.mutate(studentId)}>
               Remove
             </Button>
+            <Button variant="ghost" onClick={() => setShowFiles((v) => !v)}>
+              {showFiles ? 'Hide files' : 'Files'}
+            </Button>
           </div>
         ) : (
           <Button
@@ -97,6 +102,14 @@ function SubmissionRow({ homeworkId, studentId, name, admissionNo, submission }:
         )}
       </td>
     </tr>
+      {submission && showFiles && (
+        <tr className="border-b border-slate-100 last:border-0">
+          <td colSpan={3} className="bg-slate-50/50 px-4 py-3">
+            <AttachmentsPanel basePath={`/homework/submissions/${submission.id}`} />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 

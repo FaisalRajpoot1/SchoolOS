@@ -101,7 +101,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Homework (M10) / Assignments (M11)
 - `[ ]` P1 · M · Owner-only grading (0.2).
-- `[~]` P2 · M · Real file attachments for tasks & submissions — batch 23: task attachments (`Attachment` model + shared attachments store/controller reused across both modules; `/{homework,assignments}/:id/attachments` upload/list/download/delete; owning-teacher-or-admin to write, any admin/teacher to read; image+doc allow-list, server-derived MIME, tenant+owner scoped). Submission-file uploads still open.
+- `[x]` P2 · M · Real file attachments for tasks & submissions — batch 23: task attachments (`Attachment` model + shared attachments store/controller reused across both modules; `/{homework,assignments}/:id/attachments` upload/list/download/delete; owning-teacher-or-admin to write, any admin/teacher to read; image+doc allow-list, server-derived MIME, tenant+owner scoped). Batch 43: submission-file uploads — extended `Attachment` with `homeworkSubmissionId`/`assignmentSubmissionId` owner variants (service `ownerWhere`/create-data simplified to spread the owner); `/{homework,assignments}/submissions/:id/attachments` reuse the same controller factory (writes require the owning teacher via `assertSubmissionOwned`, reads tenant-scoped); the generic client `AttachmentsPanel` is reused behind an expandable "Files" row per submission.
 
 ### Library (M13)
 - `[ ]` P3 · M · Reservations/holds + barcode lookup.
