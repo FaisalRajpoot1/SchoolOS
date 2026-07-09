@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useStudents } from '@/features/students/useStudents';
 import { useTeacherOptions } from '@/features/teachers/useTeachers';
+import { useSubjects } from '@/features/academics/useAcademics';
 import { useDeleteDocument, useDocuments, useUploadDocument } from '../useDocuments';
 import {
   DOCUMENT_CATEGORIES,
@@ -37,10 +38,11 @@ export function DocumentsPage() {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<DocumentCategory>('GENERAL');
   const [file, setFile] = useState<File | null>(null);
-  const [ownerType, setOwnerType] = useState<'none' | 'student' | 'teacher'>('none');
+  const [ownerType, setOwnerType] = useState<'none' | 'student' | 'teacher' | 'subject'>('none');
   const [studentSearch, setStudentSearch] = useState('');
   const [studentId, setStudentId] = useState('');
   const [teacherId, setTeacherId] = useState('');
+  const [subjectId, setSubjectId] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<DocumentCategory | ''>('');
   const [page, setPage] = useState(1);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -48,6 +50,7 @@ export function DocumentsPage() {
 
   const students = useStudents({ limit: 20, search: studentSearch || undefined });
   const teachers = useTeacherOptions();
+  const subjects = useSubjects();
   const list = useDocuments({ page, limit: 10, category: categoryFilter || undefined });
   const upload = useUploadDocument();
   const remove = useDeleteDocument();
@@ -70,6 +73,7 @@ export function DocumentsPage() {
         category,
         studentId: ownerType === 'student' ? studentId || undefined : undefined,
         teacherId: ownerType === 'teacher' ? teacherId || undefined : undefined,
+        subjectId: ownerType === 'subject' ? subjectId || undefined : undefined,
       },
       {
         onSuccess: () => {
@@ -81,6 +85,7 @@ export function DocumentsPage() {
           setStudentId('');
           setStudentSearch('');
           setTeacherId('');
+          setSubjectId('');
           if (fileInput.current) fileInput.current.value = '';
         },
         onError: (err) => toast.error(getApiErrorMessage(err)),
@@ -130,14 +135,16 @@ export function DocumentsPage() {
                 label="Attach to"
                 value={ownerType}
                 onChange={(e) => {
-                  setOwnerType(e.target.value as 'none' | 'student' | 'teacher');
+                  setOwnerType(e.target.value as 'none' | 'student' | 'teacher' | 'subject');
                   setStudentId('');
                   setTeacherId('');
+                  setSubjectId('');
                 }}
               >
                 <option value="none">School-level</option>
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
+                <option value="subject">Subject</option>
               </Select>
             </div>
             {ownerType === 'student' && (
@@ -166,6 +173,16 @@ export function DocumentsPage() {
                   <option value="">Select</option>
                   {teachers.data?.map((t) => (
                     <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
+            {ownerType === 'subject' && (
+              <div className="w-72">
+                <Select label="Subject" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
+                  <option value="">Select</option>
+                  {subjects.data?.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
                   ))}
                 </Select>
               </div>
@@ -236,7 +253,9 @@ export function DocumentsPage() {
                         ? `${d.teacher.firstName} ${d.teacher.lastName} (teacher)`
                         : d.employee
                           ? `${d.employee.firstName} ${d.employee.lastName}`
-                          : '—'}
+                          : d.subject
+                            ? `${d.subject.name} (subject)`
+                            : '—'}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-slate-500">{formatBytes(d.sizeBytes)}</td>
                   <td className="px-4 py-3 text-slate-500">{d.createdAt.slice(0, 10)}</td>

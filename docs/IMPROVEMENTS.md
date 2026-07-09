@@ -82,7 +82,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Academics (M8)
 - `[ ]` P3 · M · Electives / subject groups / streams.
-- `[ ]` P3 · S · Syllabus/curriculum document per subject (needs 1.10).
+- `[x]` P3 · S · Syllabus/curriculum document per subject — batch 44: added a `subjectId` owner variant to the shared `Document` model (mirrors the teacher-owner from batch 31), so admins can attach syllabus/curriculum files to a subject; Documents page "Attach to" gains a Subject option + subject picker, and the list shows the subject owner. Tenant-scoped, at-most-one-owner enforced.
 
 ### Timetable (M9)
 - `[ ]` P3 · L · Auto-generation (constraint solver) from teacher availability + rooms.

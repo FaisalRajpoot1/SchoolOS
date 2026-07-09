@@ -24,6 +24,7 @@ export const documentsApi = {
     if (payload.studentId) form.append('studentId', payload.studentId);
     if (payload.employeeId) form.append('employeeId', payload.employeeId);
     if (payload.teacherId) form.append('teacherId', payload.teacherId);
+    if (payload.subjectId) form.append('subjectId', payload.subjectId);
     // Unset the instance's default JSON Content-Type so the browser sets
     // multipart/form-data with the correct boundary.
     const { data } = await api.post<{ data: { document: DocumentItem } }>('/documents', form, {

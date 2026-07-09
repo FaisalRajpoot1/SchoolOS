@@ -19,13 +19,14 @@ export const createDocumentSchema = z
     studentId: z.string().uuid().optional(),
     employeeId: z.string().uuid().optional(),
     teacherId: z.string().uuid().optional(),
+    subjectId: z.string().uuid().optional(),
   })
   .strict()
   .refine(
-    (d) => [d.studentId, d.employeeId, d.teacherId].filter(Boolean).length <= 1,
+    (d) => [d.studentId, d.employeeId, d.teacherId, d.subjectId].filter(Boolean).length <= 1,
     {
-      message: 'A document can belong to at most one of a student, employee, or teacher',
-      path: ['teacherId'],
+      message: 'A document can belong to at most one of a student, employee, teacher, or subject',
+      path: ['subjectId'],
     },
   );
 
@@ -33,6 +34,7 @@ export const listDocumentsSchema = paginationSchema.extend({
   studentId: z.string().uuid().optional(),
   employeeId: z.string().uuid().optional(),
   teacherId: z.string().uuid().optional(),
+  subjectId: z.string().uuid().optional(),
   category: category.optional(),
 });
 

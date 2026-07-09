@@ -329,6 +329,7 @@ model Subject {
   homeworks      Homework[]
   assignments    Assignment[]
   timetableSlots TimetableSlot[]
+  documents      Document[]
 
   @@unique([schoolId, code])
   @@unique([schoolId, name])
@@ -1499,6 +1500,9 @@ model Document {
   teacherId String?
   teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
   uploadedById String?
   uploadedBy   User?   @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
@@ -1506,6 +1510,7 @@ model Document {
   @@index([studentId])
   @@index([employeeId])
   @@index([teacherId])
+  @@index([subjectId])
   @@map("documents")
 }
 

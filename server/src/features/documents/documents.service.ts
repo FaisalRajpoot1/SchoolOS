@@ -22,6 +22,7 @@ const documentSelect = {
   student: { select: { id: true, firstName: true, lastName: true, admissionNo: true } },
   employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } },
   teacher: { select: { id: true, firstName: true, lastName: true, employeeNo: true } },
+  subject: { select: { id: true, name: true, code: true } },
   uploadedBy: { select: { id: true, firstName: true, lastName: true } },
 } satisfies Prisma.DocumentSelect;
 
@@ -38,6 +39,11 @@ const assertEmployee = async (schoolId: string, employeeId: string): Promise<voi
 const assertTeacher = async (schoolId: string, teacherId: string): Promise<void> => {
   const teacher = await prisma.teacher.findFirst({ where: { id: teacherId, schoolId } });
   if (!teacher) throw ApiError.notFound('Teacher not found');
+};
+
+const assertSubject = async (schoolId: string, subjectId: string): Promise<void> => {
+  const subject = await prisma.subject.findFirst({ where: { id: subjectId, schoolId } });
+  if (!subject) throw ApiError.notFound('Subject not found');
 };
 
 interface UploadedFile {
@@ -60,6 +66,7 @@ export const documentsService = {
     if (input.studentId) await assertStudent(schoolId, input.studentId);
     if (input.employeeId) await assertEmployee(schoolId, input.employeeId);
     if (input.teacherId) await assertTeacher(schoolId, input.teacherId);
+    if (input.subjectId) await assertSubject(schoolId, input.subjectId);
 
     const storageKey = buildStorageKey(randomUUID(), file.originalname);
     await fileStorage.save(storageKey, file.buffer);
@@ -79,6 +86,7 @@ export const documentsService = {
           studentId: input.studentId ?? null,
           employeeId: input.employeeId ?? null,
           teacherId: input.teacherId ?? null,
+          subjectId: input.subjectId ?? null,
         },
         select: documentSelect,
       });
@@ -96,12 +104,14 @@ export const documentsService = {
     if (query.studentId) await assertStudent(schoolId, query.studentId);
     if (query.employeeId) await assertEmployee(schoolId, query.employeeId);
     if (query.teacherId) await assertTeacher(schoolId, query.teacherId);
+    if (query.subjectId) await assertSubject(schoolId, query.subjectId);
     const { skip, take } = toPrismaPagination(query);
     const where: Prisma.DocumentWhereInput = {
       schoolId,
       ...(query.studentId ? { studentId: query.studentId } : {}),
       ...(query.employeeId ? { employeeId: query.employeeId } : {}),
       ...(query.teacherId ? { teacherId: query.teacherId } : {}),
+      ...(query.subjectId ? { subjectId: query.subjectId } : {}),
       ...(query.category ? { category: query.category } : {}),
     };
 

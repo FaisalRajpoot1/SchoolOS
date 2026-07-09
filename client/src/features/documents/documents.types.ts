@@ -30,6 +30,7 @@ export interface DocumentItem {
   student: { id: string; firstName: string; lastName: string; admissionNo: string } | null;
   employee: { id: string; firstName: string; lastName: string; employeeCode: string } | null;
   teacher: { id: string; firstName: string; lastName: string; employeeNo: string } | null;
+  subject: { id: string; name: string; code: string } | null;
   uploadedBy: { id: string; firstName: string; lastName: string } | null;
 }
 
@@ -40,6 +41,7 @@ export interface CreateDocumentPayload {
   studentId?: string;
   employeeId?: string;
   teacherId?: string;
+  subjectId?: string;
 }
 
 export interface ListDocumentsParams {
@@ -48,6 +50,7 @@ export interface ListDocumentsParams {
   studentId?: string;
   employeeId?: string;
   teacherId?: string;
+  subjectId?: string;
   category?: DocumentCategory;
 }
 
