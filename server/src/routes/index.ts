@@ -37,6 +37,7 @@ import { behaviorRoutes } from '@/features/behavior/behavior.routes';
 import { medicalRoutes } from '@/features/medical/medical.routes';
 import { notificationRoutes } from '@/features/notifications/notifications.routes';
 import { documentRoutes } from '@/features/documents/documents.routes';
+import { messageRoutes } from '@/features/messages/messages.routes';
 
 /**
  * Aggregates all feature routers under the API prefix.
@@ -84,6 +85,7 @@ router.use('/behavior', behaviorRoutes);
 router.use('/medical', medicalRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/documents', documentRoutes);
+router.use('/messages', messageRoutes);
 // ...future feature routers
 
 export const apiRouter = router;

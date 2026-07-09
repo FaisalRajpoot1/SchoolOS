@@ -127,7 +127,7 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ### Parent Portal (M5)
 - `[ ]` P1 · M · Online fee payment from portal (needs Fees gateway).
-- `[ ]` P2 · M · Parent↔teacher messaging; PTM booking.
+- `[~]` P2 · M · Parent↔teacher messaging; PTM booking — batch 45: parent↔teacher messaging — `MessageThread`/`Message` models; `/messages` module (contacts, threads, thread detail with read-receipts, post message) gated to PARENT+TEACHER, two-participant threads, best-effort new-message notification; contacts resolve parent→children's-section-teachers and teacher→section-students'-parents. Client Messages page (thread list + conversation + composer, deep-linkable from notifications) + nav entry. PTM booking still open.
 
 ### Communication (M19)
 - `[ ]` P2 · L · Real email/SMS/push delivery + templates + delivery status (needs 1.12).

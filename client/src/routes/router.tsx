@@ -72,6 +72,7 @@ import { BehaviorPage } from '@/features/behavior/pages/BehaviorPage';
 import { MedicalPage } from '@/features/medical/pages/MedicalPage';
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
 import { DocumentsPage } from '@/features/documents/pages/DocumentsPage';
+import { MessagesPage } from '@/features/messages/pages/MessagesPage';
 import { GradeSchemePage } from '@/features/exams/pages/GradeSchemePage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
@@ -105,6 +106,13 @@ export const router = createBrowserRouter([
           { path: '/announcements', element: <AnnouncementsFeedPage /> },
           { path: '/notifications', element: <NotificationsPage /> },
           { path: '/events', element: <EventsCalendarPage /> },
+          {
+            element: <ProtectedRoute roles={['PARENT', 'TEACHER']} />,
+            children: [
+              { path: '/messages', element: <MessagesPage /> },
+              { path: '/messages/:id', element: <MessagesPage /> },
+            ],
+          },
           {
             element: <ProtectedRoute roles={['SCHOOL_ADMIN']} />,
             children: [

@@ -189,6 +189,7 @@ model School {
   feeCategories         FeeCategory[]
   invoices              Invoice[]
   invoiceInstallments   InvoiceInstallment[]
+  messageThreads        MessageThread[]
   payments              Payment[]
   exams                 Exam[]
   homeworks             Homework[]
@@ -405,6 +406,7 @@ model Student {
   medicalProfile        MedicalProfile?
   infirmaryVisits       InfirmaryVisit[]
   documents             Document[]
+  messageThreads        MessageThread[]
 
   @@unique([schoolId, admissionNo])
   @@index([schoolId])
@@ -1669,11 +1671,60 @@ model User {
   documents           Document[]           @relation("DocumentUploader")
   backupCodes         BackupCode[]
   attachments         Attachment[]         @relation("AttachmentUploader")
+  threadsAsParent     MessageThread[]      @relation("ThreadParent")
+  threadsAsTeacher    MessageThread[]      @relation("ThreadTeacher")
+  messagesSent        Message[]            @relation("MessageSender")
 
   // Email is unique within a tenant.
   @@unique([schoolId, email])
   @@index([schoolId])
   @@map("users")
+}
+
+/// A direct message thread between a parent and a teacher, optionally about a
+/// specific student. Participants are the two User accounts; only they may read.
+model MessageThread {
+  id            String   @id @default(uuid())
+  subject       String
+  createdAt     DateTime @default(now())
+  lastMessageAt DateTime @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  parentUserId String
+  parentUser   User @relation("ThreadParent", fields: [parentUserId], references: [id], onDelete: Cascade)
+
+  teacherUserId String
+  teacherUser   User @relation("ThreadTeacher", fields: [teacherUserId], references: [id], onDelete: Cascade)
+
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  messages Message[]
+
+  @@index([schoolId])
+  @@index([parentUserId])
+  @@index([teacherUserId])
+  @@map("message_threads")
+}
+
+/// A single message within a thread. `readAt` is set when the recipient (the
+/// participant who is not the sender) first opens the thread.
+model Message {
+  id        String    @id @default(uuid())
+  body      String
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  threadId String
+  thread   MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@map("messages")
 }
 
 /// A single-use two-factor recovery code (SHA-256 hashed). Consumed by setting

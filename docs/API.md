@@ -580,6 +580,18 @@ A secure document store: files are held by a pluggable storage backend (local fi
 
 Categories: `GENERAL`, `ID_PROOF`, `CERTIFICATE`, `REPORT`, `MEDICAL`, `CONTRACT`, `OTHER`.
 
+## Messaging — Module N5 (roles `PARENT` + `TEACHER`, tenant-scoped)
+
+Direct threaded conversations between a parent and a teacher, optionally about a specific student. Each thread has exactly two participants (the two `User` accounts); only they may read it, and messages are marked read for a participant when they open the thread. New messages fan a best-effort in-app notification to the other participant. `contacts` returns who the caller may start a conversation with — for a parent, the teachers of their children's sections; for a teacher, the parents of students in their sections.
+
+| Method | Path                             | Description                                                              |
+| ------ | -------------------------------- | ------------------------------------------------------------------------ |
+| GET    | `/messages/contacts`             | Eligible counterparties for the caller (parent→child's teachers, teacher→students' parents) |
+| GET    | `/messages/threads`              | The caller's threads, newest activity first, each with an unread count   |
+| POST   | `/messages/threads`              | Start a thread (`toUserId`, optional `studentId`, `subject`, `body`); counterparty must hold the opposite role |
+| GET    | `/messages/threads/:id`          | A thread + its messages (participant only); marks incoming messages read |
+| POST   | `/messages/threads/:id/messages` | Post a message to a thread (participant only)                            |
+
 ## Photos & Branding — Module N4b (role `SCHOOL_ADMIN`, tenant-scoped)
 
 Student profile photos and a school logo, stored via the same file-storage backend as documents. Uploads are `multipart/form-data` (field `file`), image-only (PNG/JPG/WEBP/GIF — **SVG excluded**), with server-generated keys and a MIME derived from the validated extension. Images are served **inline** with `Content-Type` from the stored extension; because auth is bearer-token (not cookie) based, a direct browser navigation without the token returns 401, so images cannot be embedded cross-site with the user's credentials.
